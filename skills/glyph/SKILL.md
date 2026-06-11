@@ -16,7 +16,7 @@ Audience: the LLM re-reading SPEC.md into context. SPEC.md is LLM-facing — Cla
 "Math-glyph" is not "glyph". Generic glyphs are any printable symbol (status markers `.` `x`, bullets); math-glyphs are math operators. This skill keeps a curated low-token subset (→ ≥ ≤ ! ? § |) and retires heavy multi-token operators to ASCII words (see SYMBOLS). Glyph vs steno split is grammar aggression, not symbol set: glyph drops articles/aux/filler and runs in fragments; steno keeps grammar intact for GitHub reviewers.
 
 Applies to SPEC.md writes, spec-referencing prose, backprop entries.
-Does NOT apply to code, error strings, commit messages, PR descriptions, or anything a human reviewer reads on GitHub (use the `core:steno` skill for that).
+Does NOT apply to code, error strings, commit messages, PR descriptions, or anything a human reviewer reads on GitHub (use the `sdd:steno` skill for that).
 
 ## GRAMMAR
 

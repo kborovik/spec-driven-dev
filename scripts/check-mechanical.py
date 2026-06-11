@@ -1182,13 +1182,13 @@ def selftest():
     check(flipped_since(cur_t, cur_t) == [], "flipped: stable x not flagged")
     # §V.45 Scope(a): touched-set excludes SPEC.md + SPEC.archive.md sibling
     check(exclude_spec_paths(["SPEC.md", "SPEC.archive.md",
-                              "pilot-spec/scripts/x.py"])
-          == ["pilot-spec/scripts/x.py"],
+                              "scripts/x.py"])
+          == ["scripts/x.py"],
           "touched-set excludes SPEC.md + SPEC.archive.md")
     check(exclude_spec_paths(["SPEC.md", "SPEC.archive.md"]) == [],
           "SPEC-only diff → empty touched-set")
     check(exclude_spec_paths([]) == [], "touched-set exclude: empty in → empty out")
-    check(exclude_spec_paths(["pilot-spec/SPEC.md"]) == ["pilot-spec/SPEC.md"],
+    check(exclude_spec_paths(["sub/SPEC.md"]) == ["sub/SPEC.md"],
           "touched-set exclude: only repo-root SPEC.md, not same-basename subpath")
     # body-row aggregation: > threshold → single per-section summary row
     many_v = [{"id": f"V{200 + i}", "body": "foo retired 2026-01-02 bar",

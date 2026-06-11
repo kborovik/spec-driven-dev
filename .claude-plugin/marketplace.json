@@ -1,0 +1,12 @@
+{
+  "name": "spec-driven-dev",
+  "description": "Marketplace for the Spec-Driven Development (SDD) Claude Code plugin.",
+  "owner": { "name": "Konstantin Borovik", "email": "github@lab5.ca" },
+  "plugins": [
+    {
+      "name": "sdd",
+      "source": "./",
+      "description": "Spec-Driven Development (SDD) — compressed spec-driven development over one SPEC.md."
+    }
+  ]
+}

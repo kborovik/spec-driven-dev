@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 # steno — human-facing terse text
 
-Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words and readable symbols; math glyphs belong to the `glyph` skill (`sdd` plugin).
+Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words and readable symbols; math glyphs belong to the `glyph` skill (same plugin).
 
 ## SKIM TEST
 
@@ -32,7 +32,6 @@ Common applications (not exhaustive):
 
 - GitHub issues and PRs — titles, bodies (incl. PR desc refresh on merge).
 - PR squash/merge commit message bodies (release-note section).
-- Insights comments emitted by gh skills.
 - READMEs and user-facing docs where compression aids scan.
 
 not apply to:

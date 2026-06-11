@@ -14,7 +14,7 @@ Skill body in SPEC-ADJACENT so glyph register. Design file output (`designs/<slu
 
 ## Position in funnel
 
-`/sdd:design` is front door — caller has named the layer mentally and wants to commit a shape. If layer / shape-space unclear, run `/sdd:explore <topic>` first (optional pre-step → tradeoff matrix @ `designs/<slug>-explore.md`); user picks an option, then dispatches `/sdd:design <option>` to commit shape. No auto-route — user-driven only.
+`/sdd:design` is front door — caller has named the layer mentally and wants to commit a shape. Layer / shape-space unclear → loop step 2 localization questions narrow it. No auto-route — user-driven only.
 
 ## Loop
 
@@ -82,7 +82,7 @@ reactive only. not preemptive scans.
 - not allowed: grep repo before first proposal "to find context". propose from user's framing + `SPEC.md`.
 - ✓ allowed: user cites `file:line` or symbol or path → read that target. user claims behavior in code → spot-check before next proposal turn.
 
-cap: ≤ 2 reads/turn. broader sweep needed → stop, hand to `/gh:issue` (broad investigation by design).
+cap: ≤ 2 reads/turn. broader sweep needed → stop; return control to user for codebase investigation.
 
 ## SPEC.md degradation
 
@@ -139,11 +139,11 @@ not root-cause debugging — that belongs to the backprop skill (user route is `
 
 ## Escape hatch
 
-"just file it" or "skip the design" or "I already know what I want" → stop. hand verbatim intent to `/gh:issue` (file as GitHub issue) or `/sdd:spec` (amend SPEC directly w/o design draft).
+"just file it" or "skip the design" or "I already know what I want" → stop. hand verbatim intent to `/sdd:spec` (amend SPEC directly w/o design draft).
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (e.g. fold-in leaves `designs/<slug>.md` in working tree post-apply so user removes or preserves manually). Design is iterative: mid-loop items lead w/ Open-Q resolution (answer, park, abort); post-persist items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in and escape hatches (`/gh:issue`, `/sdd:design` rework).
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (e.g. fold-in leaves `designs/<slug>.md` in working tree post-apply so user removes or preserves manually). Design is iterative: mid-loop items lead w/ Open-Q resolution (answer, park, abort); post-persist items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in and escape hatches (`/sdd:design` rework).
 
 Example mid-loop with Open Questions outstanding:
 
@@ -152,7 +152,7 @@ Example mid-loop with Open Questions outstanding:
 
 1. answer the next Open Question to converge the proposal
 2. /sdd:design park — move unresolved Q under `## Unresolved` and persist
-3. /gh:issue — file verbatim intent as an issue instead
+3. /sdd:spec <intent> — amend SPEC directly w/o design draft
 ```
 
 Example after persist (terminal — `designs/<slug>.md` written):
@@ -162,5 +162,4 @@ Example after persist (terminal — `designs/<slug>.md` written):
 
 1. /sdd:spec designs/<slug>.md — fold the draft into SPEC.md
 2. /sdd:design <topic> — re-run for a revised draft (new file per write-new mode)
-3. /gh:issue — file the intent as an issue instead
 ```

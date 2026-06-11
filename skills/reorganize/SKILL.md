@@ -26,7 +26,7 @@ Mutation contract is single commit per atomic-operation discipline; not partial 
 ## LOAD
 
 1. Read `SPEC.md`. Missing → "no spec, nothing to reorganize." Stop.
-2. Read `pilot-spec/SPEC-FORMAT.md` every row schema and section catalog.
+2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` every row schema and section catalog.
 3. Parse `$ARGUMENTS`:
    - empty → full cluster + renumber + sweep propose
    - `--taxonomy-only` → PROPOSE report only, not mutation (mirrors /sdd:compact `--dry-run`)

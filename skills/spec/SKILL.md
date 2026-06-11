@@ -21,7 +21,7 @@ The `glyph` skill (math-glyph encoder) applies to all writes here.
 
 **Step 1 (design-fold-in shortcut):** input arg is path matching `designs/*.md` and file exists → FOLD-IN procedure (skip socratic gate; design skill Open-Questions-empty rule is persistence pre-condition so design content already converged). Else → continue to gate.
 
-Engage `core:socratic` gate w/ user input as intent. Gate runs single-question loop until convergence triple matches one mode:
+Engage `sdd:socratic` gate w/ user input as intent. Gate runs single-question loop until convergence triple matches one mode:
 
 - **NEW** is goal and first-principle-asked and (≥ 1 invariant or ≥ 1 task)
 - **DISTILL** is explicit "build from code" intent (gate exits ≤ 1 turn — walks repo, no further interrogation)
@@ -115,7 +115,7 @@ next-block   | delta touches user-typeable SKILL.md                             
 fold-first   | delta adds §V row to pre-existing §V section and mode not FOLD-IN   | AskUserQuestion gate per Fold-first audit section
 ```
 
-Table written in named-invariant + placeholder cite form only (`per <named> invariant`, `§V.<n>`) — `pilot-spec/skills/**` in PUBLISHED, where pinned §-digit cites are banned by pinned-cite sub-recipe (a); body pinned-cite count is 0, stays 0.
+Table written in named-invariant + placeholder cite form only (`per <named> invariant`, `§V.<n>`) — `skills/**` in PUBLISHED, where pinned §-digit cites are banned by pinned-cite sub-recipe (a); body pinned-cite count is 0, stays 0.
 
 **Step 2 — render-split**: §V and §B content rows → steno per steno skill (audience is user reviewing proposal); all else → glyph per glyph skill (§T and §I pipe/prose forms already human-legible, §G/§C targets, header-only §B row).
 
@@ -203,7 +203,7 @@ Catches the class where SPEC.md amend invalidates derivative content in `<plugin
 
 ## OUTPUT RULES
 
-Defer to `pilot-spec/SPEC-FORMAT.md` — row shape, section catalog, citation forms, header conventions.
+Defer to `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` — row shape, section catalog, citation forms, header conventions.
 
 ## OUTPUT — "Next" block
 

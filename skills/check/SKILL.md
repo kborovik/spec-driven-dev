@@ -31,7 +31,7 @@ Pure diagnostic. Reports violations. Writes nothing to SPEC or code. User decide
 
 ## MECHANICAL CORE — audit script
 
-The mechanical audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cites / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, memo bookkeeping (sha / rev-parse), token estimate — is deterministic so owned by `pilot-spec/scripts/check-mechanical.py` per the mechanical-realization invariant. not re-derived as per-run LLM greps; the script's regex is single source of truth every these audits (mirrors the canonical-agent-block verbatim contract — per-run paraphrase not permitted).
+The mechanical audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cites / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, memo bookkeeping (sha / rev-parse), token estimate — is deterministic so owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py` per the mechanical-realization invariant. not re-derived as per-run LLM greps; the script's regex is single source of truth every these audits (mirrors the canonical-agent-block verbatim contract — per-run paraphrase not permitted).
 
 Run at audit start (body-level `${CLAUDE_PLUGIN_ROOT}` expansion; the variable not valid in frontmatter `allowed-tools` patterns so frontmatter grants broad `Bash(python3 *)`):
 
@@ -322,5 +322,5 @@ Variants: clean run w/ pending task `.` → swap items to `/sdd:build --next` + 
 ## NON-GOALS
 
 - Zero writes to SPEC or code. Memo + `.gitignore` guard in REPO-LOCAL `.claude/` (cache), written by the audit script's `write-memo` mode — not SPEC or code mutation.
-- Mechanical audits delegate to `pilot-spec/scripts/check-mechanical.py` — deterministic, not re-derived per run. Behavioral `§V` classification and interface shape-diff and task STALE-verify stay LLM; reads may delegate to Explore sub-agents (per PREAMBLE).
+- Mechanical audits delegate to `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py` — deterministic, not re-derived per run. Behavioral `§V` classification and interface shape-diff and task STALE-verify stay LLM; reads may delegate to Explore sub-agents (per PREAMBLE).
 - No scores, no grades. Binary per item: holds or drifts.

@@ -21,7 +21,7 @@ Per-section meaning and enforcement is SPEC.md §V invariant row defining the se
 
 ## ENCODING REGISTER
 
-SPEC.md and this file is LLM-facing so glyph register per `pilot-spec/skills/glyph/SKILL.md`. SPEC-ADJACENT scope per scope-set invariant. Human-facing surfaces (README.md, benchmarks/**/*.md) not in scope so steno per `pilot-core/skills/steno/SKILL.md`.
+SPEC.md and this file is LLM-facing so glyph register per `skills/glyph/SKILL.md`. SPEC-ADJACENT scope per scope-set invariant. Human-facing surfaces (README.md, user-facing docs) not in scope so steno per `skills/steno/SKILL.md`.
 
 ## ROW SCHEMAS
 
@@ -138,4 +138,4 @@ Format violations emit VIOLATE per drift-verdict-vocab invariant w/ evidence pre
 
 ## REFERENCE IMPLEMENTATION
 
-The parse rules above (column extraction, row schemas, citation forms, section catalog + order, archive-marker + archive-sibling shape, monotonic-ID, cite-DAG resolution) is deterministic so realized as plugin-internal mechanical tooling per the published-tooling carve-out: `pilot-spec/scripts/check-mechanical.py` is the single reference implementation. Contract lives here (one statement per rule); mechanism lives there (one implementation per rule). not duplicate parser pseudo-code across this file and the script and skill bodies — a rule restated as runnable code in two places is drift vector. Consumers re-implementing the audit in another runtime ! treat this file as the rule contract and the script as the canonical realization.
+The parse rules above (column extraction, row schemas, citation forms, section catalog + order, archive-marker + archive-sibling shape, monotonic-ID, cite-DAG resolution) is deterministic so realized as plugin-internal mechanical tooling per the published-tooling carve-out: `scripts/check-mechanical.py` (run via `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`) is the single reference implementation. Contract lives here (one statement per rule); mechanism lives there (one implementation per rule). not duplicate parser pseudo-code across this file and the script and skill bodies — a rule restated as runnable code in two places is drift vector. Consumers re-implementing the audit in another runtime ! treat this file as the rule contract and the script as the canonical realization.

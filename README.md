@@ -1,8 +1,8 @@
-<h1 align="center">pilot-spec</h1>
+<h1 align="center">Spec-Driven Development (SDD)</h1>
 
 <p align="center">
   <strong>compressed spec-driven development for Claude Code</strong><br/>
-  <sub>one file · five commands · main-thread writes</sub><br/>
+  <sub>one file · seven commands · main-thread writes</sub><br/>
   <sub><em>installed as the <code>sdd</code> plugin · slash commands <code>/sdd:*</code></em></sub>
 </p>
 
@@ -10,12 +10,12 @@
 
 ## What this is
 
-**Code consistency is the casualty of LLM agent velocity.** LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. `pilot-spec` keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
+**Code consistency is the casualty of LLM agent velocity.** LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. SDD keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
 
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Math-glyph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured — see [`benchmarks/glyph/README.md`](../benchmarks/glyph/README.md)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the human-facing shorthand in `core`).
+- **Math-glyph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the bundled human-facing shorthand).
 - **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
 - **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
@@ -31,8 +31,8 @@ That framing is load-bearing. Math glyphs over English, fragments over sentences
 ## Install
 
 ```bash
-/plugin marketplace add kborovik/pilot-skills
-/plugin install sdd@pilot-skills
+/plugin marketplace add kborovik/spec-driven-dev
+/plugin install sdd@spec-driven-dev
 ```
 
 Then in any repo:
@@ -126,7 +126,7 @@ Distinct from `/sdd:spec`'s socratic gate: socratic converges on **enough** (sha
 
 ### `/sdd:spec` — mutate the spec
 
-The sole mutator. The argument is **free-form intent** — the socratic gate (`core:socratic`) reads what you wrote and picks a mode. You don't pick the mode yourself.
+The sole mutator. The argument is **free-form intent** — the socratic gate (the bundled `socratic` skill) reads what you wrote and picks a mode. You don't pick the mode yourself.
 
 | project state    | possible modes                                                       | gate behavior                                                                                                              |
 | ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -186,20 +186,33 @@ The inverse of `glyph`. Given any citation, returns plain English with cited con
 
 Useful for code review, onboarding, or when you'd otherwise have to translate `every req → auth check before handler` in your head.
 
+### `/sdd:compact` — token-budget sweep
+
+Operator-triggered compactor for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~25k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to glyph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
+
+### `/sdd:reorganize` — §V cluster + renumber
+
+Operator-triggered clarity pass (at most once per major epoch): clusters §V invariants by topic, renumbers them, and sweeps every citation in the same commit. Renumber history persists to `.claude/spec-renumber-map.json` so old citations still resolve via `/sdd:explain`.
+
 ## Skills
 
 Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
 
-| skill      | role                                                    |
-| ---------- | ------------------------------------------------------- |
-| `design`   | propose-then-critique → `designs/<slug>.md`             |
-| `spec`     | sole mutator                                            |
-| `build`    | plan → execute loop                                     |
-| `check`    | drift report                                            |
-| `glyph`    | math-glyph encoder (~30% reduction vs prose)            |
-| `backprop` | bug → spec protocol; fires on every failed verification |
+| skill        | role                                                              |
+| ------------ | ----------------------------------------------------------------- |
+| `design`     | propose-then-critique → `designs/<slug>.md`                       |
+| `spec`       | sole mutator                                                      |
+| `build`      | plan → execute loop                                               |
+| `check`      | drift report                                                      |
+| `explain`    | math-glyph → prose decoder                                        |
+| `compact`    | token-budget compaction sweep                                     |
+| `reorganize` | §V cluster + renumber + cite sweep                                |
+| `glyph`      | math-glyph encoder (~30% reduction vs prose); auto-fires on writes |
+| `backprop`   | bug → spec protocol; fires on every failed verification           |
+| `socratic`   | single-question intent gate; invoked by `/sdd:spec`               |
+| `steno`      | human-facing terse-prose register for reviewer-read text          |
 
-You don't usually invoke skills directly — Claude picks them up from the command flow. The exception is `backprop`, which fires automatically on test/build failure inside `/sdd:build`.
+You don't usually invoke `glyph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically on test/build failure inside `/sdd:build`.
 
 ## Workflows
 
@@ -243,7 +256,7 @@ You don't usually invoke skills directly — Claude picks them up from the comma
 
 `glyph` writes terse grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Heavy multi-token math operators (`∀ ∃ ∴ ⊥ ∈ ∉ ∧ ∨ ≡ ¬ ≠`) are retired to ASCII words: each costs 2–4 tokens vs a 1-token word, so a symbol stays only where it reads clearer than the word.
 
-Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (in `core`, invoked from `gh` commands) handles GitHub-facing text and deliberately omits math-glyphs so reviewers don't slow down.
+Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and deliberately omits math-glyphs so reviewers don't slow down.
 
 Rules:
 
@@ -288,20 +301,25 @@ Triggers:
 ## Files
 
 ```
-skills/design/             /sdd:design — propose-then-critique design loop → designs/<slug>.md
-skills/explore/            /sdd:explore — optional pre-design layer x frame divergence → designs/<slug>-explore.md
-skills/spec/               /sdd:spec — sole SPEC.md mutator
-skills/build/              /sdd:build — plan-execute loop
-skills/check/              /sdd:check — read-only drift report
-skills/explain/            /sdd:explain — glyph → prose decoder
-skills/compact/            /sdd:compact — token-budget compaction sweep
-skills/reorganize/         /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
-skills/glyph/              auto-fire math-glyph encoder for SPEC-adjacent writes
-skills/backprop/           auto-fire bug → spec protocol on /sdd:build verify-fail
+.claude-plugin/plugin.json       plugin manifest (name: sdd)
+.claude-plugin/marketplace.json  marketplace manifest for direct install
+skills/design/                   /sdd:design — propose-then-critique design loop → designs/<slug>.md
+skills/spec/                     /sdd:spec — sole SPEC.md mutator
+skills/build/                    /sdd:build — plan-execute loop
+skills/check/                    /sdd:check — read-only drift report
+skills/explain/                  /sdd:explain — glyph → prose decoder
+skills/compact/                  /sdd:compact — token-budget compaction sweep
+skills/reorganize/               /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
+skills/glyph/                    auto-fire math-glyph encoder for SPEC-adjacent writes
+skills/backprop/                 auto-fire bug → spec protocol on /sdd:build verify-fail
+skills/socratic/                 intent-sharpening gate invoked by /sdd:spec
+skills/steno/                    human-facing terse-prose register
+scripts/check-mechanical.py      deterministic audit core used by /sdd:check
+SPEC-FORMAT.md                   structural format contract for every SPEC.md
 ```
 
 ## Attribution & license
 
-`pilot-spec` is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed). For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
+SDD is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed). For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
 
-MIT. See repo-root [`LICENSE`](../LICENSE).
+MIT. See [`LICENSE`](LICENSE).

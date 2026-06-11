@@ -20,7 +20,7 @@ Operator-triggered six-prong sweep. Single atomic commit, rollback via `git reve
 ## LOAD
 
 1. Read `SPEC.md`. Missing → "no spec, nothing to compact." Stop.
-2. Read `pilot-spec/SPEC-FORMAT.md` every row schema and section catalog.
+2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` every row schema and section catalog.
 3. Compute baseline `tokens ≈ bytes/3.4` per token-budget-compact invariant (single source is `check-mechanical.py` `TOKEN_RATIO` per mechanical-realization invariant; not hardcode divisor). Record.
 
 ## PROPOSE

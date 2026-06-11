@@ -1,7 +1,7 @@
 ---
 name: socratic
 description: |
-  Parameterized single-question intent-sharpening gate. not user-invoked — invoked from consumer cmd pre-apply gate (/gh:issue, /sdd:spec).
+  Parameterized single-question intent-sharpening gate. not user-invoked — invoked from consumer cmd pre-apply gate (e.g. /sdd:spec).
 allowed-tools: AskUserQuestion, Read, Grep, Skill
 disable-model-invocation: true
 ---
