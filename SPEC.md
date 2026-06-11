@@ -64,10 +64,11 @@ V47: check-dispatch — /sdd:check accepts bare (memo-driven) or `--full` (drop 
 V48: token-budget — estimate = bytes / 3.4; > 25k tokens → check advisory → operator /sdd:compact; > 50 closed §T rows → window-vs-archive split; canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
 V49: extras-hook — executable `.claude/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.claude/check-extras.md`, consulted by check + build pre-commit probe.
 V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
-V61: sub-skill-flags — auto-fire sub-skills (telegraph, backprop, socratic, steno) ! `user-invocable: false`, never `disable-model-invocation: true` (hides skill from Skill tool, breaks consumer engagement).
+V61: sub-skill-flags — auto-fire sub-skills (telegraph, backprop, socratic, steno, monitor) ! `user-invocable: false`, never `disable-model-invocation: true` (hides skill from Skill tool, breaks consumer engagement).
 V62: tooling-preference — pattern scans `rg --pcre2`; JSON parse `jq`, fallback python3; audit core single-file stdlib-only python3; skill frontmatter pre-approves exactly the tools its body prescribes.
 V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
 V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:compact, /sdd:reorganize) (closes §B.6).
+V65: monitor-protocol — consumer-repo skill deviation → capture (skill, version, expected vs actual) ! redact consumer paths/code/identifiers pre-publish; dedup `gh issue list` pre-file, hit → comment not new issue; AskUserQuestion gate every gh write (§V.23); target = manifest `.repository` (§V.41); cwd = plugin repo → backprop hand-off (§V.27), no issue filed.
 
 ## §T TASKS
 
@@ -78,6 +79,7 @@ T3|x|create REPO-LOCAL `.claude/skills/release/SKILL.md`: gh release flow — bu
 T4|x|add script `emit-overview` mode (§G/§C/§I/§T/§B bodies + §V id list, no §V bodies); check LOAD step 1 → emit-overview i/o whole-file Read|V64,V40
 T5|.|sweep: add PROGRESS § to multi-phase recipes — scope vocab {check, build, compact, reorganize}; per skill TaskCreate per recipe phase, TaskUpdate per transition, frontmatter allowed-tools += `TaskCreate`, `TaskUpdate`|V24,V62
 T6|.|script audit emits batch-advisory row from §V row count + PUBLISHED file census; check batch step 1 consumes row, retire hand-computed heuristic|V46,V40
+T7|.|init `skills/monitor/SKILL.md`: auto-fire deviation capture per monitor-protocol; trigger in frontmatter description only, existing skill bodies byte-identical|V65,V61
 
 ## §B BUGS
 
