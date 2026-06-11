@@ -17,7 +17,7 @@ Pure diagnostic. Reports violations; writes nothing to SPEC or code; user decide
 
 ## LOAD
 
-1. Read `SPEC.md`. Missing → "no spec, nothing to check." Stop.
+1. Load spec overview (SCOPE, not whole-file Read per single-load invariant) — `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-overview`. Prints §G/§C/§I/§T/§B bodies + §V id list (no §V bodies — those arrive via `emit-v-slices` step 4; whole-file Read here double-loads SPEC.md + re-hits the Read token cap). Script exits non-zero "no SPEC.md" → "no spec, nothing to check." Stop.
 2. Parse `$ARGUMENTS` (two forms only, per dispatch invariant):
    - bare → memo-driven default sweep: invariants + interfaces + tasks. Memo absent or invalidated → full re-classify. Fresh memo written on clean.
    - `--full` → delete `.claude/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation). Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).

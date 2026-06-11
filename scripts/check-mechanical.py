@@ -56,6 +56,13 @@ Modes:
                 set, so a live row can't be silently dropped from the verdict
                 table (omitted-row undercoverage class). §I ids derive from
                 kind-prefixed interface rows (`- api: POST /x → …` → `I.api`).
+  emit-overview — read SPEC.md, print the LOAD-step spec overview: §G/§C/§I/§T/§B
+                headers + bodies verbatim plus the §V id list only (no §V row
+                bodies). The drift-detector loads this in place of a whole-file
+                Read per the single-load invariant; §V bodies arrive via
+                emit-v-slices, so loading them here too would double-load SPEC.md
+                and re-hit the Read token cap on a large spec. The id list lets
+                the consumer size the classification batch from the row count.
   --self-test — run inline fixtures; exit 0 iff every assertion holds.
 
 Parametric per the published-tooling invariant: reads SPEC-FORMAT conventions and
@@ -228,6 +235,27 @@ def collect_v_slices(sections):
                        "line_end": block[-1][0],
                        "text": "\n".join(b[1] for b in block)})
     return slices
+
+
+def collect_overview(sections, order):
+    """Render the LOAD-step overview: §G/§C/§I/§T/§B headers + bodies verbatim,
+    but §V as its id list only (no row bodies). Feeds the drift-detector's spec
+    load in place of a whole-file Read per the single-load invariant — §V bodies
+    arrive via emit-v-slices, so re-loading them here would double-load SPEC.md
+    and re-hit the Read pagination cap on a large spec. Sections render in
+    observed order; the §V id list lets the consumer size the classification
+    batch (row count) without the bodies."""
+    out = []
+    v_ids = [r["id"] for r in parse_v_rows(sections)]
+    for letter in order:
+        if letter not in CANONICAL_ORDER:
+            continue
+        out.append(f"## §{letter} {SECTION_NAME[letter]}")
+        if letter == "V":
+            out.append(",".join(v_ids))
+        else:
+            out.extend(line for _, line in sections.get(letter, []))
+    return "\n".join(out)
 
 
 def emit_superseded_candidates(v_rows, t_rows):
@@ -1041,6 +1069,13 @@ def cmd_emit_row_ids(args):
     return 0
 
 
+def cmd_emit_overview(args):
+    text, _, _ = load_spec(args.repo_root, args.spec)
+    sections, order = parse_sections(text)
+    print(collect_overview(sections, order))
+    return 0
+
+
 def parse_table(text):
     rows = []
     for line in text.splitlines():
@@ -1406,6 +1441,31 @@ def selftest():
     check([r[0] for r in parsed] == skel and all(v == "" for _, v, _ in parsed),
           "emit-row-ids: pipe-table parses for fill-verdicts hand-off")
 
+    # emit-overview: non-§V sections verbatim + §V id list only (no bodies)
+    spec_ov = ("## §G GOAL\n" "goal prose line\n"
+               "## §C CONSTRAINTS\n" "- one constraint\n"
+               "## §I INTERFACES\n" "- cmd: `foo bar` → out\n"
+               "## §V INVARIANTS\n"
+               "section preamble line\n"
+               + _vrow(1, "first axiom body") + "\n"
+               + _vrow(2, "second `a|b` body") + "\n"
+               "## §T TASKS\n" "id|status|task|cites\n"
+               + f"T{3}|x|do `a|b` thing|V{1}" + "\n"
+               "## §B BUGS\n" "id|date|cause|fix\n")
+    ov_secs, ov_order = parse_sections(spec_ov)
+    ov = collect_overview(ov_secs, ov_order)
+    check("goal prose line" in ov and "- one constraint" in ov,
+          "emit-overview: §G/§C bodies verbatim")
+    check(f"T{3}|x|do `a|b` thing|V{1}" in ov,
+          "emit-overview: §T row body verbatim incl inner pipe")
+    check(f"V{1},V{2}" in ov, "emit-overview: §V rendered as id list")
+    check("first axiom body" not in ov and "second" not in ov
+          and "section preamble line" not in ov,
+          "emit-overview: no §V row bodies or preamble")
+    check("## §V INVARIANTS" in ov and ov.index("## §I INTERFACES")
+          < ov.index("## §V INVARIANTS") < ov.index("## §T TASKS"),
+          "emit-overview: §V id list in observed section position")
+
     # token estimate
     check(audit_token_estimate(int(TOKEN_BUDGET * TOKEN_RATIO) + 1000), "token over fires")
     check(audit_token_estimate(100) == [], "token under silent")
@@ -1428,7 +1488,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 76
+    return 81
 
 
 # --- entry -------------------------------------------------------------------
@@ -1441,7 +1501,8 @@ def main(argv=None):
                                      description="deterministic mechanical audits")
     parser.add_argument("mode", choices=["audit", "write-memo", "emit-v-slices",
                                          "emit-superseded", "emit-fold-seeds",
-                                         "emit-v-weights", "emit-row-ids"])
+                                         "emit-v-weights", "emit-row-ids",
+                                         "emit-overview"])
     parser.add_argument("--repo-root", default=os.environ.get("CHECK_REPO_ROOT", "."))
     parser.add_argument("--spec", default="SPEC.md")
     parser.add_argument("--no-hook", action="store_true",
@@ -1466,6 +1527,8 @@ def main(argv=None):
         return cmd_emit_v_weights(args)
     if args.mode == "emit-row-ids":
         return cmd_emit_row_ids(args)
+    if args.mode == "emit-overview":
+        return cmd_emit_overview(args)
     return cmd_write_memo(args)
 
 
