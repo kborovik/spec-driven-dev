@@ -93,12 +93,21 @@ import argparse
 import datetime
 
 # --- verdict vocab (drift-verdict-vocab invariant) ---------------------------
+# Per-row-type admissibility: §V (invariant), §I (interface), §T (task) rows each
+# carry only the verdicts valid for their type, so the LLM can't silently remap
+# an out-of-type verdict (closes §B.8). MATCH is the §I-clean verdict, admissible
+# on §I rows only. Pseudo-id rows (mechanical findings: format/cite/history/… )
+# are unrestricted — script-emitted, already trusted.
 
-CLEAN_VERDICTS = {"HOLD", "HOLD-SINCE-CLEAN", "SCOPE-EMPTY", "VIOLATE-CAPTURED", "LATENT"}
+SILENT_CLEAN = {"HOLD", "HOLD-SINCE-CLEAN", "SCOPE-EMPTY", "LATENT"}   # no body row
+SURFACED_CLEAN = {"VIOLATE-CAPTURED"}                                  # clean, surfaced
+CLEAN_VERDICTS = SILENT_CLEAN | SURFACED_CLEAN
 DIRTY_VERDICTS = {"VIOLATE", "UNVERIFIABLE", "UNRESOLVED", "TYPE-MISMATCH",
                   "DRIFT", "MISSING", "STALE", "EXTRA"}
-# verdicts admissible on §V (invariant) rows in the merged table
+# per-row-type admissible verdicts in the merged table
 V_VOCAB = CLEAN_VERDICTS | {"VIOLATE", "UNVERIFIABLE"}
+I_VOCAB = {"MATCH", "DRIFT", "MISSING", "EXTRA"}      # MATCH = §I-clean (§I rows only)
+T_VOCAB = SILENT_CLEAN | {"STALE"}
 ADVISORY = "ADVISORY"
 
 TOKEN_BUDGET = 25000       # token-budget invariant advisory threshold
@@ -1131,14 +1140,36 @@ def compute_clean(rows):
     return (len(offenders) == 0), offenders
 
 
+def row_type_vocab(rid):
+    """Admissible verdict set for a merged-table row id, by row type
+    (drift-verdict-vocab invariant): §V → V_VOCAB, §I → I_VOCAB (incl. MATCH),
+    §T → T_VOCAB. Pseudo-id rows (mechanical findings) + §B ids return None =
+    unrestricted (never classified rows)."""
+    m = ID_NUM.match(rid)
+    if m:
+        if m.group(1) == "V":
+            return V_VOCAB
+        if m.group(1) == "T":
+            return T_VOCAB
+        return None
+    if rid.startswith("I."):
+        return I_VOCAB
+    return None
+
+
 def validate_vocab(rows):
-    """§V (invariant) rows must carry a vocab verdict; pseudo-id rows may carry
-    problem/advisory verdicts. Returns list of complaints."""
+    """Per-row-type verdict admissibility (drift-verdict-vocab invariant): each
+    classified row carries only a verdict valid for its type — MATCH is §I-only,
+    V-vocab §V-only, STALE §T-only — so the LLM can't silently remap an
+    out-of-type verdict (closes §B.8). Pseudo-id rows are unrestricted; a blank
+    verdict (unfilled skeleton row) is skipped. Returns list of complaints."""
     bad = []
     for rid, v, _ in rows:
-        if ID_NUM.match(rid) and rid[0] == "V":
-            if v not in V_VOCAB and v not in ("VIOLATE", "UNVERIFIABLE"):
-                bad.append(f"{rid} verdict {v} not in vocab")
+        if not v:
+            continue
+        vocab = row_type_vocab(rid)
+        if vocab is not None and v not in vocab:
+            bad.append(f"{rid} verdict {v} not in row-type vocab")
     return bad
 
 
@@ -1537,6 +1568,18 @@ def selftest():
     check(compute_clean(dirty_rows)[0] is False, "clean-set rejects violate")
     check(validate_vocab([(f"V{1}", "BOGUS", "")]), "vocab rejects bogus V verdict")
     check(validate_vocab([("format", "VIOLATE", "")]) == [], "vocab allows pseudo-id")
+    # per-row-type vocab (drift-verdict-vocab invariant): MATCH is §I-clean, §I-only
+    check(validate_vocab([("I.api", "MATCH", "")]) == [], "vocab admits MATCH on §I row")
+    check(validate_vocab([("I.api", "DRIFT", "")]) == [], "vocab admits DRIFT on §I row")
+    check(validate_vocab([(f"V{1}", "MATCH", "")]),
+          "vocab rejects MATCH on §V row (§I-only)")
+    check(validate_vocab([("I.api", "HOLD", "")]),
+          "vocab rejects §V silent verdict on §I row")
+    check(validate_vocab([(f"T{9}", "STALE", "")]) == [], "vocab admits STALE on §T row")
+    check(validate_vocab([(f"T{9}", "MATCH", "")]), "vocab rejects MATCH on §T row")
+    check(validate_vocab([("I.api", "", "")]) == [], "vocab skips blank skeleton verdict")
+    check(compute_clean([("I.api", "MATCH", "")])[0] is True, "clean-set: MATCH is clean")
+    check(compute_clean([("I.api", "DRIFT", "")])[0] is False, "clean-set: DRIFT is dirty")
 
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
@@ -1547,7 +1590,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 92
+    return 101
 
 
 # --- entry -------------------------------------------------------------------
