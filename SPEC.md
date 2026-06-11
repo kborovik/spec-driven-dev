@@ -11,7 +11,6 @@
 - `scripts/check-mechanical.py` single-file, stdlib-only python3
 - no orchestrator, no swarm: main Claude executes; sub-agents read-only
 - no state beyond SPEC.md + git + REPO-LOCAL `.claude/` cache
-- MIT; adapted from cavekit v4.0.0
 
 ## §I INTERFACES
 
