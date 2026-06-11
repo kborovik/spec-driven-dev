@@ -18,7 +18,7 @@ Pure diagnostic. Reports violations; writes nothing to SPEC or code; user decide
 ## LOAD
 
 1. Read `SPEC.md`. Missing → "no spec, nothing to check." Stop.
-2. Args (two forms only, per dispatch invariant):
+2. Parse `$ARGUMENTS` (two forms only, per dispatch invariant):
    - bare → memo-driven default sweep: invariants + interfaces + tasks. Memo absent or invalidated → full re-classify. Fresh memo written on clean.
    - `--full` → delete `.claude/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation). Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
    - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full`. Legacy section-name args and multi-flag forms retired.

@@ -4,7 +4,7 @@ description: |
   Telegraph encoding — LLM-facing compression for SPEC.md and spec-adjacent
   writes. Loaded by /sdd:spec, /sdd:build, /sdd:check. Triggers on any
   write to SPEC.md or user says "telegraph", "compress this", "be brief".
-allowed-tools: [Skill]
+allowed-tools: Skill
 user-invocable: false
 ---
 

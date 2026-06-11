@@ -16,7 +16,7 @@ Single-thread native plan→execute. You are main Claude. No swarm.
 ## LOAD
 
 1. Read `SPEC.md`. Missing → tell user run spec skill first; bail.
-2. Args: `§T.n` → that task only; `--next` or empty → lowest-numbered `.` row; `--all` → every `.` row in §T order — plan once, then chain {edit → verify → commit} per row autonomously.
+2. Parse `$ARGUMENTS`: `§T.n` → that task only; `--next` or empty → lowest-numbered `.` row; `--all` → every `.` row in §T order — plan once, then chain {edit → verify → commit} per row autonomously.
 
 ## PLAN
 

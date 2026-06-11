@@ -4,7 +4,7 @@ description: |
   Human-facing terse-prose register for non-author reviewers.
   Triggers: write/edit human-facing terse prose for review; user says
   "steno", "shorthand", "tighten this", "make this shorter".
-allowed-tools: [Skill]
+allowed-tools: Skill
 user-invocable: false
 ---
 

@@ -18,7 +18,7 @@ caller passes:
 
 skill returns `(converged-mode, facts)` — data only; not file, not commit, not write artifact. skill owns question selection, convergence check, escape hatch, teach overlay. caller owns draft, file-write, git ops, root-cause analysis. skill not know caller's artifact shape — checks fact presence per triple, not meaning.
 
-## Loop
+## LOOP
 
 1. ask 1 question
 2. wait for answer
@@ -27,7 +27,7 @@ skill returns `(converged-mode, facts)` — data only; not file, not commit, not
 
 every turn: 1 question. not batched. not checklist tone. not re-ask facts already supplied.
 
-## Question pool
+## QUESTION POOL
 
 |category|fires when|shape|
 |clarify|symptom vague|"what specifically — input → observed vs expected?"|
@@ -41,17 +41,17 @@ pick by what's most missing.
 
 NEW mode: fire first-principle probe explicitly, once — not buried under clarify. user may decline → converge on remaining triple facts. record `first-principle-asked` in returned facts regardless of answer.
 
-## Tone
+## TONE
 
 interrogate problem, not user. probe statement, not judgment. not "are you sure?" → "what would falsify this?"
 
-## Code reads
+## CODE READS
 
 reactive only. not grep repo pre-questions to "find the bug" — undermines dialogue, duplicates caller's investigation. user cites `file:line`/symbol/path → read that target. user claims breakage w/o data → spot-check before next question.
 
 shape: "looking at `<file>:<line>`, [observable fact] — given that, [next question]". model verifies, user diagnoses. ≤ 2 reads/turn; broader sweep needed → stop dialogue, return control to caller.
 
-## Teach
+## TEACH
 
 overlay, not phase. answer reveals gap → surface distinction in 1–2 sentences, then next question. not lecture.
 
@@ -61,10 +61,10 @@ overlay, not phase. answer reveals gap → surface distinction in 1–2 sentence
 |scope conflated w/ ambition|smallest-change seam vs total redesign|
 |breakage assumed w/o data|observed vs expected vs assumed|
 
-## Convergence
+## CONVERGENCE
 
 converged iff some mode's triple fully present in dialogue history. ≥ 3 turns w/o convergence → offer escape: "enough for rough draft — return now and refine downstream, or keep going?"
 
-## Escape hatch
+## ESCAPE HATCH
 
 "just file it" / "skip the questions" / "I know what I want" → stop dialogue, not bypass gate: audit facts vs triples. gaps → ask once for missing piece or return `(mode, partial-facts)` + explicit `unmet-criteria` list so caller surfaces gaps in artifact (e.g. `## Unresolved` callout). gaps stay visible; user's "done thinking" honored.

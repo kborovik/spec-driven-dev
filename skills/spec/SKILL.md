@@ -21,9 +21,9 @@ model: fable
 
 **Step 0 (precondition):** `git status --porcelain SPEC.md` empty → continue; else bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit assumes clean baseline; porcelain catches staged + untracked, which `git diff --quiet` misses).
 
-**Step 1 (fold-in shortcut):** input arg matches `designs/*.md`, file exists, SPEC.md exists @ repo root → FOLD-IN (skip socratic gate — design skill Open-Questions-empty rule already enforced convergence pre-persist). Design path w/o SPEC.md → bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first" (design skill degrades gracefully sans SPEC.md so converged drafts can predate it). Else → gate.
+**Step 1 (fold-in shortcut):** `$ARGUMENTS` matches `designs/*.md`, file exists, SPEC.md exists @ repo root → FOLD-IN (skip socratic gate — design skill Open-Questions-empty rule already enforced convergence pre-persist). Design path w/o SPEC.md → bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first" (design skill degrades gracefully sans SPEC.md so converged drafts can predate it). Else → gate.
 
-Engage `sdd:socratic` gate w/ user input as intent. Single-question loop until convergence triple matches one mode:
+Engage `sdd:socratic` gate w/ `$ARGUMENTS` as intent. Single-question loop until convergence triple matches one mode:
 
 - **NEW** — goal + first-principle-asked + (≥ 1 invariant or ≥ 1 task)
 - **DISTILL** — explicit "build from code" intent (gate exits ≤ 1 turn — walks repo, no interrogation)
@@ -100,18 +100,18 @@ Five steps in order; audits fire on condition, not mode authorship. All audits r
 
 **Step 0 — write-time prune** (delta-rewrite stage, ordered ahead of audit table so every audit sees final-form delta):
 
-- delta patches pre-existing §V row → §V-row residue prune per write-time prune §.
-- delta adds or rewrites §B `cause` cell → one-line trim per write-time prune §.
+- delta patches pre-existing §V row → §V-row residue prune per WRITE-TIME PRUNE §.
+- delta adds or rewrites §B `cause` cell → one-line trim per WRITE-TIME PRUNE §.
 - pruned content → commit-msg body (step 4); step 3 shows post-prune form.
 
 **Step 1 — audit table** (on-fail column names owning § — bail strings + sub-recipe detail live there only):
 
 ```
 audit | fires when delta is | on fail
-sweep-scope | contains sweep-§T row (§V-violation remediation) | bail → sweep-§T scope audit
-pinned-cite | touches PUBLISHED (a) or SPEC.md narrative (b) | bail → pinned-cite audit, matching sub-recipe
-next-block  | touches user-typeable SKILL.md | bail → Next-block-section audit
-fold-first  | adds §V row to pre-existing §V section, mode not FOLD-IN | AskUserQuestion gate → Fold-first audit
+sweep-scope | contains sweep-§T row (§V-violation remediation) | bail → SWEEP-§T SCOPE AUDIT
+pinned-cite | touches PUBLISHED (a) or SPEC.md narrative (b) | bail → PINNED-CITE AUDIT, matching sub-recipe
+next-block  | touches user-typeable SKILL.md | bail → NEXT-BLOCK-SECTION AUDIT
+fold-first  | adds §V row to pre-existing §V section, mode not FOLD-IN | AskUserQuestion gate → FOLD-FIRST AUDIT
 ```
 
 pinned-cite (a) + next-block rows structurally no-op while step 4 writes SPEC.md only — retained defensive (fire only if future mode widens write set).
@@ -136,11 +136,11 @@ FOLD-IN  → fold-in §V.<n>(+) and §T.<n>(+): <slug>            (omit absent �
 
 APPLY ends @ commit. `## POST-APPLY` fires after, unchanged.
 
-## sweep-§T scope audit
+## SWEEP-§T SCOPE AUDIT
 
 Every sweep-§T row (remediating §V-class violation) in delta ! task line declares scope as grep pattern or vocab table per sweep-§T-scope invariant; named-procedure or named-site list not accepted. No pattern → bail w/ `sweep §T row scope ! grep pattern per sweep-§T scope rule`; user supplies pattern, retry.
 
-## pinned-cite audit
+## PINNED-CITE AUDIT
 
 **Sub-recipe (a) — PUBLISHED-scope ban**: grep `§[VTB]\.[0-9]+` in delta touching PUBLISHED scope (per scope-set invariant). Match → bail `pinned §-cite not allowed in PUBLISHED — use placeholder form (§V.<n>) or inline rule embedding` until rewrite. No PUBLISHED delta → no-op.
 
@@ -148,7 +148,7 @@ Every sweep-§T row (remediating §V-class violation) in delta ! task line decla
 
 (a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (compact prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`. Pattern-match catches what LLM prose-review missed (see §B history).
 
-## Next-block-section audit
+## NEXT-BLOCK-SECTION AUDIT
 
 Audits touched user-typeable `<plugin>/skills/<n>/SKILL.md` per skills-only architecture invariant. User-typeable = frontmatter lacks `disable-model-invocation: true` and `user-invocable: false` (skill dir surfaces as `/<plugin>:<n>` natively unless opted out).
 
@@ -159,7 +159,7 @@ Each touched file in post-amend tree:
 
 Defends against new user-typeable skill bodies (or cross-plugin migrations) omitting Next-block contract sister skills carry — V20-class runtime rule governs response shape, not authoring-time presence (see §B history). Structurally no-op while APPLY step 4 writes SPEC.md only (mirrors pinned-cite (a) posture).
 
-## Fold-first audit
+## FOLD-FIRST AUDIT
 
 Per fold-first authoring invariant (§V.<n>). Mechanical decision-gate.
 
@@ -177,7 +177,7 @@ Each proposed new §V row in delta:
 
 Defends against premature-split class — small audit or enforcement-meta additions creating new §V row when inline amend sufficed. "mirrors §V.<n>" alone insufficient justification per fold-first authoring invariant.
 
-## write-time prune
+## WRITE-TIME PRUNE
 
 Per freshness-contract invariant (SPEC.md is clean current design; history in commit log + archive, not inlined). Auto-rewrites delta → clean current state; pruned history → auto-commit msg body (recoverable via code + `git log`). Show-user diff displays post-prune row — prune reviewed, not blind.
 

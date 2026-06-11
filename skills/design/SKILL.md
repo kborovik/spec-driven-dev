@@ -10,11 +10,11 @@ model: fable
 
 Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold → steno (readable symbols `→ & | §` only).
 
-## Position in funnel
+## POSITION IN FUNNEL
 
 `/sdd:design` is front door — caller named the layer mentally, wants to commit a shape. Layer / shape-space unclear → loop step 2 questions narrow. No auto-route — user-driven only.
 
-## Loop
+## LOOP
 
 1. read `SPEC.md` @ root; absent → degrade per § below
 2. topic vague or empty → ≤ 2 questions to localize, then propose
@@ -23,11 +23,11 @@ Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold 
 5. wait → user critique / answers
 6. patch Proposal in place; resolved Qs → `## Design decisions` w/ rationale
 7. repeat 5–6 until `## Open Questions` empty
-8. user confirms → persist per `## Persist`
+8. user confirms → persist per `## PERSIST`
 
 never self-resolve Open Qs — resolution requires user input. never persist w/o confirmation. never collapse multiple Qs into one to fake convergence.
 
-## Distinction from socratic
+## DISTINCTION FROM SOCRATIC
 
 |skill|converges on|mechanism|
 |socratic|"enough"|1 question/turn, sharpen intent|
@@ -35,7 +35,7 @@ never self-resolve Open Qs — resolution requires user input. never persist w/o
 
 not merged. socratic = bug or small-feature framing. design = structural choice.
 
-## Output template (design file body)
+## OUTPUT TEMPLATE (design file body)
 
 steno body; § citations OK when `SPEC.md` present.
 
@@ -73,7 +73,7 @@ steno body; § citations OK when `SPEC.md` present.
 [only if ≥3-turn escape used — parked Qs for follow-up]
 ```
 
-## Code reads
+## CODE READS
 
 reactive only — no preemptive scans.
 
@@ -82,11 +82,11 @@ reactive only — no preemptive scans.
 
 cap ≤ 2 reads/turn. broader sweep needed → stop, return control to user for codebase investigation.
 
-## SPEC.md degradation
+## SPEC.md DEGRADATION
 
 `SPEC.md` @ root absent → flag once: "designing without SPEC anchor; §V/§B/§T citations omitted". continue; omit `## Effect on in-flight SPEC items` from output.
 
-## Long-session escape
+## LONG-SESSION ESCAPE
 
 single Open Q ≥ 3 turns unresolved → AskUserQuestion per decision-gate invariant (selection drives persist-shape in current turn; prose `or keep going?` form not allowed):
 
@@ -98,13 +98,13 @@ single Open Q ≥ 3 turns unresolved → AskUserQuestion per decision-gate invar
 
 park → persisted draft carries Q under `## Unresolved` — not pretend resolved.
 
-## Title and slug
+## TITLE AND SLUG
 
 body opens `# <title>`. conventional-commits prefix optional (`feat(<scope>): ...`) — design-ness encoded by `designs/` location, not title prefix.
 
 slug: short kebab-case (`<noun-phrase>` or `<scope>-<noun>`), ≤ 5 words, ≤ 50 chars. ambiguous topic → ask once for confirmation. collision → append `-<n>`.
 
-## Persist
+## PERSIST
 
 write-new only — never append to existing design file. `Write` auto-creates `designs/` @ repo root (no `Bash` mkdir).
 
@@ -114,13 +114,13 @@ write-new only — never append to existing design file. `Write` auto-creates `d
 
 not commit — caller stages manually or runs `/sdd:spec designs/<slug>.md` fold-in (folds → SPEC.md, leaves design file in working tree per design-lifecycle invariant in SPEC.md; user removes or preserves manually post-fold).
 
-## Boundary
+## BOUNDARY
 
 never mutate `SPEC.md` — output is `designs/<slug>.md` only. SPEC amend = `/sdd:spec <designs/<slug>.md>` post-persist (gate routes to fold-in); impl = `/sdd:build` post-amend.
 
 not root-cause debugging — backprop skill owns that (user route `/sdd:spec <bug intent>`, gate → BACKPROP). design = structural shape, not "why is this broken".
 
-## Escape hatch
+## ESCAPE HATCH
 
 "just file it" / "skip the design" / "I already know what I want" → stop; hand verbatim intent to `/sdd:spec` (amend SPEC directly, no design draft).
 

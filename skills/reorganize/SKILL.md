@@ -92,7 +92,7 @@ Map is append-only history of all runs; stacked runs admit duplicate `old:` keys
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, not `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. State-mutator → post-EXECUTE prefer /sdd:check (confirm cite-DAG + format-layer clean post-renumber).
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. State-mutator → post-EXECUTE prefer /sdd:check (confirm cite-DAG + format-layer clean post-renumber).
 
 Example after EXECUTE (commit auto-fired):
 
