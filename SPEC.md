@@ -2,7 +2,7 @@
 
 ## §G GOAL
 
-7 slash cmds + 4 auto-fire sub-skills hold one telegraph SPEC.md authoritative over code an LLM writes faster than humans read.
+LLM writes code faster than humans read → standards + logic drift unchecked; counter: one telegraph SPEC.md authoritative over code; plugin skills keep code shape + component contracts aligned over time.
 
 ## §C CONSTRAINTS
 
