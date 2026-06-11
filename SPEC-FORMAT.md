@@ -43,6 +43,8 @@ One line. Opens `V<n>:` w/ monotonic `<n>` (per monotonic-numbering invariant).
 V<n>: <subject> <relation> <condition>
 ```
 
+Named form permitted (preferred for cross-skill-referenced rows): `V<n>: <name> — <body>` w/ short kebab-case `<name>` label. Free-text references cite `per <name> invariant` — grep-resolvable, no pinned digit, so PUBLISHED-safe per pinned-cite ban.
+
 ### §T row
 
 Pipe-table under `## §T TASKS` heading. Header row exactly:

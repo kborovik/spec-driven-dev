@@ -521,10 +521,12 @@ def strip_backticks(s):
     return PF_BACKTICK.sub('', s)
 
 
-def audit_cite_dag(v_rows, t_rows, b_rows, sections, arch_ids, repo_local_files):
+def audit_cite_dag(v_rows, t_rows, b_rows, sections, arch_ids, repo_local_files,
+                   i_ids):
     """Resolve typed cites to existing rows of the expected edge type.
     Emits UNRESOLVED / TYPE-MISMATCH only (HOLD silent)."""
     out = []
+    i_set = {r["id"] for r in i_ids}
     live = {"V": {r["id"] for r in v_rows},
             "T": {r["id"] for r in t_rows},
             "B": {r["id"] for r in b_rows}}
@@ -548,7 +550,13 @@ def audit_cite_dag(v_rows, t_rows, b_rows, sections, arch_ids, repo_local_files)
         if r["last"] is None:
             continue
         for tok in r["last"].split(','):
-            if tok == '-' or tok.startswith('I.'):
+            if tok == '-':
+                continue
+            if tok.startswith('I.'):
+                if tok not in i_set:
+                    out.append(("cite", "UNRESOLVED",
+                                f"§T.{r['id']}.cites {tok} UNRESOLVED: "
+                                f"kind absent from §I"))
                 continue
             m = ID_NUM.match(tok)
             if m:
@@ -948,7 +956,8 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_monotonic(t_rows, "T")
     findings += audit_monotonic(b_rows, "B")
     findings += audit_cite_dag(v_rows, t_rows, b_rows, sections, arch_ids,
-                               discover_repo_local(repo_root))
+                               discover_repo_local(repo_root),
+                               parse_i_ids(sections))
     findings += audit_history_residue(v_rows, t_rows, b_rows, full=full,
                                       oversized_ack=oversized_ack)
     findings += audit_pinned_header(discover_published_md(repo_root))
@@ -1177,9 +1186,17 @@ def selftest():
     tr = [{"id": f"T{9}", "last": f"V{1}", "line": 2}]
     tr_bad = [{"id": f"T{9}", "last": f"V{77}", "line": 2}]
     empty_ids = {"V": set(), "T": set(), "B": set()}
-    check(audit_cite_dag(vr, tr, [], {}, empty_ids, []) == [], "cite resolved silent")
-    bad = audit_cite_dag(vr, tr_bad, [], {}, empty_ids, [])
+    check(audit_cite_dag(vr, tr, [], {}, empty_ids, [], []) == [],
+          "cite resolved silent")
+    bad = audit_cite_dag(vr, tr_bad, [], {}, empty_ids, [], [])
     check(any(v == "UNRESOLVED" for _, v, _ in bad), "cite unresolved flagged")
+    # I.<kind> cites resolve against the live §I id set
+    tr_i = [{"id": f"T{9}", "last": f"V{1},I.api", "line": 2}]
+    check(audit_cite_dag(vr, tr_i, [], {}, empty_ids, [], [{"id": "I.api"}]) == [],
+          "I-cite resolved silent")
+    bad_i = audit_cite_dag(vr, tr_i, [], {}, empty_ids, [], [])
+    check(any(v == "UNRESOLVED" and "I.api" in e for _, v, e in bad_i),
+          "I-cite unresolved flagged")
 
     # history-residue: each pattern flagged; pre-filters exempt
     flag_v = [{"id": f"V{8}", "body": "foo retired 2026-01-02 bar", "line": 1}]
@@ -1411,7 +1428,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 74
+    return 76
 
 
 # --- entry -------------------------------------------------------------------
