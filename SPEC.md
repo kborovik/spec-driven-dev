@@ -73,7 +73,7 @@ V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.jso
 
 id|status|task|cites
 T1|x|add CI: script --self-test + audit dirty-verdict gate on push/PR|V40,V62
-T2|.|bump plugin version 1.1.0 + sync manifest description post-consistency-pass|-
+T2|x|bump plugin version 1.1.0 + sync manifest description post-consistency-pass|-
 
 ## §B BUGS
 
