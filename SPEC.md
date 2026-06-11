@@ -68,7 +68,7 @@ V61: sub-skill-flags — auto-fire sub-skills (telegraph, backprop, socratic, st
 V62: tooling-preference — pattern scans `rg --pcre2`; JSON parse `jq`, fallback python3; audit core single-file stdlib-only python3; frontmatter grant = narrowest pattern over body-prescribed invocations: zero-body-use grant banned; script-sole-use interpreter grant pins script path (mid-glob `Bash(python3 */check-mechanical.py *)` form); pin inexpressible (`${CLAUDE_PLUGIN_ROOT}` no-expand in frontmatter) → broad grant + inline note citing upstream limit (closes §B.10).
 V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
 V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:compact, /sdd:reorganize) (closes §B.6).
-V65: monitor-protocol — consumer-repo skill deviation → capture (skill, version, expected vs actual) ! redact consumer paths/code/identifiers pre-publish; dedup `gh issue list` pre-file, hit → comment not new issue; AskUserQuestion gate every gh write (§V.23); target = manifest `.repository` (§V.41); cwd = plugin repo → backprop hand-off (§V.27), no issue filed.
+V65: monitor-protocol — consumer-repo skill deviation → capture (skill, version, expected vs actual) ! redact consumer paths/code/identifiers pre-publish; dedup `gh issue list` pre-file, hit → comment not new issue; AskUserQuestion gate every gh write (§V.23) surfacing resolved `--repo` target; gh-write target = manifest `.repository` (§V.41), asserted == resolved `--repo` immediately pre-write — repo named in deviation excerpt never bleeds into `<target>`; cwd = plugin repo → backprop hand-off (§V.27), no issue filed (closes §B.11).
 
 ## §T TASKS
 
@@ -85,6 +85,7 @@ T9|x|script: write-memo `--from-audit` re-runs mechanical side internally, stdin
 T10|x|script: write-memo dirty → exit 1 (memo untouched), invalid vocab stays 2; self-test covers exit codes|V44
 T11|x|sweep frontmatter grants — scope `rg -n 'Bash\(' skills/*/SKILL.md`: zero-use → drop (check `Bash(git *)`); script-sole-use python3 → mid-glob pin (check, compact); jq-fallback python3 (reorganize, monitor) stays broad + note|V62
 T12|x|open upstream FR anthropics/claude-code: env-var expansion in skill frontmatter `allowed-tools`|V62
+T13|.|patch `skills/monitor/SKILL.md`: assert resolved gh-write `--repo` target == manifest `.repository` immediately pre-write + GATE surfaces resolved target; reject excerpt-named repo|V65,B11
 
 ## §B BUGS
 
@@ -99,3 +100,4 @@ B7|2026-06-11|batch narrow-scope override keyed on post-classification audit fil
 B8|2026-06-11|clean §I rows classify MATCH but memo vocab lacked it → LLM silently remapped MATCH→HOLD, no doc stated mapping|V43
 B9|2026-06-11|dirty run demanded full hand-merged table then refused write, exited 0 → unusable as CI gate|V44
 B10|2026-06-11|frontmatter grant matched command name not arg pattern: `${CLAUDE_PLUGIN_ROOT}` no-expand in `allowed-tools` → broad `Bash(python3 *)` 4 skills; check carried zero-use `Bash(git *)`|V62
+B11|2026-06-11|monitor gh-write hit upstream `anthropics/claude-code` not plugin `.repository` — target unasserted pre-write, excerpt-named repo bled into `<target>`|V65
