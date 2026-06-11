@@ -86,7 +86,7 @@ Single atomic commit:
 4. Overwrite `.claude/spec-clusters.json` w/ post-run state; keyed by fingerprint, `current_id` = `V<new>`. Archived rows not persisted (terminus in archive sibling).
 5. Cite-DAG sweep w/ renumber map: target set per PREAMBLE scope; backtick pre-filter as ARCHIVE-RETIRED step 2. Every surviving `§V.<old>` free-text or bare `V<old>` typed-column cite (§T.cites, §B.fix) → `§V.<new>` / `V<new>` per context. `new:'archive'` entries not substituted — citer-protection gate already excluded live citers.
 6. Probe `.claude/.gitignore`: both json files not gitignored (git-tracked per scope-set invariant); not guard add.
-7. `git add SPEC.md SPEC.archive.md .claude/spec-clusters.json .claude/spec-renumber-map.json` + touched sweep sites; auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
+7. Stage owned paths `git add SPEC.md SPEC.archive.md .claude/spec-clusters.json .claude/spec-renumber-map.json` + touched sweep sites (add tracks new-file artifacts), then path-scoped commit `git commit -- <those same paths>` (write-ownership invariant — commit scopes to the owned set, pre-staged files never leak); auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
 
 EXECUTE ends @ commit. Rollback `git revert <reorganize-sha>` per single-commit shape. Drift cascade surfaces as Next-block item per response-shape invariant — operator dispatches next turn.
 

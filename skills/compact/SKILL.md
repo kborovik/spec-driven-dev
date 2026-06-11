@@ -82,7 +82,7 @@ Single atomic commit:
 2. Prong 3 fired → `git add SPEC.archive.md`.
 3. Prong 6 fired → `git add .claude/check-extras.md`.
 4. Prong 1 fired → cite-DAG sweep same commit; touch REPO-LOCAL citers renumbered by fold.
-5. `git add` artifacts + `SPEC.md`; auto-commit msg `compact SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
+5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit `git commit -- <staged artifacts> SPEC.md` (write-ownership invariant — commit scopes to staged owned set, pre-staged files never leak); auto-commit msg `compact SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
 
 EXECUTE ends @ commit. Rollback `git revert <compact-sha>`. Drift cascade → Next-block item #1; operator dispatches next turn.
 

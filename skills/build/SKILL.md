@@ -38,10 +38,10 @@ Emit plan inline every task (transparency, not wait-state) → EXECUTE.
 
 Per task in order:
 
-1. Edit code per plan. Stage explicit `git add <listed-paths>`, never `git add -A` — pre-existing dirty tree not bundled.
+1. Edit code per plan. Stage explicit `git add <listed-paths>` (feeds step-3 staged-diff probe); step-4 commit path-scoped so pre-existing dirty tree never bundled (write-ownership invariant).
 2. Run verification cmd.
 3. Staged diff touches PUBLISHED → probe `.claude/check-extras.md`; exists → run its audit recipes, bail per recipe msg every surviving match, no commit until match-free. No file → no-op.
-4. **Pass** (cmd exits 0 + planned tests added + full-suite re-run shows no §V regress) → flip §T.n `.` → `x`; auto-commit, no prompt, msg `T<n>: <goal line>` + §V cites. Next task.
+4. **Pass** (cmd exits 0 + planned tests added + full-suite re-run shows no §V regress) → flip §T.n `.` → `x`; auto-commit path-scoped `git commit -- <listed-paths> SPEC.md`, no prompt, msg `T<n>: <goal line>` + §V cites. Next task.
 5. **Fail** → FAIL → BACKPROP. No blind retry, no commit, status stays `.`.
 
 ## FAIL → BACKPROP
