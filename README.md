@@ -1,21 +1,17 @@
-<h1 align="center">Spec-Driven Development (SDD)</h1>
-
-<p align="center">
-  <strong>compressed spec-driven development for Claude Code</strong><br/>
-  <sub>one file · seven commands · main-thread writes</sub><br/>
-  <sub><em>installed as the <code>sdd</code> plugin · slash commands <code>/sdd:*</code></em></sub>
-</p>
-
----
+<h1 align="center">
+  Spec-Driven Development (SDD)
+</h1>
 
 ## What this is
 
-**Code consistency is the casualty of LLM agent velocity.** LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. SDD keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
+**Code consistency is the casualty of LLM agent velocity.** 
+
+LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. SDD keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
 
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Telegraph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the bundled human-facing shorthand).
+- **Telegraph encoding cuts tokens ~30%** vs Claude prose for the same content. The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); Distinct from `steno` (the bundled human-facing shorthand).
 - **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
 - **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
@@ -32,6 +28,9 @@ That framing is load-bearing. Telegraphic fragments over full sentences, pipe ta
 
 ```bash
 /plugin marketplace add kborovik/spec-driven-dev
+```
+
+```bash
 /plugin install sdd@spec-driven-dev
 ```
 
