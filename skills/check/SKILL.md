@@ -49,8 +49,9 @@ Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBL
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
 - `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
+- `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` rows → their REPORT blocks; `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` rows → their REPORT blocks; `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
 
 ## MEMO
 
@@ -113,7 +114,7 @@ Recipes never name repo-literal paths beyond `SPEC.md`. Repo-specific enforcemen
 
 Invariant audit MAY parallelize via Explore sub-agents:
 
-1. **Batch count** = `ceil(|V|/15)` clamped `[1, 4]`. <15 rows → main-thread. **Narrow-scope override**: |V| ≥ 15 and unique-file-scope (distinct PUBLISHED files audits touch) < `ceil(|V|/2)` → 1 agent regardless — cross-cutting greps amortize (one `rg` scans full scope once), and local `rg` cost < agent-spawn cost on narrow repo. Threshold = row count x file-scope diversity, not row count alone.
+1. **Batch count** = the audit's `batch|ADVISORY|recommended: <n> agents` row — script-computed from §V row count + PUBLISHED file census; formula owned by the script per mechanical-realization invariant, never re-derived here. `n` = 1 → main-thread single-agent path. Narrow-scope collapse (PUBLISHED census small vs §V count → fewer agents amortize cross-cutting greps better) folds into the row already, closing the eyeballed-file-count proxy class (§B.7).
 2. **Partition** = contiguous V<n> spans per batch (cite locality → shared file reads).
 3. **Prompt** = canonical block below, copied verbatim per batch, fill only `{...}` placeholders — no paraphrase, no per-call schema improvisation. `{V_SLICE}` + `{LINE_START}`/`{LINE_END}` filled from `emit-v-slices` output (batch = contiguous span; line bounds from the `## V<n> SPEC.md:<start>-<end>` headers), never re-Read SPEC.md. Single-agent path sources same slice in-thread.
 4. **Aggregate** — main thread concatenates per-batch tables → REPORT invariant drift block.

@@ -11,6 +11,10 @@ standardized `id|verdict|evidence` pipe-table the skill merges into its REPORT.
 Modes:
   audit       — read SPEC.md (+ sibling archive if present), run every mechanical
                 audit, print the pipe-table. Optionally probe a REPO-LOCAL hook.
+                Emits `batch|ADVISORY|recommended: <n> agents` — the
+                §V-classification sub-agent count from the §V row count +
+                PUBLISHED file census (batch invariant), consumed by the
+                drift-detector's batch step in place of a hand-computed heuristic.
                 Also emits the machine-side scope feed for the memo-driven default
                 sweep: `tasks|ADVISORY|flipped-since-clean: …` (§T flipped `.`→`x`
                 since the memo's clean sha) and `diff|ADVISORY|touched: …` (paths
@@ -102,6 +106,8 @@ TOKEN_RATIO = 3.4          # bytes-per-token for telegraph register (token-budge
 OVERSIZE_CELL = 300        # history-residue oversized-cell advisory (chars)
 MEMO_SCHEMA = 3            # memo schema version (memo invariant)
 HISTORY_AGGREGATE_THRESHOLD = 10  # per-section body-row aggregation (drift-verdict-vocab invariant)
+BATCH_ROW_DIVISOR = 15     # batch invariant: base agent count = ceil(|V| / 15)
+BATCH_MAX_AGENTS = 4       # batch invariant: clamp ceil to [1, BATCH_MAX_AGENTS]
 
 # --- structural patterns (note source discipline above) ----------------------
 
@@ -716,6 +722,34 @@ def audit_token_estimate(spec_bytes):
     return []
 
 
+# --- batch-sizing advisory ---------------------------------------------------
+
+def recommend_batch_count(v_count, published_census):
+    """§V-classification sub-agent count (batch invariant). Base =
+    ceil(|V| / BATCH_ROW_DIVISOR) clamped [1, BATCH_MAX_AGENTS]. Narrow-scope
+    override: PUBLISHED file census < ceil(|V| / 2) → 1 agent regardless — a
+    narrow file set means cross-cutting greps amortize (one in-thread `rg` sweep
+    beats per-agent spawn cost). Census is the deterministic PUBLISHED markdown
+    file count, not an LLM-eyeballed repo-file proxy (closes §B.7)."""
+    if v_count <= 0:
+        return 1
+    base = (v_count + BATCH_ROW_DIVISOR - 1) // BATCH_ROW_DIVISOR
+    base = max(1, min(BATCH_MAX_AGENTS, base))
+    if published_census < (v_count + 1) // 2:   # census < ceil(|V| / 2)
+        return 1
+    return base
+
+
+def audit_batch_advisory(v_rows, published_md):
+    """Emit the batch-sizing advisory (batch invariant):
+    `batch|ADVISORY|recommended: <n> agents` from the live §V row count +
+    PUBLISHED file census. The drift-detector consumes this row for its
+    Batch-protocol agent count instead of hand-computing the heuristic
+    (closes §B.7)."""
+    n = recommend_batch_count(len(v_rows), len(published_md))
+    return [("batch", ADVISORY, f"recommended: {n} agents")]
+
+
 # --- memo bookkeeping --------------------------------------------------------
 
 def row_body_sha(body):
@@ -988,7 +1022,9 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
                                parse_i_ids(sections))
     findings += audit_history_residue(v_rows, t_rows, b_rows, full=full,
                                       oversized_ack=oversized_ack)
-    findings += audit_pinned_header(discover_published_md(repo_root))
+    published_md = discover_published_md(repo_root)
+    findings += audit_pinned_header(published_md)
+    findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
     findings += audit_scope_feed(repo_root, memo, t_rows, spec_path)
@@ -1470,6 +1506,29 @@ def selftest():
     check(audit_token_estimate(int(TOKEN_BUDGET * TOKEN_RATIO) + 1000), "token over fires")
     check(audit_token_estimate(100) == [], "token under silent")
 
+    # batch agent count (batch invariant): ceil(|V|/15) clamp [1,4]; PUBLISHED
+    # census < ceil(|V|/2) → 1 regardless; census deterministic (closes §B.7)
+    check(recommend_batch_count(0, 5) == 1, "batch: empty §V → 1 agent")
+    check(recommend_batch_count(14, 50) == 1, "batch: <15 rows → base 1 agent")
+    check(recommend_batch_count(16, 50) == 2, "batch: ceil(16/15) → 2 agents")
+    check(recommend_batch_count(45, 50) == 3, "batch: ceil(45/15) → 3 agents")
+    check(recommend_batch_count(60, 50) == 4, "batch: ceil(60/15) → 4 agents")
+    check(recommend_batch_count(100, 50) == 4, "batch: ceil clamps at 4 agents")
+    # narrow-scope override: census < ceil(|V|/2) collapses to 1 regardless
+    check(recommend_batch_count(30, 14) == 1,
+          "batch: census < ceil(|V|/2) → 1 agent (narrow scope)")
+    check(recommend_batch_count(30, 15) == 2,
+          "batch: census == ceil(|V|/2) → base count (not narrow)")
+    check(recommend_batch_count(30, 50) == 2, "batch: wide census → base count")
+    # audit emits the advisory row the drift-detector consumes
+    bv = [{"id": f"V{i}"} for i in range(16)]
+    check(audit_batch_advisory(bv, ["a.md"] * 16)
+          == [("batch", ADVISORY, "recommended: 2 agents")],
+          "batch: audit emits recommended-agents advisory row")
+    check(audit_batch_advisory(bv, ["a.md"] * 4)
+          == [("batch", ADVISORY, "recommended: 1 agents")],
+          "batch: advisory honors narrow-scope override")
+
     # clean-set + vocab
     clean_rows = [(f"V{1}", "HOLD", ""), (f"V{2}", "VIOLATE-CAPTURED", ""),
                   ("token", ADVISORY, "")]
@@ -1488,7 +1547,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 81
+    return 92
 
 
 # --- entry -------------------------------------------------------------------
