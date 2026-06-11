@@ -5,7 +5,7 @@ description: |
   Triggers: write/edit human-facing terse prose for review; user says
   "steno", "shorthand", "tighten this", "make this shorter".
 allowed-tools: [Skill]
-disable-model-invocation: true
+user-invocable: false
 ---
 
 # steno — human-facing terse text

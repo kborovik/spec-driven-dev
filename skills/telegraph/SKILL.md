@@ -5,7 +5,7 @@ description: |
   writes. Loaded by /sdd:spec, /sdd:build, /sdd:check. Triggers on any
   write to SPEC.md or user says "telegraph", "compress this", "be brief".
 allowed-tools: [Skill]
-disable-model-invocation: true
+user-invocable: false
 ---
 
 # telegraph — LLM-facing telegraph encoding

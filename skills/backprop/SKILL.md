@@ -7,7 +7,7 @@ description: |
   "this should never recur", "add a §V for". Not for mechanical typo or
   one-off fix w/ no recurrence class — pure code fix only.
 allowed-tools: Read, Grep, Glob, Skill
-disable-model-invocation: true
+user-invocable: false
 ---
 
 # backprop — bug → spec
