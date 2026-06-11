@@ -29,7 +29,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` every row schema and section catalog.
 3. Parse `$ARGUMENTS`: empty → full cluster + renumber + sweep propose; `--taxonomy-only` → PROPOSE report only, not mutation.
 4. Discovery probe — repo-agnostic plugin scope per published-scope invariant:
-   - (a) `<repo>/.claude-plugin/marketplace.json` → parse `plugins[].source` via `jq` (fallback `python3` per tooling-preference invariant) → {dir-name → plugin-name} map per plugin-name-vs-dir invariant; PUBLISHED = `{<dir>/**}` over each `source` value.
+   - (a) `<repo>/.claude-plugin/marketplace.json` → parse `plugins[].source` via `jq` (fallback `python3` per tooling-preference invariant; python3 here = arbitrary JSON parse, not script-sole → frontmatter `Bash(python3 *)` stays broad, no single script path to pin) → {dir-name → plugin-name} map per plugin-name-vs-dir invariant; PUBLISHED = `{<dir>/**}` over each `source` value.
    - (b) else `<repo>/.claude-plugin/plugin.json` → single-plugin map; PUBLISHED = `{<repo>/**}` minus REPO-LOCAL.
    - (c) else → empty map; sweep targets REPO-LOCAL + SPEC.md internal only.
 5. Load `.claude/spec-clusters.json` if exists, else cold-start. Shape `[{cluster:<name>, rows:[{fingerprint:<hash>, current_id:V<n>}, ...]}, ...]`. Per-row key is §V body-text fingerprint (sha256 over row body w/o `V<n>:` prefix) — stable across renumber; id-as-key invalidates persist every run.

@@ -5,7 +5,7 @@ description: |
   Triggers when user invokes `/sdd:compact` or asks to compact spec or /sdd:check
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:compact",
   "compact SPEC.md", "SPEC too big", "shrink the spec", "token budget".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 */check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
@@ -26,6 +26,8 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 ## PROPOSE
 
 Six prongs, execution order 1 → 6. Per prong: scan SPEC.md for trigger match; emit firing-set + skip-set w/ 1-line rationale each.
+
+Script modes below run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>`; `${CLAUDE_PLUGIN_ROOT}` no-expand in frontmatter → python3 grant pinned mid-glob `Bash(python3 */check-mechanical.py *)` (script-sole use, leading `*` absorbs the plugin-root prefix) per tooling-preference invariant.
 
 ### Prong 1 — §V fold-first sweep
 

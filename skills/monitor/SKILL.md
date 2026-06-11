@@ -28,7 +28,7 @@ Not: consumer-repo code bugs, env breakage unrelated to an sdd skill, operator t
 
 ## PROTOCOL — ordered, stop on bail:
 
-1. **CAPTURE** — skill name + plugin version + expected (quoted skill-body line) vs actual + minimal excerpt. Version ← `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` `.version` (jq; no jq → python3).
+1. **CAPTURE** — skill name + plugin version + expected (quoted skill-body line) vs actual + minimal excerpt. Version ← `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` `.version` (jq; no jq → python3 — JSON parse not script-sole → frontmatter `Bash(python3 *)` stays broad per tooling-preference invariant, no single script path to pin).
 2. **REDACT** — strip consumer-repo paths, code, identifiers, URLs; only the sdd skill-body text + deviation description survive. Mandatory pre-publish (monitor-protocol invariant) — excerpts originate in third-party repos.
 3. **ROUTE** — cwd == plugin repo? `git remote get-url origin` resolves to manifest `.repository` → dev repo → hand off to backprop (backprop-protocol invariant): §B row, no issue filed. Stop. Else consumer repo → continue.
 4. **TARGET** — issue repo ← `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` `.repository`, parsed to `owner/repo` (jq). No hardcoded slug in this body (parametric-recipe invariant — the plugin-internal file owns the slug).

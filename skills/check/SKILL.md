@@ -7,7 +7,7 @@ description: |
   spec, or verify invariants. Phrasings: "check drift", "audit the spec",
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
-allowed-tools: Read, Grep, Glob, Bash(git *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: Read, Grep, Glob, Bash(python3 */check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
@@ -33,7 +33,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 
 Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`. Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract).
 
-Run at audit start (`${CLAUDE_PLUGIN_ROOT}` invalid in frontmatter `allowed-tools` → frontmatter grants broad `Bash(python3 *)`):
+Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
 
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]
