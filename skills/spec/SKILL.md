@@ -1,13 +1,15 @@
 ---
 name: spec
 description: |
-  Sole mutator of SPEC.md @ repo root — create, amend, or backprop bugs.
+  Sole semantic author of SPEC.md @ repo root — create, amend, fold designs,
+  or backprop bugs (§T status-flip → build, archive → compact, §V renumber →
+  reorganize; those carve-outs not authoring paths).
   Triggers when user asks to write spec, start new spec, distill spec from
   code, add invariants, amend a section, or record a bug. Common phrasings:
   "write the spec for...", "new spec", "distill spec from code",
   "spec this idea", "import existing repo", "pull invariants out of code",
   "this bug keeps biting", "post-mortem on Y".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Skill
 model: opus
 ---
 
@@ -17,9 +19,9 @@ The `telegraph` skill (telegraph encoder) applies to all writes here.
 
 ## DISPATCH
 
-**Step 0 (precondition):** `git diff --quiet SPEC.md` clean → continue; not → bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit on apply assumes clean baseline).
+**Step 0 (precondition):** `git status --porcelain SPEC.md` empty → continue; not → bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit on apply assumes clean baseline; porcelain form catches staged + untracked, which `git diff --quiet` misses).
 
-**Step 1 (design-fold-in shortcut):** input arg is path matching `designs/*.md` and file exists → FOLD-IN procedure (skip socratic gate; design skill Open-Questions-empty rule is persistence pre-condition so design content already converged). Else → continue to gate.
+**Step 1 (design-fold-in shortcut):** input arg is path matching `designs/*.md` and file exists and `SPEC.md` exists @ repo root → FOLD-IN procedure (skip socratic gate; design skill Open-Questions-empty rule is persistence pre-condition so design content already converged). Design path w/o SPEC.md → bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first" (design skill degrades gracefully sans SPEC.md so converged drafts can predate it). Else → continue to gate.
 
 Engage `sdd:socratic` gate w/ user input as intent. Gate runs single-question loop until convergence triple matches one mode:
 
@@ -43,7 +45,7 @@ Steps:
 1. Extract goal (1 line, telegraph). → §G.
 2. List constraints user stated or implied. → §C.
 3. List external surfaces user named. → §I.
-4. Propose initial invariants. → §V (numbered V<n>). first-principle (foundational claim) probed by gate; user may decline → NEW converges on derived invariants only. late first-principle → AMEND §V back-door (spec mutator skill is sole writer; not second mutator path).
+4. Propose initial invariants. → §V (numbered V<n>). first-principle (foundational claim) probed by gate; user may decline → NEW converges on derived invariants only. late first-principle → AMEND §V back-door (AMEND is the only late-entry path; not second authoring path).
 5. Break goal into ordered tasks. → §T pipe table, all status `.`, ids T<n>.
 6. §B section with header row only (`id|date|cause|fix`).
 
@@ -63,8 +65,8 @@ Steps:
 1. Parse bug description.
 2. Find root cause (read relevant code).
 3. Decide: would a new invariant catch recurrence? If yes → draft `V<next>`.
-4. Append §B row: `B<next>|<date>|<cause>|V<N>`.
-5. Append new invariant to §V.
+4. Append §B row: `B<next>|<date>|<cause>|<fix>` — fix cell is `V<N>` when step 3 drafted an invariant, sentinel `-` otherwise (per SPEC-FORMAT §B fix grammar).
+5. If drafted: append new invariant to §V.
 6. If fix also changes behavior → add/update §T rows.
 
 → APPLY.
@@ -105,15 +107,17 @@ Runs after a mode hands off its drafted delta. Five steps in order; audits fire 
 - delta adds or rewrites a §B `cause` cell → one-line trim per write-time prune section.
 - pruned content → commit-msg body (picked up @ step 4); step 3 show-user displays post-prune form. Prune-first guarantees every audit sees final-form delta.
 
-**Step 1 — audit table** (condition-gated bail-gates; on-fail cells cite the named recipe — bail strings live in recipes only, not restated here):
+**Step 1 — audit table** (condition-gated; on-fail column names the owning recipe section — bail strings and sub-recipe detail live there only, not restated here):
 
 ```
-audit        | fires when                                                     | on fail
-sweep-scope  | delta contains sweep-§T row (remediating §V-class violation)        | bail per sweep-§T scope audit section
-pinned-cite  | delta touches PUBLISHED or SPEC.md narrative                        | bail per pinned-cite audit section, sub-recipe (a)/(b)
-next-block   | delta touches user-typeable SKILL.md                                | bail per Next-block-section audit section
-fold-first   | delta adds §V row to pre-existing §V section and mode not FOLD-IN   | AskUserQuestion gate per Fold-first audit section
+audit       | fires when delta…                                        | on fail
+sweep-scope | contains sweep-§T row (§V-violation remediation)         | bail → sweep-§T scope audit
+pinned-cite | touches PUBLISHED (a) or SPEC.md narrative (b)           | bail → pinned-cite audit, matching sub-recipe
+next-block  | touches user-typeable SKILL.md                           | bail → Next-block-section audit
+fold-first  | adds §V row to pre-existing §V section, mode not FOLD-IN | AskUserQuestion gate → Fold-first audit
 ```
+
+pinned-cite (a) + next-block rows structurally no-op while step 4 writes SPEC.md only — retained defensive (fire only if a future mode widens the write set).
 
 Table written in named-invariant + placeholder cite form only (`per <named> invariant`, `§V.<n>`) — `skills/**` in PUBLISHED, where pinned §-digit cites are banned by pinned-cite sub-recipe (a); body pinned-cite count is 0, stays 0.
 
@@ -131,7 +135,7 @@ AMEND    → amend §<S>.<n>(+): <one-line>                       (pruned-histor
 FOLD-IN  → fold-in §V.<n>(+) and §T.<n>(+): <slug>            (omit absent sections from message)
 ```
 
-**Re-entry**: any stage rewriting the delta after step 0 — concretely fold-first's fold-into reroute (new §V row → existing-row amend) — re-enters APPLY @ step 0; the rewritten delta newly satisfies prune (a) and audits that already ran saw a delta that no longer exists.
+**Re-entry**: any stage rewriting the delta after step 0 — concretely fold-first's fold-into reroute (new §V row → existing-row amend) — re-enters APPLY @ step 0; the rewritten delta newly satisfies the §V-row delta prune and audits that already ran saw a delta that no longer exists.
 
 APPLY ends @ commit. `## POST-APPLY` fires after, unchanged.
 
@@ -158,7 +162,7 @@ Recipe: every touched `<plugin>/skills/<n>/SKILL.md` in post-amend tree:
 2. Match `disable-model-invocation: true` or `user-invocable: false` → audit no-op every this file (auto-fire or programmatic-only skill, no slash-cmd surface).
 3. Else (user-typeable) → grep `## OUTPUT — "Next" block` heading in post-amend target file. Match → audit no-op. not match → bail `<skill> SKILL.md lacks Next-block section per /<plugin>:<n> response-shape contract` until author adds section.
 
-Defensive against new user-typeable skill bodies (or skill migrations across plugins) omitting the Next-block contract that sister user-typeable skills carry. V20-class runtime rule governs response shape but not enforce authoring-time presence so omission slips until `/sdd:check` surfaces (see §B history).
+Defensive against new user-typeable skill bodies (or skill migrations across plugins) omitting the Next-block contract that sister user-typeable skills carry. V20-class runtime rule governs response shape but not enforce authoring-time presence so omission slips until `/sdd:check` surfaces (see §B history). Structurally no-op while APPLY step 4 writes SPEC.md only (mirrors pinned-cite sub-recipe (a) defensive posture) — fires only if a future mode widens the write set.
 
 ## Fold-first audit (pre-show-user)
 
@@ -174,7 +178,7 @@ Recipe: every proposed new §V row in delta:
      - `Fold into §V.<m>` → re-route delta as §V.<m> amend; rewrites proposed row as inline addition to existing row.
      - `New row (cite §B recurrence-class)` → proceed w/ new row, requires §B.<k> cite in delta justifying split (audit checks delta body grep `§B\.[0-9]+` post-selection).
      - `New row (orthogonal concept)` → proceed w/ new row, requires user-typed orthogonal-concept declaration recorded in commit message post-selection.
-3. Selection drives next mutation per decision-gate invariant: fold-into → re-render delta as §V.<m> amend and re-invoke show-user gate; new-row branches → record justification (§B cite or orthogonal declaration) and proceed to show-user.
+3. Selection drives next mutation per decision-gate invariant: fold-into → re-render delta as §V.<m> amend and re-enter APPLY @ step 0 per Re-entry rule (rewritten delta re-prunes and re-audits — not jump straight to show-user); new-row branches → record justification (§B cite or orthogonal declaration) and proceed to show-user.
 
 Defensive against premature-split class — small audit or enforcement-meta additions creating new §V row when inline amend sufficed. Closes pattern-mirroring split recurrence — "mirrors §V.<n>" alone not sufficient justification per fold-first authoring invariant (§V.<n>).
 
@@ -207,26 +211,33 @@ Defer to `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` — row shape, section catalog, 
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. spec presents a diff awaiting decision so apply and revise typically lead; post-BACKPROP/AMEND prefer `/sdd:check` (confirm whether amended invariant surfaces drift) or `/sdd:build §T.n` only when a pending §T row exists.
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. Two output moments, distinct item leads: show-user turn (diff pending) → apply and revise lead; post-commit turn → `/sdd:check` is item #1 every mode per POST-APPLY, then `/sdd:build §T.n` when a pending §T row exists.
 
-Example after NEW mode (Hint skipped — items self-explanatory):
+Example @ show-user, NEW mode diff pending (Hint skipped — items self-explanatory):
 
 ```
 ## Next
 
 1. accept the spec as written
 2. /sdd:spec rework the V<N> invariant before building
-3. /sdd:build T<n> — start the first task
 ```
 
-Example after AMEND mode (Hint skipped):
+Example @ show-user, AMEND mode diff pending (Hint skipped):
 
 ```
 ## Next
 
 1. apply the diff to `SPEC.md`
 2. revise the proposed wording
-3. /sdd:check — see whether existing code still satisfies the amended invariant
+```
+
+Example post-commit, any mode (`/sdd:check` leads per POST-APPLY):
+
+```
+## Next
+
+1. /sdd:check — cascade scan over the just-applied delta
+2. /sdd:build T<n> — start the next pending task
 ```
 
 ## NON-GOALS
