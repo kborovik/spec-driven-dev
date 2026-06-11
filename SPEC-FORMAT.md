@@ -25,6 +25,16 @@ SPEC.md and this file is LLM-facing so telegraph register per `skills/telegraph/
 
 ## ROW SCHEMAS
 
+### §I row
+
+One line, bullet optional. Opens `<kind>:` w/ kind in `[a-z_][a-z0-9_]*`:
+
+```
+- <kind>: <name> → <shape>
+```
+
+Row id is `I.<kind>` (e.g. `api:` row → `I.api`) — the form `§T.cites` references. One row per kind preferred; duplicate kinds dedup to one id addressing the set. Preamble prose w/o kind opener permitted, carries no id.
+
 ### §V row
 
 One line. Opens `V<n>:` w/ monotonic `<n>` (per monotonic-numbering invariant).
@@ -129,6 +139,8 @@ Section-catalog audit pattern `^## §[GCIVTB] ` not matches either archive marke
 - **section presence + order** — grep `^## §[GCIVTB] ` in SPEC.md → 6 hits in canonical order; missing or reordered → VIOLATE.
 - **§T cites parse** — split `§T.<row>.cites` on `,` → every token match `^(V[0-9]+|T[0-9]+|B[0-9]+|I\.[a-z_]+|-)$`; not match → VIOLATE.
 - **§B fix parse** — split `§B.<row>.fix` on `,` → every token match `^(V[0-9]+|-)$`; not match → VIOLATE.
+- **§T status cell** — status ! in {`.`, `x`}; other → VIOLATE.
+- **§B date cell** — date ! match ISO-8601 `YYYY-MM-DD`; other → VIOLATE.
 - **monotonic ID** — extract `V<n>`/`T<n>`/`B<n>` row IDs in document order → every section IDs ! strictly increasing; gap ? allowed (closure history), reuse not allowed.
 - **cite-DAG resolution** — per cite-resolution invariant: every bare-form cite in typed column ! resolve to existing SPEC.md row of expected edge type.
 - **archive marker shape** — every archive marker line in SPEC.md §T or §B section ! match `^## archived: §[TB]\.[0-9]+\.\.§[TB]\.[0-9]+ → SPEC\.archive\.md \([0-9]+ rows\)$`; every archive marker line in SPEC.md §V section ! match `^## archived: §V\.retired → SPEC\.archive\.md \([0-9]+ retired rows\)$`; not match → VIOLATE.

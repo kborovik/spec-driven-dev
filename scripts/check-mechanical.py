@@ -54,8 +54,8 @@ Modes:
                 and evidence cells (`id||`). The drift-detector fills verdicts
                 against this skeleton instead of hand-enumerating the live row
                 set, so a live row can't be silently dropped from the verdict
-                table (omitted-row undercoverage class). §I ids derive from the
-                user-typeable command surfaces (`/<plugin>:<skill>` → `I.<plugin>:<skill>`).
+                table (omitted-row undercoverage class). §I ids derive from
+                kind-prefixed interface rows (`- api: POST /x → …` → `I.api`).
   --self-test — run inline fixtures; exit 0 iff every assertion holds.
 
 Parametric per the published-tooling invariant: reads SPEC-FORMAT conventions and
@@ -102,13 +102,13 @@ SECTION_HDR = re.compile(r'^## §([GCIVTB]) ')
 V_ROW = re.compile(r'^(V\d+):\s?(.*)$')
 T_ROW = re.compile(r'^(T\d+)\|')
 B_ROW = re.compile(r'^(B\d+)\|')
-# §I interface id is a user-typeable command-definition bullet whose leading
-# backtick token is a `/<plugin>:<skill>` surface (the auditable interface
-# contract); the plugin-header bullet (backtick token w/o `/`) and auto-fire
-# sub-skills (no slash surface) are not interface ids.
-I_SURFACE = re.compile(r'^\s*-\s+`(/[a-z][\w-]*:[\w-]+)')
+# §I interface id derives from the row's kind prefix (`- api: POST /x → …`
+# → `I.api`), bullet optional; kind charset matches CITE_TOKEN's I-token
+# grammar so every emitted id is citable from §T.cites. Prose lines without
+# a kind opener carry no id.
+I_KIND = re.compile(r'^\s*(?:-\s+)?([a-z_][a-z0-9_]*):\s')
 ID_NUM = re.compile(r'^([VTB])(\d+)$')
-CITE_TOKEN = re.compile(r'^(V\d+|T\d+|B\d+|I\.[a-z_]+|-)$')
+CITE_TOKEN = re.compile(r'^(V\d+|T\d+|B\d+|I\.[a-z_][a-z0-9_]*|-)$')
 FIX_TOKEN = re.compile(r'^(V\d+|-)$')
 TYPED_CITE = re.compile(r'§([VTB])\.(\d+)')
 PINNED_HDR = re.compile(r'^#{2,}\s+[VTB]\d+\b')
@@ -118,6 +118,9 @@ ARCHIVE_MARK_TB = re.compile(
 ARCHIVE_MARK_V = re.compile(
     r'^## archived: §V\.retired → SPEC\.archive\.md \(\d+ retired rows\)$')
 ARCHIVE_V_BLOCK = re.compile(r'^## §V\.retired\b')
+
+# §B date cell shape (ISO-8601)
+B_DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 
 # history-residue (freshness-contract invariant)
 HR_AMEND = re.compile(r'\(∆+\)')
@@ -177,17 +180,16 @@ def parse_v_rows(sections):
 
 def parse_i_ids(sections):
     """Derive the live §I interface id set. The §I section is prose/bullets
-    (no pipe-rows), so each user-typeable command-definition bullet
-    (`- `/<plugin>:<skill> …` → …`) yields id `I.<plugin>:<skill>` — the
-    auditable interface contract. Plugin-header bullets and auto-fire-only
-    sub-skills (no slash surface, no shape line) are not interface ids.
-    De-duplicated, source order preserved."""
+    (no pipe-rows); each kind-prefixed row (`- <kind>: <name> → <shape>`,
+    bullet optional) yields id `I.<kind>` — the auditable interface contract.
+    Preamble prose without a kind opener carries no id. Duplicate kinds dedup
+    to one id (first occurrence), source order preserved."""
     ids = []
     seen = set()
     for lineno, line in sections.get("I", []):
-        m = I_SURFACE.match(line)
+        m = I_KIND.match(line)
         if m:
-            iid = "I." + m.group(1)[1:]   # /sdd:spec → I.sdd:spec
+            iid = "I." + m.group(1)
             if iid not in seen:
                 seen.add(iid)
                 ids.append({"id": iid, "line": lineno})
@@ -431,6 +433,30 @@ def audit_monotonic(rows, letter):
                         f"format: §{letter}.{r['id']} ID reuse or out-of-order "
                         f"@ SPEC.md:{r['line']}"))
         prev = n
+    return out
+
+
+def audit_status_cells(t_rows):
+    """§T status cell ! in {`.`, `x`} (SPEC-FORMAT row schema)."""
+    out = []
+    for r in t_rows:
+        status = (r["body"] or "").split('|', 1)[0].strip()
+        if status not in (".", "x"):
+            out.append(("format", "VIOLATE",
+                        f"format: §T.{r['id']} status \"{status}\" not in "
+                        f"{{., x}} @ SPEC.md:{r['line']}"))
+    return out
+
+
+def audit_bug_dates(b_rows):
+    """§B date cell ! ISO-8601 `YYYY-MM-DD` (SPEC-FORMAT row schema)."""
+    out = []
+    for r in b_rows:
+        date = (r["body"] or "").split('|', 1)[0].strip()
+        if not B_DATE.match(date):
+            out.append(("format", "VIOLATE",
+                        f"format: §B.{r['id']} date \"{date}\" not ISO-8601 "
+                        f"(YYYY-MM-DD) @ SPEC.md:{r['line']}"))
     return out
 
 
@@ -747,10 +773,11 @@ def git_touched_paths(repo_root, sha):
 
 
 def exclude_spec_paths(paths, spec_path="SPEC.md"):
-    """§V.45 Scope(a): drop SPEC.md + its SPEC.archive.md sibling from the touched
-    set. Structural SPEC audits are owned mechanically by this script and per-row
-    `v_row_shas` is the precise spec-edit signal so a SPEC-only edit not collapse the §V
-    dirty set to a near-full sweep via ubiquitous SPEC.md body-refs (per §V.37)."""
+    """Scope-feed rule: drop SPEC.md + its SPEC.archive.md sibling from the
+    touched set. Structural SPEC audits are owned mechanically by this script
+    and per-row `v_row_shas` is the precise spec-edit signal, so a SPEC-only
+    edit not collapse the §V dirty set to a near-full sweep via ubiquitous
+    SPEC.md body-refs."""
     archive = (spec_path[:-3] if spec_path.endswith(".md") else spec_path) + ".archive.md"
     excl = {spec_path, archive}
     return [p for p in paths if p not in excl]
@@ -763,7 +790,7 @@ def audit_scope_feed(repo_root, memo, t_rows, spec_path="SPEC.md"):
     the drift-detector chains them into `emit-v-slices --dirty` not hand-rolling
     `git diff`. No memo or schema mismatch or unreachable sha → no rows (first-run /
     invalidated → full sweep, nothing to scope — mirrors the memo advisory gate).
-    Touched-set drops SPEC.md + SPEC.archive.md per `exclude_spec_paths` (§V.45)."""
+    Touched-set drops SPEC.md + SPEC.archive.md per `exclude_spec_paths`."""
     if not memo or memo.get("schema_version") != MEMO_SCHEMA:
         return []
     sha = memo.get("last_clean_sha", "")
@@ -804,6 +831,21 @@ def read_text(path):
         return f.read()
 
 
+def plugin_source_dirs(repo_root, plugins):
+    """Resolve marketplace `plugins[].source` values to absolute plugin dirs.
+    `./` (root-source plugin) resolves to the repo root — a naive
+    `lstrip("./")` empties it and silently drops the plugin from PUBLISHED
+    scope. Missing/empty source is skipped."""
+    dirs = []
+    for p in plugins:
+        raw = p.get("source", "")
+        if not raw:
+            continue
+        src = os.path.normpath(raw)
+        dirs.append(repo_root if src == "." else os.path.join(repo_root, src))
+    return dirs
+
+
 def discover_published_md(repo_root):
     """PUBLISHED markdown bodies — discovered from the marketplace manifest
     (plugin sources), single plugin.json, else empty. Repo-agnostic."""
@@ -813,10 +855,7 @@ def discover_published_md(repo_root):
     if os.path.exists(mp):
         try:
             data = json.loads(read_text(mp))
-            for p in data.get("plugins", []):
-                src = p.get("source", "").lstrip("./")
-                if src:
-                    dirs.append(os.path.join(repo_root, src))
+            dirs = plugin_source_dirs(repo_root, data.get("plugins", []))
         except (OSError, ValueError):
             pass
     elif os.path.exists(pj):
@@ -850,6 +889,10 @@ def discover_repo_local(repo_root):
 
 def load_spec(repo_root, spec_path):
     spec = os.path.join(repo_root, spec_path)
+    if not os.path.exists(spec):
+        sys.stderr.write(f"check-mechanical: {spec_path} not found in "
+                         f"{repo_root} — nothing to audit\n")
+        sys.exit(2)
     text = read_text(spec)
     spec_bytes = os.path.getsize(spec)
     arch_path = os.path.join(repo_root, "SPEC.archive.md")
@@ -899,6 +942,8 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
         findings += audit_archive_sibling(arch_text)
     findings += audit_cites_grammar(t_rows)
     findings += audit_fix_grammar(b_rows)
+    findings += audit_status_cells(t_rows)
+    findings += audit_bug_dates(b_rows)
     findings += audit_monotonic(v_rows, "V")
     findings += audit_monotonic(t_rows, "T")
     findings += audit_monotonic(b_rows, "B")
@@ -1111,6 +1156,10 @@ def selftest():
     check(audit_cites_grammar(ok) == [], "cites comma-list ok")
     check(len(audit_cites_grammar(rng)) == 1, "cites range rejected")
 
+    # cites grammar: I.<kind> tokens citable
+    ok_i = [{"id": f"T{9}", "last": "I.api,I.check_cli", "line": 1}]
+    check(audit_cites_grammar(ok_i) == [], "cites I.<kind> tokens ok")
+
     # fix grammar: only V-tokens / sentinel
     check(audit_fix_grammar([{"id": f"B{5}", "last": "-", "line": 1}]) == [],
           "fix sentinel ok")
@@ -1180,7 +1229,7 @@ def selftest():
     check(flipped_since(old_t, cur_t) == [f"T{1}", f"T{3}"],
           "flipped: .→x and newly-added x flagged")
     check(flipped_since(cur_t, cur_t) == [], "flipped: stable x not flagged")
-    # §V.45 Scope(a): touched-set excludes SPEC.md + SPEC.archive.md sibling
+    # scope-feed rule: touched-set excludes SPEC.md + SPEC.archive.md sibling
     check(exclude_spec_paths(["SPEC.md", "SPEC.archive.md",
                               "scripts/x.py"])
           == ["scripts/x.py"],
@@ -1190,6 +1239,23 @@ def selftest():
     check(exclude_spec_paths([]) == [], "touched-set exclude: empty in → empty out")
     check(exclude_spec_paths(["sub/SPEC.md"]) == ["sub/SPEC.md"],
           "touched-set exclude: only repo-root SPEC.md, not same-basename subpath")
+    # §T status + §B date cell shape
+    check(audit_status_cells([{"id": f"T{1}", "body": ".|task", "line": 1}]) == [],
+          "status . ok")
+    check(len(audit_status_cells([{"id": f"T{1}", "body": "?|task", "line": 1}])) == 1,
+          "status ? flagged")
+    check(audit_bug_dates([{"id": f"B{1}", "body": "2026-06-11|cause", "line": 1}]) == [],
+          "date iso ok")
+    check(len(audit_bug_dates([{"id": f"B{1}", "body": "yesterday|cause", "line": 1}])) == 1,
+          "date non-iso flagged")
+    # marketplace source resolution: root `./` keeps the plugin in scope
+    check(plugin_source_dirs("/r", [{"source": "./"}]) == ["/r"],
+          "source ./ resolves to repo root")
+    check(plugin_source_dirs("/r", [{"source": "./plugins/x"}])
+          == [os.path.join("/r", "plugins/x")],
+          "nested source resolves under root")
+    check(plugin_source_dirs("/r", [{}, {"source": ""}]) == [],
+          "missing/empty source skipped")
     # body-row aggregation: > threshold → single per-section summary row
     many_v = [{"id": f"V{200 + i}", "body": "foo retired 2026-01-02 bar",
                "line": i + 1}
@@ -1301,20 +1367,21 @@ def selftest():
     check([w["id"] for w in tied] == [f"V{1}", f"V{2}"],
           "v-weights: tie-break ascending id")
 
-    # emit-row-ids: §I ids from command surfaces; skeleton is §V+§I+§T in order
+    # emit-row-ids: §I ids from kind prefixes; skeleton is §V+§I+§T in order
     isec = ("## §I INTERFACES\n"
-            "- `sdd` (user-typeable: `/sdd:spec`; auto-fire: `telegraph`):\n"
-            "  - `/sdd:spec <intent>` → mutator.\n"
-            "  - `/sdd:build [args]` → loop.\n"
-            "- `core` (auto-fire only): `socratic`, `steno`.\n"
+            "external surface — what world sees.\n"
+            "- cmd: `foo bar <arg>` → stdout JSON\n"
+            "api: POST /x → 200 {id}\n"
+            "- api: GET /x → 200 {id}\n"
+            "- `quoted` lead token → no id\n"
             "## §V INVARIANTS\n")
     isecs, _ = parse_sections(isec)
     i_ids = parse_i_ids(isecs)
-    check([r["id"] for r in i_ids] == ["I.sdd:spec", "I.sdd:build"],
-          "emit-row-ids: §I ids from surfaces, header+auto-fire excluded")
+    check([r["id"] for r in i_ids] == ["I.cmd", "I.api"],
+          "emit-row-ids: §I ids from kind prefixes; prose, dup, backtick-lead excluded")
     skel = emit_row_ids([{"id": f"V{1}"}], i_ids,
                         [{"id": f"T{9}"}, {"id": f"T{10}"}])
-    check(skel == [f"V{1}", "I.sdd:spec", "I.sdd:build", f"T{9}", f"T{10}"],
+    check(skel == [f"V{1}", "I.cmd", "I.api", f"T{9}", f"T{10}"],
           "emit-row-ids: skeleton is §V+§I+§T in section order")
     # skeleton rows survive write-memo's parse_table (≥ 2 pipes, header skipped)
     skel_table = "id|verdict|evidence\n" + "\n".join(f"{r}||" for r in skel)
@@ -1344,7 +1411,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 66
+    return 74
 
 
 # --- entry -------------------------------------------------------------------
