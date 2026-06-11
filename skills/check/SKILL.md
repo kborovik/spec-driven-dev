@@ -249,7 +249,7 @@ Emits one blank-verdict row per live §V/§I/§T id (`id||`, header `id|verdict|
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py write-memo --from-audit < <filled-skeleton>
 ```
 
-Script merges its internal mechanical audit w/ the behavioral rows, validates vocab per row type, computes clean-set membership (clean iff no VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA), writes memo only when clean (schema v3, per-row hashes, `last_clean_sha` = HEAD, oversized-cell ack, `.gitignore` guard). Dirty run → no write, offenders on stderr. `## checkpoint` line reflects the outcome.
+Script merges its internal mechanical audit w/ the behavioral rows, validates vocab per row type, computes clean-set membership (clean iff no VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA), writes memo only when clean (schema v3, per-row hashes, `last_clean_sha` = HEAD, oversized-cell ack, `.gitignore` guard). Exit `0` = clean (memo advanced); `1` = dirty (memo untouched, offenders on stderr — CI-gateable); `2` = invalid vocab. `## checkpoint` line reflects the outcome.
 
 ## REMEDY HINTS
 

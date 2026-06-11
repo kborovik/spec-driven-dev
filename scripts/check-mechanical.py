@@ -28,7 +28,9 @@ Modes:
                 Validate the verdict vocab per row type, compute clean-set
                 membership itself, and write the run memo (schema v3, per-row §V
                 hashes, oversized-cell ack) plus the `.gitignore` guard — only
-                when the run is clean. The model never decides "clean".
+                when the run is clean. The model never decides "clean". Exit
+                0 = clean, 1 = dirty (memo untouched, CI-gateable), 2 = invalid
+                vocab.
   emit-v-slices — read SPEC.md, print every §V row body with its source line
                 range (`## V<n> SPEC.md:<start>-<end>` header + verbatim row
                 text). Optional `--dirty V<n>,...` restricts to named rows
@@ -1175,6 +1177,21 @@ def validate_vocab(rows):
     return bad
 
 
+def memo_exit_code(rows):
+    """write-memo decision (memo invariant), no side effects so unit-testable
+    without git/filesystem: 2 = invalid vocab, 1 = dirty run (memo untouched,
+    CI-gateable), 0 = clean (caller writes the memo). Vocab failure outranks
+    dirtiness. Returns (code, detail) — detail is the vocab complaints (code 2),
+    the dirty offenders (code 1), or None (code 0)."""
+    bad = validate_vocab(rows)
+    if bad:
+        return 2, bad
+    clean, offenders = compute_clean(rows)
+    if not clean:
+        return 1, offenders
+    return 0, None
+
+
 def ensure_gitignore_guard(repo_root):
     path = os.path.join(repo_root, ".claude", ".gitignore")
     line = "check-state.json"
@@ -1201,15 +1218,14 @@ def cmd_write_memo(args):
         rows = mechanical + behavioral
     else:
         rows = behavioral
-    bad = validate_vocab(rows)
-    if bad:
-        sys.stderr.write("write-memo: invalid verdicts: " + "; ".join(bad) + "\n")
+    code, detail = memo_exit_code(rows)
+    if code == 2:
+        sys.stderr.write("write-memo: invalid verdicts: " + "; ".join(detail) + "\n")
         return 2
-    clean, offenders = compute_clean(rows)
-    if not clean:
+    if code == 1:
         sys.stderr.write("write-memo: run not clean (" + ", ".join(
-            f"{r}:{v}" for r, v in offenders[:8]) + ") — memo not written\n")
-        return 0
+            f"{r}:{v}" for r, v in detail[:8]) + ") — memo untouched (exit 1)\n")
+        return 1
     text, _, _ = load_spec(args.repo_root, args.spec)
     sections, _ = parse_sections(text)
     v_rows = parse_v_rows(sections)
@@ -1599,6 +1615,19 @@ def selftest():
     check(compute_clean(behav_clean)[0] is True, "from-audit: behavioral set alone clean")
     check(compute_clean(mech_dirty + behav_clean)[0] is False,
           "from-audit: mechanical VIOLATE flips merged set dirty")
+    # write-memo exit codes (memo invariant): 2 invalid vocab, 1 dirty (memo
+    # untouched, CI-gateable), 0 clean; vocab failure outranks dirtiness
+    check(memo_exit_code([(f"V{1}", "BOGUS", "")])[0] == 2,
+          "write-memo: invalid vocab → exit 2")
+    check(memo_exit_code([(f"V{1}", "VIOLATE", "")])[0] == 1,
+          "write-memo: behavioral VIOLATE → exit 1")
+    check(memo_exit_code(mech_dirty + behav_clean)[0] == 1,
+          "write-memo: merged mechanical VIOLATE → exit 1")
+    check(memo_exit_code([(f"V{1}", "HOLD", ""), ("I.api", "MATCH", ""),
+                          ("token", ADVISORY, "")])[0] == 0,
+          "write-memo: clean → exit 0")
+    check(memo_exit_code([(f"V{1}", "BOGUS", ""), (f"V{2}", "VIOLATE", "")])[0] == 2,
+          "write-memo: invalid vocab outranks dirty → exit 2")
 
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
@@ -1609,7 +1638,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 103
+    return 108
 
 
 # --- entry -------------------------------------------------------------------
