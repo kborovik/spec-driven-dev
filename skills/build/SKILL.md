@@ -20,7 +20,7 @@ Single-thread native plan→execute. You are main Claude. No swarm.
 
 ## PLAN
 
-Native plan mode, per chosen task(s):
+Emit plan inline, per chosen task(s) — never enter plan mode (a wait-state breaks the `--all` autonomous chain):
 
 1. Cite every applicable §V invariant — plan respects all.
 2. Cite every §I interface touched — plan preserves shape.
@@ -48,6 +48,8 @@ Per task in order:
 4. (b)/(c) → run spec skill w/ the cause as free-form intent (gate routes to BACKPROP); it records §B (+ §V) and commits SPEC.md. Resume build vs updated spec per backprop HANDOFF: failing test first, then fix; commit cites the new §B/§V.
 
 Rule: never silently fix root-cause w/o considering backprop — §B records bug-class precedent so recurrence-class blocked.
+
+Mid-loop spec dispatch here is the sole exclusion from the operator-dispatch rule (slash-cmd dispatch is otherwise operator-turn only); without it every verify-fail costs an operator round-trip.
 
 ## WRITE POLICY
 

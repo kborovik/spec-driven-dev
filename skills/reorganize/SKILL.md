@@ -23,7 +23,7 @@ Distinct from /sdd:compact: compact = token reduction (folds, archives, trims); 
 
 1. Read `SPEC.md`. Missing → "no spec, nothing to reorganize." Stop.
 2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` every row schema and section catalog.
-3. Parse `$ARGUMENTS`: empty → full cluster + renumber + sweep propose; `--taxonomy-only` → PROPOSE report only, not mutation (mirrors /sdd:compact `--dry-run`).
+3. Parse `$ARGUMENTS`: empty → full cluster + renumber + sweep propose; `--taxonomy-only` → PROPOSE report only, not mutation.
 4. Discovery probe — repo-agnostic plugin scope per published-scope invariant:
    - (a) `<repo>/.claude-plugin/marketplace.json` → parse `plugins[].source` via `jq` (fallback `python3` per tooling-preference invariant) → {dir-name → plugin-name} map per plugin-name-vs-dir invariant; PUBLISHED = `{<dir>/**}` over each `source` value.
    - (b) else `<repo>/.claude-plugin/plugin.json` → single-plugin map; PUBLISHED = `{<repo>/**}` minus REPO-LOCAL.

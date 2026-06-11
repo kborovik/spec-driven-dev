@@ -100,4 +100,4 @@ Variants: CONFIRM cancel (no commit) → swap item 1 for `/sdd:compact` (re-run 
 
 - not auto-fire — /sdd:check emits advisory; operator invokes /sdd:compact next turn.
 - not partial commit — every firing prong applies or none.
-- not retune thresholds (25k advisory, 20k window, > 50 closed-§T archive trigger) in this skill body — values live in token-budget-compact invariant row, retunable via /sdd:spec AMEND only.
+- not retune thresholds (25k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-compact invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.
