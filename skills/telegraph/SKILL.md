@@ -147,7 +147,7 @@ env: FOO_KEY ! set
 
 ## ONE FILE RULE
 
-Big project → more §s, not more files. grep ceremony kills agent speed. SPEC.md > 500 lines → compact §B (drop oldest bugs) before split.
+Big project → more §s, not more files. grep ceremony kills agent speed. Token-budget overflow → /sdd:compact (folds, trims, archives), never split. Thresholds live w/ compact skill + audit script, not here.
 
 ## EXAMPLES
 
@@ -162,7 +162,7 @@ Good: `api: POST /x → 200 {id}`
 
 ## BOUNDARIES
 
-Normal English when: user asks for prose explanation; external-review docs (RFC, pitch); commit messages; diff comments in code.
+Normal English when: user asks for prose explanation; external-review docs (RFC, pitch); diff comments in code. Commit messages: subject = per-skill fixed template (preserve verbatim); body = steno per steno skill (humans read git log).
 
 ## WHEN UNSURE
 

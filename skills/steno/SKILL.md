@@ -29,7 +29,7 @@ Human-facing terse prose for non-author reviewers — readers scan facts, benefi
 Applies (not exhaustive):
 
 - GitHub issues & PRs — titles, bodies (incl. PR desc refresh on merge).
-- PR squash/merge commit bodies (release-note section).
+- Commit-message bodies, incl. PR squash/merge release-note sections (subjects = per-skill fixed templates, preserve verbatim).
 - READMEs & user-facing docs where compression aids scan.
 
 Not:
