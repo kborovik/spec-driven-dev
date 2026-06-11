@@ -116,7 +116,7 @@ B<n>|2026-04-21|race on write|V<n>
 
 ### `/sdd:design` — propose-then-critique
 
-Use when there's a structural choice to weigh — tradeoffs, named alternatives, subsystem shape. The model proposes a shape, you critique, the loop converges only when `## Open Questions` is empty. Persists to `designs/<slug>.md`. `/sdd:spec` later folds the converged design into `§V` / `§T` rows and deletes the draft.
+Use when there's a structural choice to weigh — tradeoffs, named alternatives, subsystem shape. The model proposes a shape, you critique, the loop converges only when `## Open Questions` is empty. Persists to `designs/<slug>.md`. `/sdd:spec` later folds the converged design into `§V` / `§T` rows; the draft file stays in the working tree for you to remove or keep.
 
 ```bash
 /sdd:design how should the release pipeline split monorepo plugins?
@@ -208,11 +208,11 @@ Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/s
 | `compact`    | token-budget compaction sweep                                     |
 | `reorganize` | §V cluster + renumber + cite sweep                                |
 | `telegraph`  | telegraph encoder (~30% reduction vs prose); auto-fires on writes |
-| `backprop`   | bug → spec protocol; fires on every failed verification           |
+| `backprop`   | bug → spec protocol; fires on non-code-bug verification failures  |
 | `socratic`   | single-question intent gate; invoked by `/sdd:spec`               |
 | `steno`      | human-facing terse-prose register for reviewer-read text          |
 
-You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically on test/build failure inside `/sdd:build`.
+You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically when a `/sdd:build` verification failure smells like under-specification (clear code bugs are just fixed).
 
 ## Workflows
 
@@ -257,7 +257,7 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 `telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol earns its place only where it reads clearer than the word.
 
-Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
+Result: every spec write lands ~30% leaner in tokens than the equivalent prose (the measured per-row mean) while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
 Rules:
 
@@ -293,11 +293,11 @@ Triggers:
 
 **Why Markdown, not YAML / JSON?** Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting. JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
 
-**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. If `SPEC.md` exceeds 500 lines, compact §B (drop oldest bugs) before splitting.
+**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (~25k tokens — `/sdd:check` raises an advisory), `/sdd:compact` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
 
 **Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
 
-**Can I skip telegraph encoding and write prose specs?** Yes, but the next time the spec is loaded into context you'll pay 4x the tokens for the same content. Optional in syntax, expensive in practice.
+**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays ~1.4x the tokens for the same content (the measured ~30% cut, inverted). Optional in syntax, expensive in practice.
 
 ## Files
 
