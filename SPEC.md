@@ -65,7 +65,7 @@ V48: token-budget — estimate = bytes / 3.4; > 25k tokens → check advisory �
 V49: extras-hook — executable `.claude/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.claude/check-extras.md`, consulted by check + build pre-commit probe.
 V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
 V61: sub-skill-flags — auto-fire sub-skills (telegraph, backprop, socratic, steno, monitor) ! `user-invocable: false`, never `disable-model-invocation: true` (hides skill from Skill tool, breaks consumer engagement).
-V62: tooling-preference — pattern scans `rg --pcre2`; JSON parse `jq`, fallback python3; audit core single-file stdlib-only python3; skill frontmatter pre-approves exactly the tools its body prescribes.
+V62: tooling-preference — pattern scans `rg --pcre2`; JSON parse `jq`, fallback python3; audit core single-file stdlib-only python3; frontmatter grant = narrowest pattern over body-prescribed invocations: zero-body-use grant banned; script-sole-use interpreter grant pins script path (mid-glob `Bash(python3 */check-mechanical.py *)` form); pin inexpressible (`${CLAUDE_PLUGIN_ROOT}` no-expand in frontmatter) → broad grant + inline note citing upstream limit (closes §B.10).
 V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
 V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:compact, /sdd:reorganize) (closes §B.6).
 V65: monitor-protocol — consumer-repo skill deviation → capture (skill, version, expected vs actual) ! redact consumer paths/code/identifiers pre-publish; dedup `gh issue list` pre-file, hit → comment not new issue; AskUserQuestion gate every gh write (§V.23); target = manifest `.repository` (§V.41); cwd = plugin repo → backprop hand-off (§V.27), no issue filed.
@@ -83,6 +83,8 @@ T7|x|init `skills/monitor/SKILL.md`: auto-fire deviation capture per monitor-pro
 T8|.|script: admit MATCH as clean verdict on §I rows, per-row-type vocab validation + self-tests|V43,V40
 T9|.|script: write-memo `--from-audit` re-runs mechanical side internally, stdin = behavioral verdicts only; check WRITE-MEMO recipe drops hand-merge|V44,V40
 T10|.|script: write-memo dirty → exit 1 (memo untouched), invalid vocab stays 2; self-test covers exit codes|V44
+T11|.|sweep frontmatter grants — scope `rg -n 'Bash\(' skills/*/SKILL.md`: zero-use → drop (check `Bash(git *)`); script-sole-use python3 → mid-glob pin (check, compact); jq-fallback python3 (reorganize, monitor) stays broad + note|V62
+T12|.|open upstream FR anthropics/claude-code: env-var expansion in skill frontmatter `allowed-tools`|V62
 
 ## §B BUGS
 
@@ -96,3 +98,4 @@ B6|2026-06-11|check LOAD step 1 whole-file Read + step 4 `emit-v-slices` double-
 B7|2026-06-11|batch narrow-scope override keyed on post-classification audit file-scope → LLM eyeballed repo file count as proxy|V46
 B8|2026-06-11|clean §I rows classify MATCH but memo vocab lacked it → LLM silently remapped MATCH→HOLD, no doc stated mapping|V43
 B9|2026-06-11|dirty run demanded full hand-merged table then refused write, exited 0 → unusable as CI gate|V44
+B10|2026-06-11|frontmatter grant matched command name not arg pattern: `${CLAUDE_PLUGIN_ROOT}` no-expand in `allowed-tools` → broad `Bash(python3 *)` 4 skills; check carried zero-use `Bash(git *)`|V62
