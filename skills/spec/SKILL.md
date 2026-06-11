@@ -13,11 +13,11 @@ model: opus
 
 # spec — spec mutator
 
-The `glyph` skill (math-glyph encoder) applies to all writes here.
+The `telegraph` skill (telegraph encoder) applies to all writes here.
 
 ## DISPATCH
 
-**Step 0 (precondition):** `git diff --quiet SPEC.md` ⊢ continue; not → bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit on apply assumes clean baseline).
+**Step 0 (precondition):** `git diff --quiet SPEC.md` clean → continue; not → bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit on apply assumes clean baseline).
 
 **Step 1 (design-fold-in shortcut):** input arg is path matching `designs/*.md` and file exists → FOLD-IN procedure (skip socratic gate; design skill Open-Questions-empty rule is persistence pre-condition so design content already converged). Else → continue to gate.
 
@@ -40,7 +40,7 @@ Concrete first-turn input → gate passes ≤ 1 turn (zero-friction); vague → 
 Input: user idea.
 
 Steps:
-1. Extract goal (1 line, math-glyph). → §G.
+1. Extract goal (1 line, telegraph). → §G.
 2. List constraints user stated or implied. → §C.
 3. List external surfaces user named. → §I.
 4. Propose initial invariants. → §V (numbered V<n>). first-principle (foundational claim) probed by gate; user may decline → NEW converges on derived invariants only. late first-principle → AMEND §V back-door (spec mutator skill is sole writer; not second mutator path).
@@ -75,7 +75,7 @@ Rule: every bug gets a §B entry. Invariant optional but preferred.
 
 Input: gate-produced §-target and delta.
 
-Read that section. Show current in steno per steno skill if target in {§V, §B} (audience is user reviewing proposal); glyph per glyph skill otherwise. Ask user what changes.
+Read that section. Show current in steno per steno skill if target in {§V, §B} (audience is user reviewing proposal); telegraph per telegraph skill otherwise. Ask user what changes.
 
 → APPLY.
 
@@ -89,7 +89,7 @@ not socratic gate — design skill enforces convergence pre-persist so /sdd:spec
 
 Steps:
 1. Read `designs/<slug>.md`. Parse proposed amendments: new §V invariants, new §T rows, §I edits, §B rows.
-2. Draft each amendment in glyph per glyph skill (target sections + delta text).
+2. Draft each amendment in telegraph per telegraph skill (target sections + delta text).
 
 → APPLY.
 
@@ -117,11 +117,11 @@ fold-first   | delta adds §V row to pre-existing §V section and mode not FOLD-
 
 Table written in named-invariant + placeholder cite form only (`per <named> invariant`, `§V.<n>`) — `skills/**` in PUBLISHED, where pinned §-digit cites are banned by pinned-cite sub-recipe (a); body pinned-cite count is 0, stays 0.
 
-**Step 2 — render-split**: §V and §B content rows → steno per steno skill (audience is user reviewing proposal); all else → glyph per glyph skill (§T and §I pipe/prose forms already human-legible, §G/§C targets, header-only §B row).
+**Step 2 — render-split**: §V and §B content rows → steno per steno skill (audience is user reviewing proposal); all else → telegraph per telegraph skill (§T and §I pipe/prose forms already human-legible, §G/§C targets, header-only §B row).
 
 **Step 3 — show-user**: present the rendered diff preview; await user OK.
 
-**Step 4 — write + commit**: on user OK → write SPEC.md in glyph per glyph skill and auto-commit `git add SPEC.md`; not user prompt for commit step (uniform every mode). Commit message per mode:
+**Step 4 — write + commit**: on user OK → write SPEC.md in telegraph per telegraph skill and auto-commit `git add SPEC.md`; not user prompt for commit step (uniform every mode). Commit message per mode:
 
 ```
 NEW      → init SPEC.md (V<1>..V<n>, T<1>..T<m>)

@@ -21,7 +21,7 @@ Per-section meaning and enforcement is SPEC.md §V invariant row defining the se
 
 ## ENCODING REGISTER
 
-SPEC.md and this file is LLM-facing so glyph register per `skills/glyph/SKILL.md`. SPEC-ADJACENT scope per scope-set invariant. Human-facing surfaces (README.md, user-facing docs) not in scope so steno per `skills/steno/SKILL.md`.
+SPEC.md and this file is LLM-facing so telegraph register per `skills/telegraph/SKILL.md`. SPEC-ADJACENT scope per scope-set invariant. Human-facing surfaces (README.md, user-facing docs) not in scope so steno per `skills/steno/SKILL.md`.
 
 ## ROW SCHEMAS
 
@@ -45,7 +45,7 @@ Per-row columns:
 
 - `id` is `T<n>` w/ monotonic `<n>`.
 - `status` in {`.`, `x`}. `.` is pending, `x` is done.
-- `task` is one-line goal in glyph register. One-line is shape constraint; " not inlined history" semantic and enforcement defer to freshness-contract invariant per shape/semantics split.
+- `task` is one-line goal in telegraph register. One-line is shape constraint; " not inlined history" semantic and enforcement defer to freshness-contract invariant per shape/semantics split.
 - `cites` is comma-list of bare-form tokens in {`V<n>`, `T<n>`, `B<n>`, `I.<key>`} or sentinel `-` every no-deps. not range form (`V<a>..V<b>`), not whitespace inside list, not trailing comma.
 
 ### §B row
@@ -60,12 +60,12 @@ Per-row columns:
 
 - `id` is `B<n>` w/ monotonic `<n>`.
 - `date` is ISO-8601 (`YYYY-MM-DD`).
-- `cause` is one-line bug-class description in glyph register. One-line is shape constraint; " not inlined history" semantic and enforcement defer to freshness-contract invariant per shape/semantics split.
+- `cause` is one-line bug-class description in telegraph register. One-line is shape constraint; " not inlined history" semantic and enforcement defer to freshness-contract invariant per shape/semantics split.
 - `fix` is comma-list of `V<n>` tokens or sentinel `-` every no-invariant-added. not range form, not whitespace inside list.
 
 ### Column extraction
 
-`cites` in §T row and `fix` in §B row is last `|`-delimited segment (rightmost-`|` split); `id` is first `|`-delimited segment. Cells preceding the final delimiter preserve backtick-code `|` verbatim per glyph verbatim-preservation rule so not `\|`-escape required inside `task` or `cause` body. Naïve all-`|` split (`awk -F'|'` or `IFS='|' read`) over-splits when body cells contain unescaped `|` (e.g. argument-hint `[§T.n|--next|--all]` in backtick code) so forbidden. The extraction rule is implemented once — see REFERENCE IMPLEMENTATION below; this file states the rule, not restates parser pseudo-code.
+`cites` in §T row and `fix` in §B row is last `|`-delimited segment (rightmost-`|` split); `id` is first `|`-delimited segment. Cells preceding the final delimiter preserve backtick-code `|` verbatim per telegraph verbatim-preservation rule so not `\|`-escape required inside `task` or `cause` body. Naïve all-`|` split (`awk -F'|'` or `IFS='|' read`) over-splits when body cells contain unescaped `|` (e.g. argument-hint `[§T.n|--next|--all]` in backtick code) so forbidden. The extraction rule is implemented once — see REFERENCE IMPLEMENTATION below; this file states the rule, not restates parser pseudo-code.
 
 ## CITATION FORMS
 
@@ -120,7 +120,7 @@ Section-catalog audit pattern `^## §[GCIVTB] ` not matches either archive marke
 
 ### §V.retired block
 
-`## §V.retired` H2 block contains verbatim retired §V rows produced by reorganize archive-retired phase. Per-row shape: leading `V<orig-n>:` prefix preserved (original id, not post-renumber); body opens `retired YYYY-MM-DD — ...` form verbatim per glyph verbatim-preservation rule. Rows sorted by `<orig-n>` ascending. Archived §V rows not exists as live rows in SPEC.md §V section so historical-id resolution via renumber-map chain-walk per reorganize chain-walk semantics — chain landing on `archive` sentinel emits `archived → SPEC.archive.md ## §V.retired V<n>` and not resolves to live row.
+`## §V.retired` H2 block contains verbatim retired §V rows produced by reorganize archive-retired phase. Per-row shape: leading `V<orig-n>:` prefix preserved (original id, not post-renumber); body opens `retired YYYY-MM-DD — ...` form verbatim per telegraph verbatim-preservation rule. Rows sorted by `<orig-n>` ascending. Archived §V rows not exists as live rows in SPEC.md §V section so historical-id resolution via renumber-map chain-walk per reorganize chain-walk semantics — chain landing on `archive` sentinel emits `archived → SPEC.archive.md ## §V.retired V<n>` and not resolves to live row.
 
 ## /sdd:check VALIDATION SURFACE
 

@@ -32,7 +32,7 @@ Modes:
   emit-superseded — read SPEC.md, print the compactor's prong-2 SUPERSEDED
                 candidate set: every closed §T whose §V cite resolves only into
                 the archived §V.retired block (absent from live §V). Live-only
-                resolution, distinct from the cite-DAG audit's live∪archive
+                resolution, distinct from the cite-DAG audit's live+archive
                 scope. Prints a `tid|superseded_v|original_cites` table the
                 compactor consumes in place of by-hand per-cite resolution.
   emit-fold-seeds — read SPEC.md, print the compactor's prong-1 fold-candidate
@@ -50,7 +50,7 @@ Modes:
                 first — the compactor extracts the heavy rows' audit recipes
                 without a by-inspection guess.
   emit-row-ids — read SPEC.md, print the canonical live id-set skeleton: every
-                live §V ∪ §I ∪ §T id as a verdict-table row with blank verdict
+                live §V + §I + §T id as a verdict-table row with blank verdict
                 and evidence cells (`id||`). The drift-detector fills verdicts
                 against this skeleton instead of hand-enumerating the live row
                 set, so a live row can't be silently dropped from the verdict
@@ -91,7 +91,7 @@ V_VOCAB = CLEAN_VERDICTS | {"VIOLATE", "UNVERIFIABLE"}
 ADVISORY = "ADVISORY"
 
 TOKEN_BUDGET = 25000       # token-budget invariant advisory threshold
-TOKEN_RATIO = 3.4          # bytes-per-token for glyph register (token-budget invariant)
+TOKEN_RATIO = 3.4          # bytes-per-token for telegraph register (token-budget invariant)
 OVERSIZE_CELL = 300        # history-residue oversized-cell advisory (chars)
 MEMO_SCHEMA = 3            # memo schema version (memo invariant)
 HISTORY_AGGREGATE_THRESHOLD = 10  # per-section body-row aggregation (drift-verdict-vocab invariant)
@@ -195,7 +195,7 @@ def parse_i_ids(sections):
 
 
 def emit_row_ids(v_rows, i_ids, t_rows):
-    """Canonical live id-set skeleton (memo invariant): every live §V ∪ §I ∪ §T
+    """Canonical live id-set skeleton (memo invariant): every live §V + §I + §T
     id, in section order. Returned as a flat id list; the caller renders one
     blank-verdict verdict-table row per id (`id||`). The drift-detector fills
     verdicts against this script-emitted skeleton instead of hand-enumerating
@@ -230,13 +230,13 @@ def collect_v_slices(sections):
 
 def emit_superseded_candidates(v_rows, t_rows):
     """Prong-2 SUPERSEDED candidate set (token-budget-compact invariant): each
-    closed §T (status `x`) whose §V cite is absent from the live §V section ⇒
+    closed §T (status `x`) whose §V cite is absent from the live §V section →
     candidate — the cited invariant was amended away or folded (resolution lands
     only in the archived §V.retired block, or nowhere). Live-§V-only resolution,
-    distinct from the cite-DAG audit's live∪archive scope (where an archived
+    distinct from the cite-DAG audit's live+archive scope (where an archived
     cite holds resolved). Returns [{id, unresolved:[V<n>,...], cites}] — the
     compactor builds `SUPERSEDED — §V.<m> amend` markers from it without by-hand
-    per-cite resolution (operator confirms each ∵ content-amend-away not
+    per-cite resolution (operator confirms each because content-amend-away not
     cite-detectable)."""
     live_v = {r["id"] for r in v_rows}
     out = []
@@ -461,7 +461,7 @@ def audit_archive_markers(sections, archive_present, archive_has_vretired):
         if archive_has_vretired and not found["V"]:
             out.append(("format", "VIOLATE",
                         "format: §V missing §V.retired archive marker "
-                        "(archive ∋ §V.retired)"))
+                        "(archive contains §V.retired)"))
     return out
 
 
@@ -761,8 +761,8 @@ def audit_scope_feed(repo_root, memo, t_rows, spec_path="SPEC.md"):
     `tasks|ADVISORY|flipped-since-clean: <ids>` and `diff|ADVISORY|touched: <paths>`,
     both keyed off the memo's `last_clean_sha`. Fields comma-joined, no prose so
     the drift-detector chains them into `emit-v-slices --dirty` not hand-rolling
-    `git diff`. No memo or schema mismatch or unreachable sha ⇒ no rows (first-run /
-    invalidated ⇒ full sweep, nothing to scope — mirrors the memo advisory gate).
+    `git diff`. No memo or schema mismatch or unreachable sha → no rows (first-run /
+    invalidated → full sweep, nothing to scope — mirrors the memo advisory gate).
     Touched-set drops SPEC.md + SPEC.archive.md per `exclude_spec_paths` (§V.45)."""
     if not memo or memo.get("schema_version") != MEMO_SCHEMA:
         return []
@@ -1301,9 +1301,9 @@ def selftest():
     check([w["id"] for w in tied] == [f"V{1}", f"V{2}"],
           "v-weights: tie-break ascending id")
 
-    # emit-row-ids: §I ids from command surfaces; skeleton is §V∪§I∪§T in order
+    # emit-row-ids: §I ids from command surfaces; skeleton is §V+§I+§T in order
     isec = ("## §I INTERFACES\n"
-            "- `sdd` (user-typeable: `/sdd:spec`; auto-fire: `glyph`):\n"
+            "- `sdd` (user-typeable: `/sdd:spec`; auto-fire: `telegraph`):\n"
             "  - `/sdd:spec <intent>` → mutator.\n"
             "  - `/sdd:build [args]` → loop.\n"
             "- `core` (auto-fire only): `socratic`, `steno`.\n"
@@ -1315,7 +1315,7 @@ def selftest():
     skel = emit_row_ids([{"id": f"V{1}"}], i_ids,
                         [{"id": f"T{9}"}, {"id": f"T{10}"}])
     check(skel == [f"V{1}", "I.sdd:spec", "I.sdd:build", f"T{9}", f"T{10}"],
-          "emit-row-ids: skeleton is §V∪§I∪§T in section order")
+          "emit-row-ids: skeleton is §V+§I+§T in section order")
     # skeleton rows survive write-memo's parse_table (≥ 2 pipes, header skipped)
     skel_table = "id|verdict|evidence\n" + "\n".join(f"{r}||" for r in skel)
     parsed = parse_table(skel_table)

@@ -10,7 +10,7 @@ model: opus
 
 ## AUDIENCE
 
-Skill body in SPEC-ADJACENT so glyph register. Design file output (`designs/<slug>.md`) is user-reviewing surface pre-spec-fold so steno register (readable symbols `→ & | §`, not heavy math glyphs `∀ ∃ ∴ ⊥ ∈ ∉`). Encoding follows audience.
+Skill body in SPEC-ADJACENT so telegraph register. Design file output (`designs/<slug>.md`) is user-reviewing surface pre-spec-fold so steno register (readable symbols `→ & | §` only). Encoding follows audience.
 
 ## Position in funnel
 
@@ -27,7 +27,7 @@ Skill body in SPEC-ADJACENT so glyph register. Design file output (`designs/<slu
 7. repeat 5–6 until `## Open Questions` empty
 8. on confirm → write draft to `designs/<slug>.md` (steno-encoded per template)
 
-every turn: not self-resolve Open Questions. resolution ⊢ user input.
+every turn: not self-resolve Open Questions. resolution requires user input.
 
 ## Distinction from socratic
 
@@ -39,7 +39,7 @@ not merge. socratic = bug or small-feature framing. design = structural choice.
 
 ## Output template (design file body)
 
-body in steno per `## AUDIENCE` (readable symbols, not heavy math glyphs). § citations OK if `SPEC.md` present.
+body in steno per `## AUDIENCE` (readable symbols only). § citations OK if `SPEC.md` present.
 
 ```
 # <title>
@@ -133,7 +133,7 @@ not persist w/o confirmation. not self-resolve Qs. not collapse multiple Qs into
 
 ## Boundary
 
-not mutate `SPEC.md`. design produces `designs/<slug>.md` draft only. SPEC amendment ⊢ caller runs `/sdd:spec <designs/<slug>.md>` after persist (gate routes to design-file fold-in per design-lifecycle invariant in SPEC.md). impl ⊢ `/sdd:build` after spec amended.
+not mutate `SPEC.md`. design produces `designs/<slug>.md` draft only. SPEC amendment requires caller run `/sdd:spec <designs/<slug>.md>` after persist (gate routes to design-file fold-in per design-lifecycle invariant in SPEC.md). impl requires `/sdd:build` after spec amended.
 
 not root-cause debugging — that belongs to the backprop skill (user route is `/sdd:spec <bug intent>`, gate → BACKPROP). design = structural shape, not "why is this broken".
 

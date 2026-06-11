@@ -21,7 +21,7 @@ Operator-triggered six-prong sweep. Single atomic commit, rollback via `git reve
 
 1. Read `SPEC.md`. Missing → "no spec, nothing to compact." Stop.
 2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` every row schema and section catalog.
-3. Compute baseline `tokens ≈ bytes/3.4` per token-budget-compact invariant (single source is `check-mechanical.py` `TOKEN_RATIO` per mechanical-realization invariant; not hardcode divisor). Record.
+3. Compute baseline `tokens ~ bytes/3.4` per token-budget-compact invariant (single source is `check-mechanical.py` `TOKEN_RATIO` per mechanical-realization invariant; not hardcode divisor). Record.
 
 ## PROPOSE
 
@@ -50,11 +50,11 @@ Generalizes prior §V tail-trim → full history-residue prune across live §V/�
 
 **§T body-trim** — closed-task implementation-transcript residue owned here because /sdd:build flips status cell only per status-flip invariant so §T body not reachable by /sdd:spec write-time prune (status-flip path skips §T body): oversized `task` cell carrying step-by-step transcript → one-line goal; surplus detail → commit-msg body. Mirrors §B `cause` one-line trim.
 
-Pre-filters (match exempt, not pruned): backtick-wrapped tokens per verbatim-preservation invariant (code-context pattern-definitions and quoted historical refs — rows documenting these patterns not self-flag); cite-modifier `§V.<n>(∆)` (∆-on-citation differs ∆-on-retired-value); wholesale-retired §V row `V<n>: retired YYYY-MM-DD` pending reorganize archival. Mechanical pattern-match per glyph register; verbatim-preservation invariant preserves code blocks, paths, URLs, identifiers, error strings, regex.
+Pre-filters (match exempt, not pruned): backtick-wrapped tokens per verbatim-preservation invariant (code-context pattern-definitions and quoted historical refs — rows documenting these patterns not self-flag); cite-modifier `§V.<n>(∆)` (∆-on-citation differs ∆-on-retired-value); wholesale-retired §V row `V<n>: retired YYYY-MM-DD` pending reorganize archival. Mechanical pattern-match per telegraph register; verbatim-preservation invariant preserves code blocks, paths, URLs, identifiers, error strings, regex.
 
-### Prong 5 — §V prose → glyph rewrite
+### Prong 5 — §V prose → telegraph rewrite
 
-Embedded English connectives rewrite per glyph encoding (per glyph skill). Pattern targets: `Why:` or `For example` or `In other words` or explanatory `because` or `due to` clauses. Verbatim-preservation invariant honored — code blocks, paths, URLs, identifiers, numbers, versions, error strings, SQL, regex, JSON, YAML, quoted strings preserved.
+Embedded English connectives rewrite per telegraph encoding (per telegraph skill). Pattern targets: `Why:` or `For example` or `In other words` or explanatory `because` or `due to` clauses. Verbatim-preservation invariant honored — code blocks, paths, URLs, identifiers, numbers, versions, error strings, SQL, regex, JSON, YAML, quoted strings preserved.
 
 ### Prong 6 — §V audit-recipe extraction
 

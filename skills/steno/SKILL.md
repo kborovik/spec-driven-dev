@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 # steno — human-facing terse text
 
-Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words and readable symbols; math glyphs belong to the `glyph` skill (same plugin).
+Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words and readable symbols; the LLM-facing register belongs to the `telegraph` skill (same plugin).
 
 ## SKIM TEST
 
@@ -26,7 +26,7 @@ Compression subordinate to this test — a word that aids the skim stays.
 
 ## SCOPE
 
-Criterion: human-facing terse prose for non-author reviewers — readers scan facts, benefit from compression w/o math-glyph load.
+Criterion: human-facing terse prose for non-author reviewers — readers scan facts, benefit from compression w/o telegraph-symbol load.
 
 Common applications (not exhaustive):
 
@@ -46,7 +46,7 @@ not apply to:
 Four rules every prose sentence or bullet body:
 
 1. **Lead-first** — subject + verb open the sentence; topic-shift and qualifier clauses move to the tail. Subject delayed past the first clause → skim test fails.
-2. **Visible subject-verb** — subject explicit or imperative form (subject implicit in imperative OK, e.g. `Add X.`, `Refactor Y.`). Symbol-only fragments out: `⊥ skip flag` → `No skip flag.`
+2. **Visible subject-verb** — subject explicit or imperative form (subject implicit in imperative OK, e.g. `Add X.`, `Refactor Y.`). Symbol-chain fragments out: `auth → mw → handler` → `Auth middleware runs before the handler.`
 3. **No hidden copulas** — `is`/`are` elided only when the fragment intent is unambiguous. Drop the copula in `X — Y` form only when `Y` reads as predicate not apposition (apposition ambiguity slows the reader).
 4. **No nested participial phrases** — at most one participial phrase per sentence. Nested form (e.g. `system, having validated the token after refreshing the session, returns ...`) prevents first-clause readability.
 
@@ -65,11 +65,7 @@ Safe for GitHub readers:
 §   spec citation (e.g. `§V.<n>`, `§T.<n>`) — only for refs into SPEC.md
 ```
 
-Avoid — write the word instead; mirrors the `glyph` skill retired set:
-
-```
-⊥ ¬ ≠ ∈ ∉ ≡ ∴ ∀ ∃ ∧ ∨
-```
+No other symbols — math operators beyond this set (for-all, exists, element-of, not-equal, and, or, …) write the word instead; mirrors the `telegraph` skill symbol policy.
 
 ## PRESERVE VERBATIM
 
@@ -205,7 +201,7 @@ Steno register is literal phrasing w/ readable symbols (per SCOPE). Reviewers pa
 Exclusions (preserved verbatim):
 
 - Colloquial sentence structure — allowed where it aids reviewer flow; register applies at the word level.
-- Domain-load-bearing named ops (`backprop`, `glyph-encode`, `socratic`, `steno`).
+- Domain-load-bearing named ops (`backprop`, `telegraph-encode`, `socratic`, `steno`).
 - Established tech vocabulary that doubles as metaphor (`drift`, `bottleneck`, `leak`) — allowed when it is the standard term in context.
 
 ## WHEN SKIM TRIPS

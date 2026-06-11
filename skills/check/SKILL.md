@@ -100,7 +100,7 @@ The script does not classify behavioral invariants — `§V` claim → verifiabl
 
 1. Translate invariant into verifiable claim about code.
 2. Determine recipe scope (some invariants reduce scope per scope-set invariant, e.g. PUBLISHED-only; every invariant w/o scope reduction is full repo) and compute touch set is the script `diff|ADVISORY|touched: …` set intersect scope (memo-driven default; first-run or `--full` is scope itself). not hand-roll `git diff` — the script's touched-set is the source per the memo invariant.
-3. Touch set empty → emit `V<n> SCOPE-EMPTY: <reason>` per drift-verdict-vocab invariant; record evidence `scope ∩ touch = ∅`; skip grep. Silence differs verified-absence.
+3. Touch set empty → emit `V<n> SCOPE-EMPTY: <reason>` per drift-verdict-vocab invariant; record evidence `scope-touch overlap empty`; skip grep. Silence differs verified-absence.
 4. Row clean since `last_clean_sha` per memo and recipe scope not intersected by current touch → emit `V<n> HOLD-SINCE-CLEAN` per memo invariant; record evidence `HOLD-since-clean @ <last_clean_sha>`; skip grep.
 5. Else grep / read relevant files; classify **HOLD** / **VIOLATE** / **VIOLATE-CAPTURED** / **UNVERIFIABLE** / **SCOPE-EMPTY** / **HOLD-SINCE-CLEAN** / **LATENT** per drift-verdict-vocab invariant. Actionable set is {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE} — each → REPORT body row (HOLD silent) + distinct remedy-hint path. Silence set is {SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT} — operationally identical: not REPORT body row, not remedy hint; aggregator (main thread) collapses → summary line under unified `suppressed` label w/ per-reason breakdown per drift-verdict-vocab invariant. Classifier-internal verdicts preserved every memo precision (`last_v_classifications`). Verdict semantics: VIOLATE-CAPTURED is live violation and `§B`-recorded and remediation forward-only (e.g. historical commit body, archived artifact) — emit form `<row-id> VIOLATE-CAPTURED: <evidence>; see §B.<n>`; recipe-author classifies based on `§B` cite presence (e.g. captured-sha list in REPO-LOCAL extension). LATENT is invariant trigger condition structurally absent from current repo state so audit no-op until condition fires (e.g. invariant constrains impl-code class not present per repo constraints; invariant triggers @ artifact size threshold currently unmet); distinct from UNVERIFIABLE (which signals missing audit infrastructure every claim that should otherwise be verifiable).
 6. Record address + file:line evidence.
@@ -145,7 +145,7 @@ OUTPUT — pipe-table only. Columns: `id|verdict|evidence`.
 
 - `id` is invariant row identifier (`V<n>`).
 - `verdict` in {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE, SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT}.
-- `evidence` ≤ 1 line, one of `file:line` or `no test covers …` or `scope ∩ touch = ∅` or `HOLD-since-clean @ <sha>` or `<file:line>; see §B.<n>` (VIOLATE-CAPTURED form) or `<trigger-condition-absent reason>` (LATENT form).
+- `evidence` ≤ 1 line, one of `file:line` or `no test covers …` or `scope-touch overlap empty` or `HOLD-since-clean @ <sha>` or `<file:line>; see §B.<n>` (VIOLATE-CAPTURED form) or `<trigger-condition-absent reason>` (LATENT form).
 
 No prose preamble before the table. No trailing summary after the table. No commentary between rows. Pipe-table only — first line is header `id|verdict|evidence`, subsequent lines one row per assigned V<n>.
 ```
@@ -175,7 +175,7 @@ Interface field w/ enumerated list (verb set, cmd set, tool list, config keys, e
 
 1. extract list-valued field → spec set.
 2. build code symbol set via grep or AST (e.g. CLI verb registry, exported cmd map, config-key constants).
-3. diff: `spec − code` → MISSING rows; `code − spec` → EXTRA rows.
+3. diff: `spec - code` → MISSING rows; `code - spec` → EXTRA rows.
 
 Catches enumerated drift (missing verb, undocumented flag) that free-text re-read slips past.
 
@@ -191,12 +191,12 @@ For each T<n>:
 
 ## REPORT
 
-Math-glyph. Grouped by severity. Mechanical rows (`format` / `cite` / `history` / `pinned-header` / `token` / `memo`) from the audit script merge into their blocks; behavioral `V<n>` rows from the §V batches; `I.<key>` / `T<n>` from interface and task audits.
+Telegraph register. Grouped by severity. Mechanical rows (`format` / `cite` / `history` / `pinned-header` / `token` / `memo`) from the audit script merge into their blocks; behavioral `V<n>` rows from the §V batches; `I.<key>` / `T<n>` from interface and task audits.
 
 ```
 ## invariant drift
 V<n> VIOLATE: auth/mw.go:47 uses `<` not `≤`. see §B.<n>.
-V<n> VIOLATE-CAPTURED: <commit-sha> body contains heavy math glyphs; see §B.<n>.
+V<n> VIOLATE-CAPTURED: <commit-sha> body contains heavy math operators; see §B.<n>.
 V<n> UNVERIFIABLE: no test covers every req path.
 §T.<n> VIOLATE: history: dated-retirement in task body — prune per freshness-contract invariant.
 

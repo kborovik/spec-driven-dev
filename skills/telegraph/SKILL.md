@@ -1,19 +1,18 @@
 ---
-name: glyph
+name: telegraph
 description: |
-  Math-glyph encoding — LLM-facing compression for SPEC.md and spec-adjacent
+  Telegraph encoding — LLM-facing compression for SPEC.md and spec-adjacent
   writes. Loaded by /sdd:spec, /sdd:build, /sdd:check. Triggers on any
-  write to SPEC.md or user says "math-glyph", "glyph", "compress this",
-  "be brief".
+  write to SPEC.md or user says "telegraph", "compress this", "be brief".
 allowed-tools: [Skill]
 disable-model-invocation: true
 ---
 
-# glyph — LLM-facing math-glyph encoding
+# telegraph — LLM-facing telegraph encoding
 
-Audience: the LLM re-reading SPEC.md into context. SPEC.md is LLM-facing — Claude does every read/write; humans operate via /sdd:* cmds, and /sdd:explain decodes glyph → prose. Compression comes from terse grammar — dropped articles/aux/filler, fragments, unpadded pipe tables — cutting tokens on every re-load. Symbol set is curated for parse clarity, not token savings: heavy math operators cost 2–4 tokens vs a 1-token word, so a glyph stays only where it reads clearer than the word.
+Audience: the LLM re-reading SPEC.md into context. SPEC.md is LLM-facing — Claude does every read/write; humans operate via /sdd:* cmds, and /sdd:explain decodes telegraph → prose. Compression comes from telegraphic grammar — dropped articles/aux/filler, fragments, unpadded pipe tables — cutting tokens on every re-load. Symbol set is curated for parse clarity, not token savings: heavy math operators cost 2–4 tokens vs a 1-token word, so a symbol stays only where it reads clearer than the word.
 
-"Math-glyph" is not "glyph". Generic glyphs are any printable symbol (status markers `.` `x`, bullets); math-glyphs are math operators. This skill keeps a curated low-token subset (→ ≥ ≤ ! ? § |) and retires heavy multi-token operators to ASCII words (see SYMBOLS). Glyph vs steno split is grammar aggression, not symbol set: glyph drops articles/aux/filler and runs in fragments; steno keeps grammar intact for GitHub reviewers.
+Name per linguistics: telegraphic style — content words kept, function words dropped, as in telegrams. Encoding is grammar-first, not symbol-first; symbol set is small (→ ≥ ≤ ! ? § |). Telegraph vs steno split is grammar aggression, not symbol set: telegraph drops articles/aux/filler and runs in fragments; steno keeps grammar intact for GitHub reviewers.
 
 Applies to SPEC.md writes, spec-referencing prose, backprop entries.
 Does NOT apply to code, error strings, commit messages, PR descriptions, or anything a human reviewer reads on GitHub (use the `sdd:steno` skill for that).
@@ -43,17 +42,11 @@ Keep set — low-token and parse-clear, prefer over the word:
 |   pipe-table delimiter (no semantic meaning)
 ```
 
-Retired set — heavy multi-token operators (2–4 tokens each, measured). Write the ASCII word; sweep tasks swap surviving prose occurrences:
-
-```
-⊥ ¬ ≠ ∈ ∉ ≡ ∴ ∀ ∃ ∧ ∨
-```
-
-Retired for token cost, not banned for meaning — /sdd:explain still decodes legacy occurrences; all read as standard math except `⊥`, which reads no / not / never / nil by context. For "or" write `or` — never `∨`, never bare `|` (table delimiter only).
+No other symbols. Math operators outside the keep set (for-all, exists, element-of, not-equal, and, or, …) cost 2–4 tokens each (measured) vs a 1-token word — write the ASCII word. For "or" write `or` — never bare `|` (table delimiter only).
 
 ## VERBS
 
-Canonical action-verb vocab every math-glyph artifacts. Use canonical form; not use synonyms in `avoid` column. Exclusions same as SYMBOLS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `glyph-encode`).
+Canonical action-verb vocab every telegraph artifact. Use canonical form; not use synonyms in `avoid` column. Exclusions same as SYMBOLS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `telegraph-encode`).
 
 **Write / edit ops**
 
@@ -102,11 +95,11 @@ Canonical action-verb vocab every math-glyph artifacts. Use canonical form; not 
 |`open`|create new tracked entity w/ initial status|start, begin, file (when opening)|
 |`close`|transition entity to terminal state|finish, complete, resolve|
 
-Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `glyph-encode` as named encoding op). Canonical form distorts domain semantic → keep domain verb. Verb canonicalization is compression every LLM reader, not paraphrase.
+Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `telegraph-encode` as named encoding op). Canonical form distorts domain semantic → keep domain verb. Verb canonicalization is compression every LLM reader, not paraphrase.
 
 ## NOUNS
 
-Canonical noun vocab every math-glyph artifacts. Use canonical form; not use synonyms in `avoid` column. Same exclusions as SYMBOLS and VERBS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `glyph-encode`, `socratic`, `steno`).
+Canonical noun vocab every telegraph artifact. Use canonical form; not use synonyms in `avoid` column. Same exclusions as SYMBOLS and VERBS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `telegraph-encode`, `socratic`, `steno`).
 
 |canonical|meaning|avoid|
 |`exclusion`|permitted divergence from default rule; named exception|carve-out, exemption, escape hatch|
@@ -206,4 +199,4 @@ Big project → more §s, not more files. grep ceremony kills agent speed. SPEC.
 
 ## WHEN UNSURE
 
-If cutting a word loses a fact, keep it. Math-glyph encoding is compression, not amputation.
+If cutting a word loses a fact, keep it. Telegraph encoding is compression, not amputation.

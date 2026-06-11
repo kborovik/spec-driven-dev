@@ -15,7 +15,7 @@
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Math-glyph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the bundled human-facing shorthand).
+- **Telegraph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the bundled human-facing shorthand).
 - **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
 - **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
@@ -26,7 +26,7 @@ The mechanics:
 
 `SPEC.md` is an LLM-facing artifact. You operate it through Claude — `/sdd:spec` writes, `/sdd:build` and `/sdd:check` read, `/sdd:explain` decodes a citation back to prose when you want to read along. The loop is `human → /sdd:* → Claude → SPEC.md`, not hand-editing in your editor.
 
-That framing is load-bearing. Math glyphs over English, fragments over sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
+That framing is load-bearing. Telegraphic fragments over full sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
 
 ## Install
 
@@ -109,7 +109,7 @@ B<n>|2026-04-20|token `<` not `≤`|V<n>
 B<n>|2026-04-21|race on write|V<n>
 ```
 
-**Status glyphs:** `.` todo · `x` done.
+**Status markers:** `.` todo · `x` done.
 **Cell rules:** literal `|` → `\|`. Empty cell = `-`. Backticks OK.
 
 ## Commands
@@ -173,9 +173,9 @@ Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §
 
 Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
 
-### `/sdd:explain` — math-glyph → prose
+### `/sdd:explain` — telegraph → prose
 
-The inverse of `glyph`. Given any citation, returns plain English with cited context.
+The inverse of `telegraph`. Given any citation, returns plain English with cited context.
 
 ```bash
 /sdd:explain §V.<n>    # expand a specific invariant
@@ -188,7 +188,7 @@ Useful for code review, onboarding, or when you'd otherwise have to translate `e
 
 ### `/sdd:compact` — token-budget sweep
 
-Operator-triggered compactor for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~25k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to glyph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
+Operator-triggered compactor for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~25k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
 
 ### `/sdd:reorganize` — §V cluster + renumber
 
@@ -204,15 +204,15 @@ Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/s
 | `spec`       | sole mutator                                                      |
 | `build`      | plan → execute loop                                               |
 | `check`      | drift report                                                      |
-| `explain`    | math-glyph → prose decoder                                        |
+| `explain`    | telegraph → prose decoder                                         |
 | `compact`    | token-budget compaction sweep                                     |
 | `reorganize` | §V cluster + renumber + cite sweep                                |
-| `glyph`      | math-glyph encoder (~30% reduction vs prose); auto-fires on writes |
+| `telegraph`  | telegraph encoder (~30% reduction vs prose); auto-fires on writes |
 | `backprop`   | bug → spec protocol; fires on every failed verification           |
 | `socratic`   | single-question intent gate; invoked by `/sdd:spec`               |
 | `steno`      | human-facing terse-prose register for reviewer-read text          |
 
-You don't usually invoke `glyph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically on test/build failure inside `/sdd:build`.
+You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically on test/build failure inside `/sdd:build`.
 
 ## Workflows
 
@@ -252,11 +252,11 @@ You don't usually invoke `glyph`, `backprop`, `socratic`, or `steno` directly �
 /sdd:explain §V.<n>            # if a violation is unclear, decompress it
 ```
 
-## Math-glyph encoding
+## Telegraph encoding
 
-`glyph` writes terse grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Heavy multi-token math operators (`∀ ∃ ∴ ⊥ ∈ ∉ ∧ ∨ ≡ ¬ ≠`) are retired to ASCII words: each costs 2–4 tokens vs a 1-token word, so a symbol stays only where it reads clearer than the word.
+`telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol earns its place only where it reads clearer than the word.
 
-Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and deliberately omits math-glyphs so reviewers don't slow down.
+Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
 Rules:
 
@@ -264,12 +264,12 @@ Rules:
 - Short synonyms (`fix` over `implement`).
 - **Preserve verbatim:** code, paths, identifiers, URLs, numbers, error strings, SQL, regex.
 
-Full symbol table: `skills/glyph/SKILL.md` SYMBOLS section.
+Full symbol table: `skills/telegraph/SKILL.md` SYMBOLS section.
 
 **Example.** Prose: "The authentication middleware must verify the token expiry on every request before allowing the handler to execute."
-Math-glyph: `V<n>: every req → auth check before handler`
+Telegraph: `V<n>: every req → auth check before handler`
 
-If math-glyphs slow you down on review, `/sdd:explain §V.<n>` decompresses on demand.
+If telegraph encoding slows you down on review, `/sdd:explain §V.<n>` decompresses on demand.
 
 ## Backprop in detail
 
@@ -277,7 +277,7 @@ Backprop is the one non-obvious thing SDD does that vanilla plan-then-execute do
 
 1. **Capture** — record the failing case verbatim (test name, error, stack, repro).
 2. **Trace** — find the cause: code bug, spec wrong, or unspecified edge case.
-3. **Append §B** — add a row: `id|date|cause|fix`. Math-glyph-encoded.
+3. **Append §B** — add a row: `id|date|cause|fix`. Telegraph-encoded.
 4. **Decide on §V** — would an invariant have caught the _class_ of this bug? If yes, add or tighten one. Cite it from the new §B row.
 5. **Write the failing test first** — watch it fail, then ship the fix. The test stays as a permanent guard.
 6. **One commit** — spec edit + test + fix together. PR description points at the new §B and §V.
@@ -296,7 +296,7 @@ Triggers:
 
 **Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
 
-**Can I skip math-glyph encoding and write prose specs?** Yes, but the next time the spec is loaded into context you'll pay 4× the tokens for the same content. Optional in syntax, expensive in practice.
+**Can I skip telegraph encoding and write prose specs?** Yes, but the next time the spec is loaded into context you'll pay 4x the tokens for the same content. Optional in syntax, expensive in practice.
 
 ## Files
 
@@ -307,10 +307,10 @@ skills/design/                   /sdd:design — propose-then-critique design lo
 skills/spec/                     /sdd:spec — sole SPEC.md mutator
 skills/build/                    /sdd:build — plan-execute loop
 skills/check/                    /sdd:check — read-only drift report
-skills/explain/                  /sdd:explain — glyph → prose decoder
+skills/explain/                  /sdd:explain — telegraph → prose decoder
 skills/compact/                  /sdd:compact — token-budget compaction sweep
 skills/reorganize/               /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
-skills/glyph/                    auto-fire math-glyph encoder for SPEC-adjacent writes
+skills/telegraph/                auto-fire telegraph encoder for SPEC-adjacent writes
 skills/backprop/                 auto-fire bug → spec protocol on /sdd:build verify-fail
 skills/socratic/                 intent-sharpening gate invoked by /sdd:spec
 skills/steno/                    human-facing terse-prose register

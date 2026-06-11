@@ -1,11 +1,11 @@
 ---
 name: explain
 description: |
-  Math-glyph → prose. Expand any SPEC.md citation into plain English. Read-only.
-  Inverse of the glyph skill (math-glyph encoder). Triggers when human wants to
-  understand a §V invariant, §T task, §B bug, or §I interface without the
+  Telegraph → prose. Expand any SPEC.md citation into plain English. Read-only.
+  Inverse of the telegraph skill (telegraph encoder). Triggers when human wants
+  to understand a §V invariant, §T task, §B bug, or §I interface without the
   encoding. Phrasings: "/sdd:explain", "what does §V.<n> mean", "decompress
-  this", "explain in prose", "I don't read math-glyphs". not for writes — those
+  this", "explain in prose", "I don't read telegraph". not for writes — those
   go through /sdd:spec.
 allowed-tools: Read, Grep, Glob, Skill
 model: sonnet
@@ -13,7 +13,7 @@ model: sonnet
 
 # explain — decompress spec into prose
 
-Inverse of the `glyph` skill (math-glyph encoder). Human-facing. Reads SPEC.md, expands one citation into plain English with cited context. Writes nothing.
+Inverse of the `telegraph` skill (telegraph encoder). Human-facing. Reads SPEC.md, expands one citation into plain English with cited context. Writes nothing.
 
 ## LOAD
 
@@ -29,8 +29,8 @@ Inverse of the `glyph` skill (math-glyph encoder). Human-facing. Reads SPEC.md, 
 
 For the chosen citation:
 
-1. Quote the raw math-glyph line(s) verbatim in a code block.
-2. Restate in plain English. No math-glyphs, no fragments — full sentences.
+1. Quote the raw telegraph line(s) verbatim in a code block.
+2. Restate in plain English. No telegraph symbols, no fragments — full sentences.
 3. Pull in cited siblings:
    - §T row → expand every §V and §I it cites.
    - §V row → list §T tasks that cite it and §B bugs that reference it.
@@ -103,5 +103,5 @@ The "Bottom line" sentence stays — it summarizes the citation, it does not dir
 
 - Zero writes. No SPEC.md edits. No code edits.
 - No code reads. Spec-only. (Use `/sdd:check` if you want spec-vs-code.)
-- No math-glyphs in output. Prose is the whole point.
+- No telegraph in output. Prose is the whole point.
 - No multi-citation expansion in one call. One id per invocation; loop if needed.
