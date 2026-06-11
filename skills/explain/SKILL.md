@@ -1,43 +1,39 @@
 ---
 name: explain
 description: |
-  Telegraph → prose. Expand any SPEC.md citation into plain English. Read-only.
-  Inverse of the telegraph skill (telegraph encoder). Triggers when human wants
-  to understand a §V invariant, §T task, §B bug, or §I interface without the
-  encoding. Phrasings: "/sdd:explain", "what does §V.<n> mean", "decompress
-  this", "explain in prose", "I don't read telegraph". not for writes — those
-  go through /sdd:spec.
+  Telegraph → prose. Expand one SPEC.md citation into plain English. Read-only;
+  inverse of telegraph skill (telegraph encoder). Triggers: "/sdd:explain",
+  "what does §V.<n> mean", "decompress this", "explain in prose", "I don't
+  read telegraph". Writes → /sdd:spec.
 allowed-tools: Read, Grep, Glob, Skill
 model: sonnet
 ---
 
 # explain — decompress spec into prose
 
-Inverse of the `telegraph` skill (telegraph encoder). Human-facing. Reads SPEC.md, expands one citation into plain English with cited context. Writes nothing.
+Inverse of `telegraph` skill. Human-facing. Reads SPEC.md, expands one citation → plain English w/ cited context. Zero writes.
 
 ## LOAD
 
-1. Read `SPEC.md`. If missing → "no spec, nothing to explain." Stop.
+1. Read `SPEC.md`. Missing → "no spec, nothing to explain." Bail.
 2. Parse `$ARGUMENTS`:
    - `§T.n` / `§V.n` / `§B.n` / `§I.<key>` → that row
-   - `§G` / `§C` → that section in full
-   - `--next` or empty → lowest-numbered §T row with status `.`
-3. Renumber-map probe — `.claude/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first until not further mapping, then resolve substituted id against current SPEC.md. Read-only contract preserved per read-only-diagnostic invariant — map consulted, not mutated. not exist → arg resolves directly against current SPEC.md.
-4. If citation absent → list valid ids in target section. Stop.
+   - `§G` / `§C` → full section
+   - `--next` or empty → lowest-numbered §T row w/ status `.`
+3. `.claude/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first to end, resolve result against current SPEC.md. Map read, never mutated (read-only-diagnostic invariant). Absent → arg resolves directly.
+4. Citation absent → list valid ids in target section. Bail.
 
 ## EXPAND
 
-For the chosen citation:
-
-1. Quote the raw telegraph line(s) verbatim in a code block.
-2. Restate in plain English. No telegraph symbols, no fragments — full sentences.
-3. Pull in cited siblings:
-   - §T row → expand every §V and §I it cites.
-   - §V row → list §T tasks that cite it and §B bugs that reference it.
-   - §B row → expand the §V it broke and the fixing §T.
-   - §I row → name §V invariants that constrain it.
-   - §G / §C → no cross-cites; just prose.
-4. Close with one line: what the reader should now understand.
+1. Quote raw telegraph line(s) verbatim in code block.
+2. Restate in plain English — full sentences, no telegraph symbols, no fragments.
+3. Pull cited siblings:
+   - §T → expand every §V and §I it cites.
+   - §V → list §T tasks citing it, §B bugs referencing it.
+   - §B → expand broken §V and fixing §T.
+   - §I → name constraining §V invariants.
+   - §G / §C → no cross-cites; prose only.
+4. Close w/ one line: what reader should now understand.
 
 ## OUTPUT SHAPE
 
@@ -72,17 +68,11 @@ Bottom line: implement a middleware that enforces §V.<n> without altering §I.a
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases). explain is read-only so items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases). Read-only → items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.
 
-Example for a closed §T row (terminal state):
+Closed §T row (terminal state) — tail of output:
 
 ```
-## §T.<n> — add auth middleware
-
-> T<n>|x|add auth mw|V<n>,I.api
-
-In plain English: this task added an authentication middleware...
-
 Status: complete (`x`).
 
 Bottom line: §V.<n> is enforced by the middleware shipped under §T.<n>.
@@ -97,11 +87,11 @@ Closed rows are historical. `run 1` skips to live work; `run 2` audits whether t
 2. /sdd:check — audit whether the closed task still holds
 ```
 
-The "Bottom line" sentence stays — it summarizes the citation, it does not direct action. Action lives only in Next; pre-action context lives in optional Hint.
+"Bottom line" stays — summarizes citation, never directs action. Action only in Next; pre-action context in optional Hint.
 
 ## NON-GOALS
 
-- Zero writes. No SPEC.md edits. No code edits.
-- No code reads. Spec-only. (Use `/sdd:check` if you want spec-vs-code.)
+- Zero writes. No SPEC.md edits, no code edits.
+- No code reads. Spec-only (spec-vs-code → `/sdd:check`).
 - No telegraph in output. Prose is the whole point.
-- No multi-citation expansion in one call. One id per invocation; loop if needed.
+- One id per call. Loop for multiple.

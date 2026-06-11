@@ -6,28 +6,26 @@ allowed-tools: AskUserQuestion, Read, Grep, Write, Skill
 model: fable
 ---
 
-# Design — propose-then-critique → designs/<slug>.md draft
+# design — propose-then-critique → designs/<slug>.md draft
 
-## AUDIENCE
-
-Skill body in SPEC-ADJACENT so telegraph register. Design file output (`designs/<slug>.md`) is user-reviewing surface pre-spec-fold so steno register (readable symbols `→ & | §` only). Encoding follows audience.
+Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold → steno (readable symbols `→ & | §` only).
 
 ## Position in funnel
 
-`/sdd:design` is front door — caller has named the layer mentally and wants to commit a shape. Layer / shape-space unclear → loop step 2 localization questions narrow it. No auto-route — user-driven only.
+`/sdd:design` is front door — caller named the layer mentally, wants to commit a shape. Layer / shape-space unclear → loop step 2 questions narrow. No auto-route — user-driven only.
 
 ## Loop
 
-1. read `SPEC.md` in root → degrade gracefully if absent
+1. read `SPEC.md` @ root; absent → degrade per § below
 2. topic vague or empty → ≤ 2 questions to localize, then propose
 3. propose shape (named structures, types, key decisions) in 1 pass
 4. surface `## Open Questions` list at bottom
 5. wait → user critique / answers
-6. update Proposal in place; resolved Qs → `## Design decisions` w/ rationale
+6. patch Proposal in place; resolved Qs → `## Design decisions` w/ rationale
 7. repeat 5–6 until `## Open Questions` empty
-8. on confirm → write draft to `designs/<slug>.md` (steno-encoded per template)
+8. user confirms → persist per `## Persist`
 
-every turn: not self-resolve Open Questions. resolution requires user input.
+never self-resolve Open Qs — resolution requires user input. never persist w/o confirmation. never collapse multiple Qs into one to fake convergence.
 
 ## Distinction from socratic
 
@@ -35,32 +33,32 @@ every turn: not self-resolve Open Questions. resolution requires user input.
 |socratic|"enough"|1 question/turn, sharpen intent|
 |design|"exhausted"|propose shape, exhaust open Qs|
 
-not merge. socratic = bug or small-feature framing. design = structural choice.
+not merged. socratic = bug or small-feature framing. design = structural choice.
 
 ## Output template (design file body)
 
-body in steno per `## AUDIENCE` (readable symbols only). § citations OK if `SPEC.md` present.
+steno body; § citations OK when `SPEC.md` present.
 
 ```
 # <title>
 
 ## Problem
 
-[symptoms + §B/§V citations if SPEC.md present, else "designing without SPEC anchor"]
+[symptoms + §B/§V cites; no SPEC.md → "designing without SPEC anchor"]
 
 ## Proposal
 
-[named structures, types, shape — propose-then-critique starting point]
+[named structures, types, shape]
 
-## [topic-specific sections, e.g. "Tool ownership", "Naming", "Layering"]
+## [topic-specific §s, e.g. "Tool ownership", "Naming", "Layering"]
 
 ## Effect on in-flight SPEC items
 
-[§T/§V deltas — what gets superseded, narrowed, unchanged. omit section if SPEC.md absent.]
+[§T/§V deltas — superseded, narrowed, unchanged. omit § if SPEC.md absent]
 
 ## Design decisions
 
-[each resolved Open Q + rationale, in `**Decision:** ... **Why:** ...` shape]
+[each resolved Q: `**Decision:** ... **Why:** ...`]
 
 ## Success criterion
 
@@ -72,80 +70,65 @@ body in steno per `## AUDIENCE` (readable symbols only). § citations OK if `SPE
 
 ## Unresolved
 
-[only if ≥3-turns/Q escape used — parked Qs for follow-up]
+[only if ≥3-turn escape used — parked Qs for follow-up]
 ```
 
 ## Code reads
 
-reactive only. not preemptive scans.
+reactive only — no preemptive scans.
 
-- not allowed: grep repo before first proposal "to find context". propose from user's framing + `SPEC.md`.
-- ✓ allowed: user cites `file:line` or symbol or path → read that target. user claims behavior in code → spot-check before next proposal turn.
+- banned: grep repo before first proposal "for context". propose from user framing + `SPEC.md`.
+- OK: user cites `file:line` / symbol / path → read target. user claims code behavior → spot-check before next proposal turn.
 
-cap: ≤ 2 reads/turn. broader sweep needed → stop; return control to user for codebase investigation.
+cap ≤ 2 reads/turn. broader sweep needed → stop, return control to user for codebase investigation.
 
 ## SPEC.md degradation
 
-`SPEC.md` in root absent → flag once: "designing without SPEC anchor; §V/§B/§T citations omitted". continue. omit `## Effect on in-flight SPEC items` from output.
+`SPEC.md` @ root absent → flag once: "designing without SPEC anchor; §V/§B/§T citations omitted". continue; omit `## Effect on in-flight SPEC items` from output.
 
 ## Long-session escape
 
-single Open Q ≥ 3 turns w/o resolution → decision-gate per decision-gate invariant (mid-flow consequence-bearing prompt — selection drives persist-shape in current turn) → emit AskUserQuestion call:
+single Open Q ≥ 3 turns unresolved → AskUserQuestion per decision-gate invariant (selection drives persist-shape in current turn; prose `or keep going?` form not allowed):
 
 - **question**: `Park unresolved Q under '## Unresolved' and converge on rest?`
-- **options** (2 — mutually exclusive):
-  - `Park Q and converge` — move Q to `## Unresolved`, proceed to convergence and persist
-  - `Keep going` — return to step 5 loop
 - **header**: `Open-Q escape`
-- prose `or keep going?` form not allowed — selection drives `## Unresolved` shape in persisted draft.
+- **options** (2, mutually exclusive):
+  - `Park Q and converge` — Q → `## Unresolved`, proceed to convergence + persist
+  - `Keep going` — back to step 5
 
-park → persisted draft carries explicit unresolved list in `## Unresolved` section. not pretend resolved.
-
-## Mode
-
-write-new-design-file only. not append-to-existing.
+park → persisted draft carries Q under `## Unresolved` — not pretend resolved.
 
 ## Title and slug
 
-draft body opens w/ `# <title>` heading. conventional-commits prefix optional (`feat(<scope>): ...`, `refactor(<scope>): ...`) — design-ness encoded via file location (`designs/`), not title prefix duplicating it.
+body opens `# <title>`. conventional-commits prefix optional (`feat(<scope>): ...`) — design-ness encoded by `designs/` location, not title prefix.
 
-slug derivation:
-- short kebab-case (`<noun-phrase>` or `<scope>-<noun>`); ≤ 5 words, ≤ 50 chars.
-- ambiguous topic → ask user once for slug confirmation.
-- collision (`designs/<slug>.md` exists) → append `-<n>` suffix.
-
-filename: `designs/<slug>.md`.
+slug: short kebab-case (`<noun-phrase>` or `<scope>-<noun>`), ≤ 5 words, ≤ 50 chars. ambiguous topic → ask once for confirmation. collision → append `-<n>`.
 
 ## Persist
 
-1. `designs/` dir @ repo root — auto-created by `Write` on draft persist (no `Bash` mkdir needed).
-2. derive slug per § above.
-3. write design body (steno-encoded per template) to `designs/<slug>.md`.
-4. show file path + summary to user.
+write-new only — never append to existing design file. `Write` auto-creates `designs/` @ repo root (no `Bash` mkdir).
 
-not commit. caller may stage manually or wait for `/sdd:spec` fold-in (folds → SPEC.md and leaves design file in working tree per design-lifecycle invariant in SPEC.md; user removes or preserves manually post-fold).
+1. derive slug per § above
+2. write steno body per template → `designs/<slug>.md`
+3. show file path + summary
 
-## Convergence gate
-
-ready iff `## Open Questions` empty and user confirms.
-
-not persist w/o confirmation. not self-resolve Qs. not collapse multiple Qs into one to fake convergence.
+not commit — caller stages manually or runs `/sdd:spec designs/<slug>.md` fold-in (folds → SPEC.md, leaves design file in working tree per design-lifecycle invariant in SPEC.md; user removes or preserves manually post-fold).
 
 ## Boundary
 
-not mutate `SPEC.md`. design produces `designs/<slug>.md` draft only. SPEC amendment requires caller run `/sdd:spec <designs/<slug>.md>` after persist (gate routes to design-file fold-in per design-lifecycle invariant in SPEC.md). impl requires `/sdd:build` after spec amended.
+never mutate `SPEC.md` — output is `designs/<slug>.md` only. SPEC amend = `/sdd:spec <designs/<slug>.md>` post-persist (gate routes to fold-in); impl = `/sdd:build` post-amend.
 
-not root-cause debugging — that belongs to the backprop skill (user route is `/sdd:spec <bug intent>`, gate → BACKPROP). design = structural shape, not "why is this broken".
+not root-cause debugging — backprop skill owns that (user route `/sdd:spec <bug intent>`, gate → BACKPROP). design = structural shape, not "why is this broken".
 
 ## Escape hatch
 
-"just file it" or "skip the design" or "I already know what I want" → stop. hand verbatim intent to `/sdd:spec` (amend SPEC directly w/o design draft).
+"just file it" / "skip the design" / "I already know what I want" → stop; hand verbatim intent to `/sdd:spec` (amend SPEC directly, no design draft).
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (e.g. fold-in leaves `designs/<slug>.md` in working tree post-apply so user removes or preserves manually). Design is iterative: mid-loop items lead w/ Open-Q resolution (answer, park, abort); post-persist items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in and escape hatches (`/sdd:design` rework).
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when selection needs hidden state (e.g. fold-in leaves design file in working tree post-apply). mid-loop → items lead w/ Open-Q resolution (answer, park, abort); post-persist → items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in + escape hatches (`/sdd:design` rework).
 
-Example mid-loop with Open Questions outstanding:
+mid-loop example (Open Qs outstanding):
 
 ```
 ## Next
@@ -155,7 +138,7 @@ Example mid-loop with Open Questions outstanding:
 3. /sdd:spec <intent> — amend SPEC directly w/o design draft
 ```
 
-Example after persist (terminal — `designs/<slug>.md` written):
+post-persist example (terminal — `designs/<slug>.md` written):
 
 ```
 ## Next

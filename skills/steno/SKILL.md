@@ -10,31 +10,29 @@ disable-model-invocation: true
 
 # steno — human-facing terse text
 
-Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words and readable symbols; the LLM-facing register belongs to the `telegraph` skill (same plugin).
+Audience: human reviewer scanning prose for facts — not a token-optimised model. Plain words, readable symbols; LLM-facing register → `telegraph` skill (same plugin).
 
 ## SKIM TEST
 
-Top criterion: a reviewer scans the text and the fact appears in the first sentence or bold-lead bullet of each block. Skim fails → rewrite the first clause; not retain dense form, not cut further words.
+Top criterion: fact appears in first sentence or bold-lead bullet of each block. Skim fails → rewrite first clause to state the fact — not retain dense form, not cut further words. Compression subordinate: a word that aids the skim stays. Reviewer would slow on a symbol → use the word.
 
-Self-check every paragraph or bullet:
+Self-check every paragraph/bullet:
 
 - First clause states the fact (subject + verb ≤ 8 words).
-- Subject and verb both visible — symbol-chain fragments fail the test.
-- Anti-test: cover everything after the first clause; the core fact remains readable.
-
-Compression subordinate to this test — a word that aids the skim stays.
+- Subject and verb both visible — symbol-chain fragments fail.
+- Anti-test: cover everything after first clause; core fact still readable.
 
 ## SCOPE
 
-Criterion: human-facing terse prose for non-author reviewers — readers scan facts, benefit from compression w/o telegraph-symbol load.
+Human-facing terse prose for non-author reviewers — readers scan facts, benefit from compression w/o telegraph-symbol load.
 
-Common applications (not exhaustive):
+Applies (not exhaustive):
 
-- GitHub issues and PRs — titles, bodies (incl. PR desc refresh on merge).
-- PR squash/merge commit message bodies (release-note section).
-- READMEs and user-facing docs where compression aids scan.
+- GitHub issues & PRs — titles, bodies (incl. PR desc refresh on merge).
+- PR squash/merge commit bodies (release-note section).
+- READMEs & user-facing docs where compression aids scan.
 
-not apply to:
+Not:
 
 - Code, snippets, backticked text.
 - Conventional Commits title prefix (`type(area):`) — fixed format.
@@ -43,12 +41,12 @@ not apply to:
 
 ## SENTENCE SHAPE
 
-Four rules every prose sentence or bullet body:
+Every prose sentence or bullet body:
 
-1. **Lead-first** — subject + verb open the sentence; topic-shift and qualifier clauses move to the tail. Subject delayed past the first clause → skim test fails.
-2. **Visible subject-verb** — subject explicit or imperative form (subject implicit in imperative OK, e.g. `Add X.`, `Refactor Y.`). Symbol-chain fragments out: `auth → mw → handler` → `Auth middleware runs before the handler.`
-3. **No hidden copulas** — `is`/`are` elided only when the fragment intent is unambiguous. Drop the copula in `X — Y` form only when `Y` reads as predicate not apposition (apposition ambiguity slows the reader).
-4. **No nested participial phrases** — at most one participial phrase per sentence. Nested form (e.g. `system, having validated the token after refreshing the session, returns ...`) prevents first-clause readability.
+1. **Lead-first** — subject + verb open the sentence; topic-shift & qualifier clauses → tail. Subject past first clause → skim fails.
+2. **Visible subject-verb** — subject explicit or imperative (`Add X.` OK). No symbol-chain fragments: `auth → mw → handler` → `Auth middleware runs before the handler.`
+3. **No hidden copulas** — elide `is`/`are` only when fragment unambiguous. Drop copula in `X — Y` only when Y reads as predicate, not apposition.
+4. **≤ 1 participial phrase per sentence** — nesting kills first-clause readability.
 
 Verb-headed fragments fine. Lists > paragraphs. One idea per line in lists. Break long sentences before cutting words.
 
@@ -62,91 +60,43 @@ Safe for GitHub readers:
 ≤   at most
 &   and
 |   or (in lists, not prose)
-§   spec citation (e.g. `§V.<n>`, `§T.<n>`) — only for refs into SPEC.md
+§   spec citation (`§V.<n>`, `§T.<n>`) — refs into SPEC.md only
 ```
 
-No other symbols — math operators beyond this set (for-all, exists, element-of, not-equal, and, or, …) write the word instead; mirrors the `telegraph` skill symbol policy.
+No other symbols — math operators beyond this set → write the word; mirrors `telegraph` symbol policy.
 
 ## PRESERVE VERBATIM
 
-not compress:
-
 - Code blocks, snippets, backticked text.
-- Paths: `src/auth/mw.go`.
-- URLs and `#123` issue/PR refs.
-- Identifiers: function names, var names, env vars, flags.
+- Paths, URLs, `#123` issue/PR refs.
+- Identifiers: function names, vars, env vars, flags.
 - Numbers, versions, dates, SHAs.
-- Error message strings.
-- SQL, regex, JSON, YAML.
+- Error strings; SQL, regex, JSON, YAML.
 - Quoted user-facing copy.
 - `Resolves #N` / `Fixes #N` / `Closes #N` trailers — exact form.
 
 ## SHAPES
 
-**Bullet > paragraph** when listing > 2 items.
-
-**Definition list** for term/explanation pairs:
-
-```
-- `--dry-run` — print actions, do not execute.
-- `--force` — skip confirmation prompts.
-```
-
-**Table** for comparing options on same axes:
-
-```
-| flag        | scope    | reversible |
-|-------------|----------|------------|
-| --soft      | local    | yes        |
-| --hard      | working  | no         |
-```
-
-**Headers + fragments** > full sentences in issue/PR bodies:
-
-```
-## Summary
-JWT replaces session cookies. Tokens expire 1h. Refresh via `/auth/refresh`.
-
-## Changes
-- Add JWT generation & validation
-- New `/auth/refresh` endpoint
-- Middleware validates `Authorization: Bearer <jwt>`
-
-## Breaking
-- Session cookies dropped. Clients must send `Authorization` header.
-```
+- **Bullets > paragraph** when listing > 2 items.
+- **Definition list** for term/explanation pairs: `` - `--dry-run` — print actions, do not execute. ``
+- **Table** for comparing options on same axes.
+- **Headers + fragments** > full sentences in issue/PR bodies (see release-commit example below).
 
 ## EXAMPLES
 
-Three pairs. every pair: **Good** passes SKIM TEST (first sentence or bullet states the fact); **Anti** fails on a named shape rule.
-
----
-
-**Issue body**
-
-Anti (44 words — fails rule 1: lead-first):
+**Issue body** — Anti fails rule 1 (lead-first): reader scans 14 words before the fact.
 
 > When a user tries to log in with an email address that contains uppercase letters, the system fails to find their account because the lookup is being done in a case-sensitive manner, which is not the expected behavior for email addresses.
 
-Skim failure: opening clause `When a user tries to log in...` not name the fact. The reader scans 14 words before reaching `fails to find their account`.
-
-Good (15 words):
+Good — first sentence states fact + condition; second states cause + fix direction:
 
 > Login fails when email has uppercase letters. Lookup is case-sensitive — should be case-insensitive for emails.
 
-Skim pass: first sentence states the fact (login fails, under what condition). Second sentence states cause + fix direction.
-
----
-
-**PR body**
-
-Anti (fails SKIM TEST — filler precedes the fact):
+**PR body** — Anti fails SKIM TEST: 8 filler words precede the fact.
 
 > This pull request basically just adds some additional logging to the auth middleware so that we can debug issues more easily in production environments. It also includes a small refactor of the token validation logic.
 
-Skim failure: 8 words of filler (`This pull request basically just adds some additional`) precede the fact. The takeaway sits past mid-sentence.
-
-Good:
+Good — first fragment states both items; each bullet opens with a verb:
 
 > ## Summary
 >
@@ -157,21 +107,11 @@ Good:
 > - Log `userId`, `path`, `latency` on every authed request
 > - Extract `validateToken()` from middleware into `auth/token.go`
 
-Skim pass: first-sentence fragment states both items (logging + refactor). Each bullet opens with a verb (`Log`, `Extract`).
+**Release commit body** — Anti fails rule 4: nested participials, 47 words before the expiry fact.
 
----
-
-**Release commit body**
-
-Anti (fails rule 4: nested participials; passive obscures the fact):
-
-> ## Summary
->
 > This change implements a new authentication system using JWT tokens which replaces the previous session-based authentication that was being used. Users will now be able to log in and receive a token that they can use to make authenticated requests, and these tokens will expire after a period of 24 hours.
 
-Skim failure: 47 words before the fact `tokens expire after a period of 24 hours`. The two key facts (replacement, expiry) sit in tail clauses; nested relative clauses (`which replaces ... that was being used`) prevent first-clause readability.
-
-Good:
+Good — 4-word first sentence states the replacement; 3-word second states the constraint:
 
 > ## Summary
 >
@@ -187,23 +127,17 @@ Good:
 >
 > - Session cookies dropped — clients must send `Authorization` header.
 
-Skim pass: first sentence is 4 words and states the replacement; second sentence is 3 words and states the constraint.
-
 ## BOUNDARIES
 
-Steno register is literal phrasing w/ readable symbols (per SCOPE). Reviewers parse facts fast — idiom adds parsing cost and ambiguity. Within scope:
+Literal phrasing w/ readable symbols (per SCOPE) — idiom adds parsing cost & ambiguity. Within scope, not:
 
-- not idiom (e.g. "moves the needle", "low-hanging fruit", "boil the ocean").
-- not metaphor at the word level (e.g. "earns its keep", "bite", "smell").
-- not colloquialism (e.g. "gotcha", "ish", "yeah", "kinda").
-- not culture-loaded shorthand (sports, military, film references).
+- idiom ("moves the needle", "low-hanging fruit", "boil the ocean").
+- word-level metaphor ("earns its keep", "bite", "smell").
+- colloquialism ("gotcha", "ish", "yeah", "kinda").
+- culture-loaded shorthand (sports, military, film references).
 
-Exclusions (preserved verbatim):
+Exclusions:
 
-- Colloquial sentence structure — allowed where it aids reviewer flow; register applies at the word level.
+- Colloquial sentence structure — allowed where it aids reviewer flow; register applies at word level.
 - Domain-load-bearing named ops (`backprop`, `telegraph-encode`, `socratic`, `steno`).
-- Established tech vocabulary that doubles as metaphor (`drift`, `bottleneck`, `leak`) — allowed when it is the standard term in context.
-
-## WHEN SKIM TRIPS
-
-Fact missing from the first sentence → rewrite the first clause to state it directly; not cut further words. Reviewer would slow down on a symbol → use the word. Compression preserves fact.
+- Established tech vocab doubling as metaphor (`drift`, `bottleneck`, `leak`) — allowed when standard term in context.

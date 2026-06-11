@@ -10,27 +10,21 @@ disable-model-invocation: true
 
 # telegraph — LLM-facing telegraph encoding
 
-Audience: the LLM re-reading SPEC.md into context. SPEC.md is LLM-facing — Claude does every read/write; humans operate via /sdd:* cmds, and /sdd:explain decodes telegraph → prose. Compression comes from telegraphic grammar — dropped articles/aux/filler, fragments, unpadded pipe tables — cutting tokens on every re-load. Symbol set is curated for parse clarity, not token savings: heavy math operators cost 2–4 tokens vs a 1-token word, so a symbol stays only where it reads clearer than the word.
+Audience: LLM re-reading SPEC.md into context. Humans operate via /sdd:* cmds; /sdd:explain decodes telegraph → prose. Compression = telegraphic grammar (content words kept, function words dropped, as in telegrams), not symbols — heavy math operators cost 2–4 tokens vs 1-token word. Telegraph vs steno: telegraph drops grammar, runs in fragments; steno keeps grammar intact for GitHub reviewers.
 
-Name per linguistics: telegraphic style — content words kept, function words dropped, as in telegrams. Encoding is grammar-first, not symbol-first; symbol set is small (→ ≥ ≤ ! ? § |). Telegraph vs steno split is grammar aggression, not symbol set: telegraph drops articles/aux/filler and runs in fragments; steno keeps grammar intact for GitHub reviewers.
-
-Applies to SPEC.md writes, spec-referencing prose, backprop entries.
-Does NOT apply to code, error strings, commit messages, PR descriptions, or anything a human reviewer reads on GitHub (use the `sdd:steno` skill for that).
+Applies: SPEC.md writes, spec-referencing prose, backprop entries.
+Not: code, error strings, commit messages, PR descriptions, anything a human reads on GitHub → use `sdd:steno`.
 
 ## GRAMMAR
 
-- Drop articles (a, an, the).
-- Drop filler (just, really, basically, simply, actually).
-- Drop aux verbs where fragment works (is, are, was, were, being).
-- Drop pleasantries.
-- No hedging (skip "might", "perhaps", "could be worth").
+- Drop articles (a, an, the), filler (just, really, basically, simply, actually), aux verbs where fragment works (is, are, was, were, being), pleasantries, hedging (might, perhaps, could be worth).
 - Fragments fine.
-- Short synonyms per `## VERBS` (canonical verbs + `avoid` column).
-- Pipe tables compact: not alignment padding, not separator row. Header row + data rows, bare `|cell|cell|` (escape literal `|` as `\|`).
+- Canonical verbs/nouns per `## VERBS` / `## NOUNS`.
+- Pipe tables compact: header row + data rows, bare `|cell|cell|` — no alignment padding, no separator row. Escape literal `|` as `\|`.
 
 ## SYMBOLS
 
-Keep set — low-token and parse-clear, prefer over the word:
+Keep set — low-token, parse-clear; prefer over the word:
 
 ```
 →   leads to / becomes / on <x>
@@ -42,11 +36,13 @@ Keep set — low-token and parse-clear, prefer over the word:
 |   pipe-table delimiter (no semantic meaning)
 ```
 
-No other symbols. Math operators outside the keep set (for-all, exists, element-of, not-equal, and, or, …) cost 2–4 tokens each (measured) vs a 1-token word — write the ASCII word. For "or" write `or` — never bare `|` (table delimiter only).
+No other symbols. Math operators outside keep set (for-all, exists, element-of, not-equal, and, or, …) cost 2–4 tokens each — write the ASCII word. For "or" write `or` — never bare `|`.
+
+Exclusions (apply to SYMBOLS, VERBS, NOUNS): backticks, verbatim trigger phrases, domain-load-bearing named ops (`backprop`, `telegraph-encode`, `socratic`, `steno`).
 
 ## VERBS
 
-Canonical action-verb vocab every telegraph artifact. Use canonical form; not use synonyms in `avoid` column. Exclusions same as SYMBOLS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `telegraph-encode`).
+Use canonical form; never synonyms in `avoid` column.
 
 **Write / edit ops**
 
@@ -95,31 +91,20 @@ Canonical action-verb vocab every telegraph artifact. Use canonical form; not us
 |`open`|create new tracked entity w/ initial status|start, begin, file (when opening)|
 |`close`|transition entity to terminal state|finish, complete, resolve|
 
-Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `telegraph-encode` as named encoding op). Canonical form distorts domain semantic → keep domain verb. Verb canonicalization is compression every LLM reader, not paraphrase.
+Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `telegraph-encode` as named encoding op). Canonical form distorts domain semantic → keep domain verb.
 
 ## NOUNS
-
-Canonical noun vocab every telegraph artifact. Use canonical form; not use synonyms in `avoid` column. Same exclusions as SYMBOLS and VERBS — backticks, verbatim trigger phrases, domain-load-bearing named ops (e.g. `backprop`, `telegraph-encode`, `socratic`, `steno`).
 
 |canonical|meaning|avoid|
 |`exclusion`|permitted divergence from default rule; named exception|carve-out, exemption, escape hatch|
 |`require` (modal `!`)|obligation; mandate|earn (when subject not animate)|
 |`record` or `ledger`|persisted bug-class store|memory (when used metaphorically for §B)|
 
-Extend as new pairs surface — idioms and metaphors caught by sweep tasks land as noun rows here so future writes default to canonical form.
+Extend as new pairs surface — idioms/metaphors caught by sweep tasks land as noun rows here.
 
 ## PRESERVE VERBATIM
 
-Never compress:
-
-- Code blocks, snippets, one-liners with backticks.
-- Paths: `src/auth/mw.go`.
-- URLs.
-- Identifiers: function names, variable names, env vars.
-- Numbers and versions.
-- Error message strings.
-- SQL, regex, JSON, YAML.
-- Quoted strings.
+Never compress: code/backticked snippets, paths, URLs, identifiers (function/variable/env names), numbers, versions, error strings, SQL/regex/JSON/YAML, quoted strings.
 
 ## SHAPES
 
@@ -145,7 +130,7 @@ id|status|task|cites
 T<n>|x|add auth mw|V<n>,I.api
 ```
 
-Status: `x` done, `.` todo. Escape literal `|` as `\|`.
+Status: `x` done, `.` todo.
 
 **Interface**:
 
@@ -158,7 +143,7 @@ env: FOO_KEY ! set
 
 ## ADDRESSING
 
-`§<S>.<n>` is section.item ref (e.g. `§V.<n>` is invariants §, item n). Cmd args, commits, PRs cite by § → zero ambiguity.
+`§<S>.<n>` = section.item ref (e.g. `§V.<n>` = invariants §, item n). Cmd args, commits, PRs cite by § → zero ambiguity.
 
 ## ONE FILE RULE
 
@@ -166,37 +151,19 @@ Big project → more §s, not more files. grep ceremony kills agent speed. SPEC.
 
 ## EXAMPLES
 
-**Bad**:
+Bad: "The system should ensure that every incoming request is properly authenticated before being forwarded to its corresponding handler function."
+Good: `V<n>: every req → auth check before handler`
 
-> The system should ensure that every incoming request is properly authenticated before being forwarded to its corresponding handler function.
+Bad: "We discovered that the token expiration check in the middleware was using a strict less-than comparison, so tokens were rejected at the exact moment of expiry."
+Good: `B<n>: token `<` not `≤` → reject @ expiry boundary.`
 
-**Good**:
-
-> V<n>: every req → auth check before handler
-
-**Bad**:
-
-> We discovered that the token expiration check in the middleware was using a strict less-than comparison operator, which meant tokens were being rejected at the exact moment of their expiry.
-
-**Good**:
-
-> B<n>: token `<` not `≤` → reject @ expiry boundary.
-
-**Bad**:
-
-> The POST endpoint at /x accepts a JSON body and returns a 200 response with an object containing the created id.
-
-**Good**:
-
-> api: POST /x → 200 {id}
+Bad: "The POST endpoint at /x accepts a JSON body and returns a 200 response with an object containing the created id."
+Good: `api: POST /x → 200 {id}`
 
 ## BOUNDARIES
 
-- User asks for prose explanation → switch to normal English.
-- Spec documents for external review (RFC, pitch) → normal English.
-- Commit message → normal English (git readers expect it).
-- Diff comment in code → normal English.
+Normal English when: user asks for prose explanation; external-review docs (RFC, pitch); commit messages; diff comments in code.
 
 ## WHEN UNSURE
 
-If cutting a word loses a fact, keep it. Telegraph encoding is compression, not amputation.
+Cutting a word loses a fact → keep it. Compression, not amputation.

@@ -15,59 +15,47 @@ Single-thread native plan→execute. You are main Claude. No swarm.
 
 ## LOAD
 
-1. Read `SPEC.md`. If missing → tell user to invoke the spec skill first. Stop.
-2. Parse invocation args:
-   - `§T.n` → that task only
-   - `--next` or empty → lowest-numbered row with status `.`
-   - `--all` → every `.` row in §T order
+1. Read `SPEC.md`. Missing → tell user run spec skill first; bail.
+2. Args: `§T.n` → that task only; `--next` or empty → lowest-numbered `.` row; `--all` → every `.` row in §T order — plan once, then chain {edit → verify → commit} per row autonomously.
 
 ## PLAN
 
-Native plan mode. For chosen task(s):
+Native plan mode, per chosen task(s):
 
-1. Cite every §V invariant that applies. Plan must respect all.
-2. Cite every §I interface touched. Plan must preserve shape.
-3. List files to create / edit.
-4. List tests to add or update (one per invariant touched).
-5. Name verification command (test, build, lint).
+1. Cite every applicable §V invariant — plan respects all.
+2. Cite every §I interface touched — plan preserves shape.
+3. List files to init / patch.
+4. List tests to add or patch (one per invariant touched).
+5. Name verification cmd (test, build, lint).
 
-Emit plan inline every task — transparency, not wait-state — then proceed to EXECUTE.
+Emit plan inline every task (transparency, not wait-state) → EXECUTE.
 
 ## EXECUTE
 
-Per task in order (status flips `.` → `x` direct):
+Per task in order:
 
-1. Edit code per plan.
-2. Run verification command.
-2'. On staged diff touching PUBLISHED, probe `.claude/check-extras.md` and run audit recipes it ships; bail per recipe message every surviving match, not commit until match-free. Probe not match → no-op.
-3. **Pass** (verification exits 0 and tests added per plan and not §V regressed via full-suite re-run) → flip §T.n status `.` → `x`; auto-commit. Surface `/sdd:check` as Next-block item #1 per §V.<n> (cascade scan; not silent close). Next task.
-4. **Fail** → invoke backprop skill. Do NOT retry blindly. Status stays `.`.
+1. Edit code per plan. Stage explicit `git add <listed-paths>`, never `git add -A` — pre-existing dirty tree not bundled.
+2. Run verification cmd.
+3. Staged diff touches PUBLISHED → probe `.claude/check-extras.md`; exists → run its audit recipes, bail per recipe msg every surviving match, no commit until match-free. No file → no-op.
+4. **Pass** (cmd exits 0 + planned tests added + full-suite re-run shows no §V regress) → flip §T.n `.` → `x`; auto-commit, no prompt, msg `T<n>: <goal line>` + §V cites. Next task.
+5. **Fail** → FAIL → BACKPROP. No blind retry, no commit, status stays `.`.
 
 ## FAIL → BACKPROP
 
-On test/build failure:
-
 1. Read failure output.
-2. Classify failure: (a) code bug → step 3, (b) spec wrong → step 4, (c) unspec edge → step 4. Confident → proceed direct. Low-confidence (ambiguous or multiple plausible) → AskUserQuestion per decision-gate invariant w/ 3 options keyed (a)/(b)/(c), labels is action descriptions ("Code bug — fix and re-run", "Spec wrong — /sdd:spec bug:", "Unspec edge — /sdd:spec bug:"), header `Verify-fail class`.
-3. (a) → fix code, re-run. No spec change.
-4. (b) or (c) → invoke spec skill with `bug: <cause>` first, let it update §V and §B, then resume build against updated spec.
+2. Classify: (a) code bug, (b) spec wrong, (c) unspec edge. Confident → proceed direct. Low-confidence (ambiguous or multiple plausible) → AskUserQuestion per decision-gate invariant, header `Verify-fail class`, 3 action-labels keyed (a)/(b)/(c): "Code bug — fix and re-run" / "Spec wrong — /sdd:spec bug:" / "Unspec edge — /sdd:spec bug:".
+3. (a) → fix code, retry. No spec change.
+4. (b)/(c) → run spec skill w/ `bug: <cause>` first; it patches §V + §B; resume build vs updated spec.
 
-Rule: never silently fix root-cause without considering backprop. §B records bug-class precedent so recurrence-class blocked.
+Rule: never silently fix root-cause w/o considering backprop — §B records bug-class precedent so recurrence-class blocked.
 
 ## WRITE POLICY
 
-- Only flip §T status. No other SPEC.md edits from build.
-- Other spec edits → invoke spec skill.
-- Auto-commit on `.` → `x` per §T row; not user prompt. Message: `T<n>: <goal line>` + §V cites.
-- Stage explicit `git add <listed-paths>` per plan; not `git add -A` — pre-existing dirty working-tree state not bundled.
-- `/sdd:build --all` chains plan-once → every §T row {edit → verify → commit} autonomously.
-- FAIL → not commit; FAIL→BACKPROP runs first.
+Build flips §T status cells only. Every other SPEC.md edit → spec skill.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. PLAN not wait-state so not execute/revise/abort items; EXECUTE-pass auto-commits so Next leads w/ `/sdd:check` post-§T-close cascade; after backlog cleared, swap `/sdd:build --next` for `/sdd:spec` seed.
-
-Canonical example after EXECUTE pass (commit already auto-fired):
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. PLAN not wait-state → no execute/revise/abort items. Pass auto-commits → `/sdd:check` leads (cascade scan over just-closed §T row; not silent close):
 
 ```
 ## Next
@@ -77,9 +65,9 @@ Canonical example after EXECUTE pass (commit already auto-fired):
 3. /sdd:spec amend §T.<n> — re-scope before continuing
 ```
 
-Variant: backlog cleared (terminal state) → swap item 2 for `/sdd:spec` (seed new row), drop item 3.
+Backlog cleared (terminal state) → swap item 2 for `/sdd:spec` (seed new row), drop item 3.
 
 ## NON-GOALS
 
-- No progress dashboards. `cat SPEC.md | grep §T` is the dashboard.
+- No progress dashboards — `grep §T SPEC.md` is the dashboard.
 - No speculative work beyond chosen task scope.
