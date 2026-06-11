@@ -7,7 +7,7 @@ description: |
   spec, or verify invariants. Phrasings: "check drift", "audit the spec",
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
-allowed-tools: Read, Grep, Glob, Bash(git *), Bash(python3 *), Skill
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(python3 *), Agent, Skill
 model: sonnet
 ---
 

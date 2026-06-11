@@ -5,13 +5,13 @@ description: |
   clarity-shape pass — distinct from /sdd:compact (token reduction).
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Skill
-model: opus
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Bash(jq *), Bash(python3 *), Agent, Skill
+model: fable
 ---
 
 # reorganize — §V cluster + renumber + cite-DAG sweep
 
-Operator-triggered clarity-shape pass over SPEC.md §V. Cadence ≤ once per major epoch (months) — skill body documents intent, not /sdd:check-enforced. Single atomic commit, rollback via `git revert`.
+Operator-triggered clarity-shape pass over SPEC.md §V. Cadence ≤ once per major epoch (months) — skill body documents intent, not /sdd:check - enforced. Single atomic commit, rollback via `git revert`.
 
 ## PREAMBLE
 

@@ -5,7 +5,7 @@ description: |
   Triggers when user invokes `/sdd:compact` or asks to compact spec or /sdd:check
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:compact",
   "compact SPEC.md", "SPEC too big", "shrink the spec", "token budget".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 *), Agent, Skill
 model: sonnet
 ---
 
