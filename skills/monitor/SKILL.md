@@ -33,8 +33,8 @@ Not: consumer-repo code bugs, env breakage unrelated to an sdd skill, operator t
 3. **ROUTE** — cwd == plugin repo? `git remote get-url origin` resolves to manifest `.repository` → dev repo → hand off to backprop (backprop-protocol invariant): §B row, no issue filed. Stop. Else consumer repo → continue.
 4. **TARGET** — issue repo ← `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` `.repository`, parsed to `owner/repo` (jq). No hardcoded slug in this body (parametric-recipe invariant — the plugin-internal file owns the slug).
 5. **DEDUP** — `gh issue list --repo <target> --search "<skill> <keywords>"`. Hit → comment path. Miss → new-issue path.
-6. **GATE** — AskUserQuestion before any gh write (decision-gate invariant). Header `Skill deviation`, mutually-exclusive labels: `File issue` (miss), `Comment` (hit), `Skip`. No auto-file path exists.
-7. **WRITE** —
+6. **GATE** — AskUserQuestion before any gh write (decision-gate invariant). Header `Skill deviation`, question body surfaces the resolved `--repo <target>` verbatim (operator confirms exact write destination before any publish); mutually-exclusive labels: `File issue` (miss), `Comment` (hit), `Skip`. No auto-file path exists.
+7. **WRITE** — immediately pre-write assert resolved `--repo` == `<target>` (= manifest `.repository`, step 4); mismatch → abort, no gh write (monitor-protocol invariant). `<target>` ! derive from `.repository` only — a repo named in the deviation excerpt is never sourced as `--repo` (redaction strips it; this assertion backstops a leak). Then per gate selection:
    - miss + File issue → `gh issue create --repo <target> --title "<skill>: <deviation summary>" --body <steno>` (github-facing-register → steno per steno skill).
    - hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per deviation class).
    - Skip → nothing written.
