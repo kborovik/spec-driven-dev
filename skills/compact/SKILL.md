@@ -5,13 +5,17 @@ description: |
   Triggers when user invokes `/sdd:compact` or asks to compact spec or /sdd:check
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:compact",
   "compact SPEC.md", "SPEC too big", "shrink the spec", "token budget".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 *), Agent, Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
 # compact — SPEC.md compactor
 
 Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.claude/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 25k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
+
+## PROGRESS
+
+Multi-phase run per response-shape invariant → emit live harness checklist. Phases: LOAD, PROPOSE (six-prong scan), CONFIRM, EXECUTE. TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit. CONFIRM cancel / subset-skip → unreached phases `deleted`, not `completed`. Checklist = ephemeral harness UI: never repo state, never substitutes the `## Next` block.
 
 ## LOAD
 

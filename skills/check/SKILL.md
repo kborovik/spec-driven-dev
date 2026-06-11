@@ -7,13 +7,17 @@ description: |
   spec, or verify invariants. Phrasings: "check drift", "audit the spec",
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
-allowed-tools: Read, Grep, Glob, Bash(git *), Bash(python3 *), Agent, Skill
+allowed-tools: Read, Grep, Glob, Bash(git *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
 # check — drift report
 
 Pure diagnostic. Reports violations; writes nothing to SPEC or code; user decides remedy. Only sibling state: memo + `.gitignore` guard in REPO-LOCAL `.claude/` (cache, not source of truth — code + SPEC.md are truth). Mechanical audits owned by published script per mechanical-realization invariant — never re-derive its greps per run. Behavioral judgment stays LLM. Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.claude/scripts/check-extras.sh` hook (mechanical, run by script) + `.claude/check-extras.md` (judgment-class, consulted by LLM). Read-only → sub-agent delegation safe throughout.
+
+## PROGRESS
+
+Multi-phase run per response-shape invariant → emit live harness checklist. Phases: LOAD, audit (mechanical core), §V classify, §I + cite-DAG, §T, REPORT + WRITE-MEMO. TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit. `--full` adds no phase (same recipe, memo dropped). Checklist = ephemeral harness UI: never repo state, never the memo, never substitutes REPORT or the `## Next` block.
 
 ## LOAD
 

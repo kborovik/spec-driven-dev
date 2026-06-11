@@ -5,7 +5,7 @@ description: |
   clarity-shape pass — distinct from /sdd:compact (token reduction).
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Bash(jq *), Bash(python3 *), Agent, Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
 model: fable
 ---
 
@@ -18,6 +18,10 @@ Operator-triggered clarity-shape pass over SPEC.md §V. Cadence ≤ once per maj
 State-mutator scoped to SPEC.md + `.claude/spec-clusters.json` + `.claude/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists). Operator invokes only per recipe-step-no-dispatch rule. Owns §V renumber permission carved out of monotonic-id invariant.
 
 Distinct from /sdd:compact: compact = token reduction (folds, archives, trims); reorganize = clarity shape (cluster + renumber) — not token drop, not row folds. Writes serialize main-thread per write-serialize invariant; classification reads delegable to sub-agents. Single commit per atomic-operation discipline, not partial application; cite-DAG sweep per cite-resolution invariant rides same commit.
+
+## PROGRESS
+
+Multi-phase run per response-shape invariant → emit live harness checklist. Phases: LOAD, ARCHIVE-RETIRED, CLUSTER, PROPOSE, CONFIRM, EXECUTE. TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit. `--taxonomy-only` exit / CONFIRM cancel / subset re-loop → unreached phases `deleted`, not `completed`. Checklist = ephemeral harness UI: never repo state, never substitutes the PROPOSE render or the `## Next` block.
 
 ## LOAD
 

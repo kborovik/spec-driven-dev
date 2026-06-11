@@ -5,7 +5,7 @@ description: |
   implement, or execute spec or specific §T task. Phrasings: "build §T.<n>",
   "build --next", "implement next task", "run the build", "does the
   implementation run?", "is §T.<n> done?".
-allowed-tools: Read, Edit, Write, Bash, Skill
+allowed-tools: Read, Edit, Write, Bash, Skill, TaskCreate, TaskUpdate
 model: opus
 ---
 
@@ -29,6 +29,10 @@ Emit plan inline, per chosen task(s) — never enter plan mode (a wait-state bre
 5. Name verification cmd (test, build, lint).
 
 Emit plan inline every task (transparency, not wait-state) → EXECUTE.
+
+## PROGRESS
+
+`--all` autonomous chain = multi-phase run per response-shape invariant → emit live harness checklist (single `§T.n` / `--next` = one row, no checklist). TaskCreate one task per chosen `.` §T row @ plan start, subject `T<n>: <goal line>`. TaskUpdate `in_progress` @ that row's {edit → verify → commit} entry → `completed` @ its auto-commit. FAIL → BACKPROP (status stays `.`) → task stays `in_progress`, never `completed`. Checklist = ephemeral harness UI: never repo state (§T cells stay the dashboard per NON-GOALS), never substitutes the `## Next` block.
 
 ## EXECUTE
 
