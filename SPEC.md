@@ -74,6 +74,7 @@ V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.jso
 id|status|task|cites
 T1|x|add CI: script --self-test + audit dirty-verdict gate on push/PR|V40,V62
 T2|x|bump plugin version 1.1.0 + sync manifest description post-consistency-pass|-
+T3|.|create REPO-LOCAL `.claude/skills/release/SKILL.md`: gh release flow — bump `.claude-plugin/plugin.json` version + commit, tag `v<version>`, `gh release create` w/ generated notes|V24,V41,V42
 
 ## §B BUGS
 
