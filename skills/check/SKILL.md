@@ -97,8 +97,8 @@ Script never classifies behavior — §V claim → verifiable-code-claim transla
 3. Touch set empty → `V<n> SCOPE-EMPTY: <reason>`, evidence `scope-touch overlap empty`, skip grep. Silence differs verified-absence.
 4. Row clean since `last_clean_sha` + scope untouched → `V<n> HOLD-SINCE-CLEAN`, evidence `HOLD-since-clean @ <last_clean_sha>`, skip grep.
 5. Else grep/read relevant files; verdict in {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE, SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT} per drift-verdict-vocab invariant.
-   - Actionable {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE} → REPORT body row (HOLD silent) + distinct remedy hint.
-   - Silence {SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT} → no body row, no hint; collapse to summary `suppressed` count w/ per-reason breakdown. Verdicts still recorded in memo (`last_v_classifications`).
+   - Surfaced {VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE} → REPORT body row + distinct remedy hint.
+   - Silence {HOLD, HOLD-SINCE-CLEAN, SCOPE-EMPTY, LATENT} → no body row, no hint; collapse to summary `suppressed` count w/ per-reason breakdown. Verdicts still recorded in memo (`last_v_classifications`).
    - VIOLATE-CAPTURED = live violation, `§B`-recorded, remediation forward-only (e.g. historical commit body) → emit `<row-id> VIOLATE-CAPTURED: <evidence>; see §B.<n>`; classify on `§B` cite presence (e.g. captured-sha list in REPO-LOCAL extension).
    - LATENT = trigger condition structurally absent from repo state → audit no-op until condition fires. Differs UNVERIFIABLE (missing audit infrastructure for an otherwise-verifiable claim).
 6. Record file:line evidence.
@@ -200,7 +200,7 @@ T<n> STALE: status `x`, no middleware file exists.
 2 violate. 1 violate-captured. 1 missing. 1 stale. 1 unverifiable. 1 unresolved. 1 type-mismatch. 5 suppressed (1 scope-empty, 2 hold-since-clean, 2 latent).
 ```
 
-Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown. Rows roll forward run-to-run; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
+Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown. Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
 
 **Body-row aggregation** (mechanical core): `history`-class VIOLATE rows collapse per section (§V/§T/§B) when section count > threshold (script-owned) → single summary row `§<S>: <n> rows (<count> <pattern>, ...) → /sdd:compact body-trim` w/ breakdown across {amendment-counter, dated-retirement, supersession-narration}; below-threshold sections keep per-row form. `--full` restores per-row listing.
 
