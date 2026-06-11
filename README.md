@@ -240,8 +240,9 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 ```bash
 /sdd:spec webhook handler retried POSTs after 5xx, double-charged 11 customers
-# backprop appends §B, adds §V invariant "POST handler ! idempotent on retry",
-# writes a failing test, then commits the fix
+# gate routes to BACKPROP: appends §B, adds §V "POST handler ! idempotent on retry",
+# adds a §T fix task, commits SPEC.md
+/sdd:build --next              # failing test first, then the fix; commit cites the new §B/§V
 /sdd:check                     # confirm new §V is now upheld
 ```
 
@@ -279,8 +280,8 @@ Backprop is the one non-obvious thing SDD does that vanilla plan-then-execute do
 2. **Trace** — find the cause: code bug, spec wrong, or unspecified edge case.
 3. **Append §B** — add a row: `id|date|cause|fix`. Telegraph-encoded.
 4. **Decide on §V** — would an invariant have caught the _class_ of this bug? If yes, add or tighten one. Cite it from the new §B row.
-5. **Write the failing test first** — watch it fail, then ship the fix. The test stays as a permanent guard.
-6. **One commit** — spec edit + test + fix together. PR description points at the new §B and §V.
+5. **Write the failing test first** — in the `/sdd:build` resume: watch it fail, then ship the fix. The test stays as a permanent guard.
+6. **Two commits, cross-cited** — the spec commit lands first (§B + §V, via `/sdd:spec`); the code commit (test + fix) follows via `/sdd:build` and cites them. The record survives even when the fix is deferred.
 
 Triggers:
 

@@ -43,9 +43,9 @@ Per task in order:
 ## FAIL → BACKPROP
 
 1. Read failure output.
-2. Classify: (a) code bug, (b) spec wrong, (c) unspec edge. Confident → proceed direct. Low-confidence (ambiguous or multiple plausible) → AskUserQuestion per decision-gate invariant, header `Verify-fail class`, 3 action-labels keyed (a)/(b)/(c): "Code bug — fix and re-run" / "Spec wrong — /sdd:spec bug:" / "Unspec edge — /sdd:spec bug:".
+2. Classify: (a) code bug, (b) spec wrong, (c) unspec edge. Confident → proceed direct. Low-confidence (ambiguous or multiple plausible) → AskUserQuestion per decision-gate invariant, header `Verify-fail class`, 3 action-labels keyed (a)/(b)/(c): "Code bug — fix and re-run" / "Spec wrong — route cause to /sdd:spec" / "Unspec edge — route cause to /sdd:spec".
 3. (a) → fix code, retry. No spec change.
-4. (b)/(c) → run spec skill w/ `bug: <cause>` first; it patches §V + §B; resume build vs updated spec.
+4. (b)/(c) → run spec skill w/ the cause as free-form intent (gate routes to BACKPROP); it records §B (+ §V) and commits SPEC.md. Resume build vs updated spec per backprop HANDOFF: failing test first, then fix; commit cites the new §B/§V.
 
 Rule: never silently fix root-cause w/o considering backprop — §B records bug-class precedent so recurrence-class blocked.
 
