@@ -1,0 +1,307 @@
+<h1 align="center">pilot-spec</h1>
+
+<p align="center">
+  <strong>compressed spec-driven development for Claude Code</strong><br/>
+  <sub>one file · five commands · main-thread writes</sub><br/>
+  <sub><em>installed as the <code>sdd</code> plugin · slash commands <code>/sdd:*</code></em></sub>
+</p>
+
+---
+
+## What this is
+
+**Code consistency is the casualty of LLM agent velocity.** LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. `pilot-spec` keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
+
+The mechanics:
+
+- **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
+- **Math-glyph encoding cuts tokens ~30%** vs Claude prose for the same content (per-row mean, n=30, measured — see [`benchmarks/glyph/README.md`](../benchmarks/glyph/README.md)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); heavy multi-token math operators are retired to ASCII words. Distinct from `steno` (the human-facing shorthand in `core`).
+- **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
+- **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
+- **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
+
+> The spec is the only artifact that earns its tokens. Everything else must save more tokens later, save the agent's context, or get cut.
+
+### SPEC.md is for the LLM, not you
+
+`SPEC.md` is an LLM-facing artifact. You operate it through Claude — `/sdd:spec` writes, `/sdd:build` and `/sdd:check` read, `/sdd:explain` decodes a citation back to prose when you want to read along. The loop is `human → /sdd:* → Claude → SPEC.md`, not hand-editing in your editor.
+
+That framing is load-bearing. Math glyphs over English, fragments over sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
+
+## Install
+
+```bash
+/plugin marketplace add kborovik/pilot-skills
+/plugin install sdd@pilot-skills
+```
+
+Then in any repo:
+
+```bash
+/sdd:spec   # creates SPEC.md if missing
+```
+
+## The mental model
+
+```
+   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐
+   │/sdd:design │──►│ /sdd:spec  │──►│ /sdd:build │──►│ /sdd:check │
+   │  propose   │   │  mutator   │   │ plan→exec  │   │ read-only  │
+   └────────────┘   └─────▲──────┘   └─────┬──────┘   └─────┬──────┘
+                          │                │                │
+                          │                ▼ on failure     │ on drift
+                          │          ┌────────────┐         │
+                          │          │  backprop  │         │
+                          │          │ §B (+ §V)  │         │
+                          │          └─────┬──────┘         │
+                          │                │                │
+                          └────────────────┴────────────────┘
+                                     amend SPEC.md
+```
+
+- **One spec file.** `SPEC.md`. No `docs/` tree, no JSON sidecars.
+- **One writer.** `/sdd:spec`. (`/sdd:build` may flip a `.` → `x`; nothing else writes.)
+- **Read-only commands write nothing.** `/sdd:check` (drift report) and `/sdd:explain` (decompression).
+
+## SPEC.md format
+
+Six fixed sections, fixed order. Each row is addressable as `§<S>.<n>`.
+
+```markdown
+# SPEC
+
+## §G GOAL
+
+one line. what code must do.
+
+## §C CONSTRAINTS
+
+- non-negotiable boundary
+- tech / language / library locked in
+
+## §I INTERFACES
+
+external surface — what the world sees.
+
+- cmd: `foo bar` → stdout JSON
+- api: POST /x → 200 {id}
+- file: `config.yaml` schema …
+- env: `FOO_KEY` required
+
+## §V INVARIANTS
+
+numbered. testable. each ! MUST hold.
+V<n>: every req → auth check before handler
+V<n>: token expiry ≤ current_time → reject
+V<n>: DB write ! in transaction
+
+## §T TASKS
+
+id|status|task|cites
+T<n>|.|scaffold repo|-
+T<n>|.|impl §I.api POST /x|V<n>
+T<n>|x|add §V.<n> middleware|V<n>,I.api
+
+## §B BUGS
+
+id|date|cause|fix
+B<n>|2026-04-20|token `<` not `≤`|V<n>
+B<n>|2026-04-21|race on write|V<n>
+```
+
+**Status glyphs:** `.` todo · `x` done.
+**Cell rules:** literal `|` → `\|`. Empty cell = `-`. Backticks OK.
+
+## Commands
+
+### `/sdd:design` — propose-then-critique
+
+Use when there's a structural choice to weigh — tradeoffs, named alternatives, subsystem shape. The model proposes a shape, you critique, the loop converges only when `## Open Questions` is empty. Persists to `designs/<slug>.md`. `/sdd:spec` later folds the converged design into `§V` / `§T` rows and deletes the draft.
+
+```bash
+/sdd:design how should the release pipeline split monorepo plugins?
+```
+
+Distinct from `/sdd:spec`'s socratic gate: socratic converges on **enough** (sharpen vague intent); design converges on **exhausted** (every structural question has a decision).
+
+### `/sdd:spec` — mutate the spec
+
+The sole mutator. The argument is **free-form intent** — the socratic gate (`core:socratic`) reads what you wrote and picks a mode. You don't pick the mode yourself.
+
+| project state    | possible modes                                                       | gate behavior                                                                                                              |
+| ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| no `SPEC.md`     | **NEW** or **DISTILL**                                                | concrete intent passes ≤ 1 turn; vague intent triggers single-question dialogue to convergence                             |
+| `SPEC.md` exists | **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init) | mode emerges from convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND       |
+
+Examples (all free-form — the gate classifies):
+
+```bash
+/sdd:spec a CLI that ingests JSON over stdin and emits Parquet
+/sdd:spec build the spec from this codebase
+/sdd:spec V<n>'s `≤` should be `<` for unsigned tokens
+/sdd:spec rate-limiter dropped requests under 100rps
+```
+
+### `/sdd:build` — plan, then execute
+
+Plan → execute → verify loop. EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
+
+| arg form | scope                                      |
+| -------- | ------------------------------------------ |
+| `§T.n`   | implement that one task                    |
+| `--next` | lowest-numbered row with status `.`        |
+| `--all`  | every `.` row in §T order                  |
+| (empty)  | same as `--next`                           |
+
+Loop per task:
+
+1. **PLAN** — cite every §V / §I the task touches, then proceed to EDIT. The plan is emitted inline for transparency, not a wait-state. Gaps are annotated so you can route them back to `/sdd:spec` post-hoc; the build never invents rules.
+2. **EDIT** — make the change, run tests / build.
+3. **VERIFY** — on failure, classify: (a) code bug → fix and re-run; (b) spec wrong or unspecified edge case → invoke `backprop` (via `/sdd:spec <cause>`), let it append `§B` and usually a new `§V`, resume against the updated spec.
+4. **CLOSE** — flip `.` → `x` only when verification is green.
+
+**Ambiguity is a spec defect, not a coding judgement.** `/sdd:build` never silently retries and never edits `SPEC.md` beyond flipping a status cell — every rule-shaped question routes back to `/sdd:spec`.
+
+### `/sdd:check` — drift report
+
+Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §V + §I + §T together.
+
+| arg      | what it does                                                                       |
+| -------- | ---------------------------------------------------------------------------------- |
+| (empty)  | memo-driven sweep — re-audits §V rows touched since last clean run; rest HOLD-SINCE-CLEAN |
+| `--full` | force full re-classify — deletes `.claude/check-state.json` upfront, rebuilds memo  |
+
+Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
+
+### `/sdd:explain` — math-glyph → prose
+
+The inverse of `glyph`. Given any citation, returns plain English with cited context.
+
+```bash
+/sdd:explain §V.<n>    # expand a specific invariant
+/sdd:explain §T.<n>    # expand a task + every §V/§I it cites
+/sdd:explain §B.<n>    # expand a bug + the invariant that catches recurrence
+/sdd:explain --next    # expand the next unfinished task
+```
+
+Useful for code review, onboarding, or when you'd otherwise have to translate `every req → auth check before handler` in your head.
+
+## Skills
+
+Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
+
+| skill      | role                                                    |
+| ---------- | ------------------------------------------------------- |
+| `design`   | propose-then-critique → `designs/<slug>.md`             |
+| `spec`     | sole mutator                                            |
+| `build`    | plan → execute loop                                     |
+| `check`    | drift report                                            |
+| `glyph`    | math-glyph encoder (~30% reduction vs prose)            |
+| `backprop` | bug → spec protocol; fires on every failed verification |
+
+You don't usually invoke skills directly — Claude picks them up from the command flow. The exception is `backprop`, which fires automatically on test/build failure inside `/sdd:build`.
+
+## Workflows
+
+### Greenfield — new project
+
+```bash
+/sdd:design how should we shape the parser / renderer split?   # optional — only if structural Qs
+/sdd:spec build a static-site generator that converts a Markdown directory into a single-page HTML bundle
+# review §G/§C/§I/§V in SPEC.md, amend if needed
+/sdd:build --next   # plan, implement, verify T<n> (scaffold)
+/sdd:build --next   # T<n> (renderer)
+/sdd:check          # before opening a PR
+```
+
+### Brownfield — existing repo
+
+```bash
+/sdd:spec build the spec from this codebase   # gate routes to DISTILL
+/sdd:check                     # see what already drifts from the distilled spec
+/sdd:spec V<n>'s bound is too loose for the rate-limiter   # gate routes to AMEND
+/sdd:build §T.<n>              # tackle a specific task
+```
+
+### A bug just hit production
+
+```bash
+/sdd:spec webhook handler retried POSTs after 5xx, double-charged 11 customers
+# backprop appends §B, adds §V invariant "POST handler ! idempotent on retry",
+# writes a failing test, then commits the fix
+/sdd:check                     # confirm new §V is now upheld
+```
+
+### Pre-merge sanity
+
+```bash
+/sdd:check
+/sdd:explain §V.<n>            # if a violation is unclear, decompress it
+```
+
+## Math-glyph encoding
+
+`glyph` writes terse grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Heavy multi-token math operators (`∀ ∃ ∴ ⊥ ∈ ∉ ∧ ∨ ≡ ¬ ≠`) are retired to ASCII words: each costs 2–4 tokens vs a 1-token word, so a symbol stays only where it reads clearer than the word.
+
+Result: every spec write lands at roughly a quarter of its prose length while staying machine- and human-readable. `steno` (in `core`, invoked from `gh` commands) handles GitHub-facing text and deliberately omits math-glyphs so reviewers don't slow down.
+
+Rules:
+
+- Drop articles (a/an/the). Drop filler. Drop aux verbs where a fragment works.
+- Short synonyms (`fix` over `implement`).
+- **Preserve verbatim:** code, paths, identifiers, URLs, numbers, error strings, SQL, regex.
+
+Full symbol table: `skills/glyph/SKILL.md` SYMBOLS section.
+
+**Example.** Prose: "The authentication middleware must verify the token expiry on every request before allowing the handler to execute."
+Math-glyph: `V<n>: every req → auth check before handler`
+
+If math-glyphs slow you down on review, `/sdd:explain §V.<n>` decompresses on demand.
+
+## Backprop in detail
+
+Backprop is the one non-obvious thing SDD does that vanilla plan-then-execute doesn't. Six steps:
+
+1. **Capture** — record the failing case verbatim (test name, error, stack, repro).
+2. **Trace** — find the cause: code bug, spec wrong, or unspecified edge case.
+3. **Append §B** — add a row: `id|date|cause|fix`. Math-glyph-encoded.
+4. **Decide on §V** — would an invariant have caught the _class_ of this bug? If yes, add or tighten one. Cite it from the new §B row.
+5. **Write the failing test first** — watch it fail, then ship the fix. The test stays as a permanent guard.
+6. **One commit** — spec edit + test + fix together. PR description points at the new §B and §V.
+
+Triggers:
+
+- Test/build fails inside `/sdd:build` verification.
+- `/sdd:check` reports a `VIOLATE` whose root cause is identified.
+- User: `/sdd:spec <description>` — post-mortems, prod incidents, user reports; gate routes to BACKPROP on bug-class intent.
+
+## FAQ
+
+**Why Markdown, not YAML / JSON?** Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting. JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
+
+**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. If `SPEC.md` exceeds 500 lines, compact §B (drop oldest bugs) before splitting.
+
+**Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
+
+**Can I skip math-glyph encoding and write prose specs?** Yes, but the next time the spec is loaded into context you'll pay 4× the tokens for the same content. Optional in syntax, expensive in practice.
+
+## Files
+
+```
+skills/design/             /sdd:design — propose-then-critique design loop → designs/<slug>.md
+skills/explore/            /sdd:explore — optional pre-design layer x frame divergence → designs/<slug>-explore.md
+skills/spec/               /sdd:spec — sole SPEC.md mutator
+skills/build/              /sdd:build — plan-execute loop
+skills/check/              /sdd:check — read-only drift report
+skills/explain/            /sdd:explain — glyph → prose decoder
+skills/compact/            /sdd:compact — token-budget compaction sweep
+skills/reorganize/         /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
+skills/glyph/              auto-fire math-glyph encoder for SPEC-adjacent writes
+skills/backprop/           auto-fire bug → spec protocol on /sdd:build verify-fail
+```
+
+## Attribution & license
+
+`pilot-spec` is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed). For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
+
+MIT. See repo-root [`LICENSE`](../LICENSE).
