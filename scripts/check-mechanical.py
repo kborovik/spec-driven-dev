@@ -22,11 +22,13 @@ Modes:
                 `memo|ADVISORY|… : <ids>` row carry stable comma-joined fields
                 (no surrounding prose) so the drift-detector chains them straight
                 into `emit-v-slices --dirty` without hand-rolling `git diff`.
-  write-memo  — read a merged verdict table (mechanical + LLM-judged rows) on
-                stdin, validate the verdict vocab, compute clean-set membership
-                itself, and write the run memo (schema v3, per-row §V hashes,
-                oversized-cell ack) plus the `.gitignore` guard — only when the
-                run is clean. The model never decides "clean".
+  write-memo  — read the behavioral verdict table (§V/§I/§T classifications) on
+                stdin; with --from-audit, re-run the mechanical audit internally
+                and merge it (stdin = behavioral rows only, hand-merge banned).
+                Validate the verdict vocab per row type, compute clean-set
+                membership itself, and write the run memo (schema v3, per-row §V
+                hashes, oversized-cell ack) plus the `.gitignore` guard — only
+                when the run is clean. The model never decides "clean".
   emit-v-slices — read SPEC.md, print every §V row body with its source line
                 range (`## V<n> SPEC.md:<start>-<end>` header + verbatim row
                 text). Optional `--dirty V<n>,...` restricts to named rows
@@ -1189,7 +1191,16 @@ def ensure_gitignore_guard(repo_root):
 
 
 def cmd_write_memo(args):
-    rows = parse_table(sys.stdin.read())
+    behavioral = parse_table(sys.stdin.read())
+    if args.from_audit:
+        # script owns both ends (memo invariant): re-run the mechanical audit
+        # internally + merge it with the behavioral rows, so stdin carries
+        # behavioral verdicts only and hand-merging the audit table is banned.
+        mechanical = run_audit(args.repo_root, args.spec,
+                               run_hook=not args.no_hook, full=args.full)
+        rows = mechanical + behavioral
+    else:
+        rows = behavioral
     bad = validate_vocab(rows)
     if bad:
         sys.stderr.write("write-memo: invalid verdicts: " + "; ".join(bad) + "\n")
@@ -1580,6 +1591,14 @@ def selftest():
     check(validate_vocab([("I.api", "", "")]) == [], "vocab skips blank skeleton verdict")
     check(compute_clean([("I.api", "MATCH", "")])[0] is True, "clean-set: MATCH is clean")
     check(compute_clean([("I.api", "DRIFT", "")])[0] is False, "clean-set: DRIFT is dirty")
+    # write-memo --from-audit merge (memo invariant): the mechanical audit unions
+    # the behavioral rows, so a dirty mechanical finding flips an otherwise-clean
+    # behavioral set — the script owns the clean decision, no hand-merge.
+    behav_clean = [(f"V{1}", "HOLD", ""), ("I.api", "MATCH", "")]
+    mech_dirty = [("format", "VIOLATE", "format: bad")]
+    check(compute_clean(behav_clean)[0] is True, "from-audit: behavioral set alone clean")
+    check(compute_clean(mech_dirty + behav_clean)[0] is False,
+          "from-audit: mechanical VIOLATE flips merged set dirty")
 
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
@@ -1590,7 +1609,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 101
+    return 103
 
 
 # --- entry -------------------------------------------------------------------
@@ -1615,6 +1634,10 @@ def main(argv=None):
     parser.add_argument("--dirty", default="",
                         help="emit-v-slices: comma-list of V<n> to restrict to "
                              "(default is all rows)")
+    parser.add_argument("--from-audit", action="store_true",
+                        help="write-memo: re-run the mechanical audit internally "
+                             "and merge it with the behavioral verdicts on stdin "
+                             "(stdin = behavioral rows only; hand-merge banned)")
     args = parser.parse_args(argv)
     args.repo_root = os.path.abspath(args.repo_root)
     if args.mode == "audit":

@@ -243,13 +243,13 @@ Source the live id-set skeleton from the script — never hand-enumerate (closes
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-row-ids
 ```
 
-Emits one blank-verdict row per live §V/§I/§T id (`id||`, header `id|verdict|evidence`). Fill verdicts + evidence from REPORT classification; merge w/ the script's mechanical rows from `audit`; feed merged table to stdin:
+Emits one blank-verdict row per live §V/§I/§T id (`id||`, header `id|verdict|evidence`). Fill verdicts + evidence from REPORT classification — behavioral rows only (§V/§I/§T); never hand-merge the `audit` mechanical rows (memo invariant). Feed the filled skeleton to stdin; `--from-audit` re-runs the mechanical audit internally + merges it:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py write-memo < <merged-table>
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py write-memo --from-audit < <filled-skeleton>
 ```
 
-Script validates vocab, computes clean-set membership (clean iff no VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA), writes memo only when clean (schema v3, per-row hashes, `last_clean_sha` = HEAD, oversized-cell ack, `.gitignore` guard). Dirty run → no write, offenders on stderr. `## checkpoint` line reflects the outcome.
+Script merges its internal mechanical audit w/ the behavioral rows, validates vocab per row type, computes clean-set membership (clean iff no VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA), writes memo only when clean (schema v3, per-row hashes, `last_clean_sha` = HEAD, oversized-cell ack, `.gitignore` guard). Dirty run → no write, offenders on stderr. `## checkpoint` line reflects the outcome.
 
 ## REMEDY HINTS
 
