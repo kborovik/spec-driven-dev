@@ -250,21 +250,21 @@ Script validates vocab, computes clean-set membership (clean iff no VIOLATE / UN
 
 Populate the Next block (not a separate section) — map drift classes → candidate items, surface most acute:
 
-- VIOLATE / DRIFT → `/sdd:spec bug: <description citing V.n>`.
+- VIOLATE / DRIFT → `/sdd:spec <description citing §V.<n>>` (gate routes to BACKPROP).
 - VIOLATE-CAPTURED → no action; baseline `§B`-recorded, remediation forward-only.
 - `history:` VIOLATE → `/sdd:spec amend §<S>.<n>` to prune inlined history; task-row residue → `/sdd:compact` body-trim.
 - `format:` VIOLATE → `/sdd:spec amend §<S>.<n>` (or `/sdd:compact` when archive-marker / window split).
 - SUPPRESSED → no action; rolls forward until trigger fires / touch intersects / scope expands.
 - MISSING → `/sdd:build <task-cite>` if task exists; else `/sdd:spec amend task` to add row.
 - STALE → `/sdd:spec amend <task-cite>` to uncheck status.
-- EXTRA → invariant mandates the surface → `/sdd:spec amend interfaces` (cause known); invariant silent → `/sdd:spec bug: <surface> not in interfaces section` (cause TBD, `§B` row starts conversation).
+- EXTRA → invariant mandates the surface → `/sdd:spec amend interfaces` (cause known); invariant silent → `/sdd:spec <surface> missing from interfaces section` (cause TBD, `§B` row starts conversation).
 - UNRESOLVED / TYPE-MISMATCH → `/sdd:spec amend §<S>.<n>` to repair stale or wrong-section cite.
 
 Never invoke fixes. Report only.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (severity order VIOLATE > DRIFT > MISSING > STALE > EXTRA; `bug:` vs `amend` choice). Items are slash-cmd follow-ups; before `/sdd:build --next` confirm ≥ 1 pending `.` task else suggest `/sdd:spec` seed.
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (severity order VIOLATE > DRIFT > MISSING > STALE > EXTRA; record-vs-amend choice). Items are slash-cmd follow-ups; before `/sdd:build --next` confirm ≥ 1 pending `.` task else suggest `/sdd:spec` seed.
 
 Example (drift found):
 
@@ -278,8 +278,8 @@ VIOLATE outranks DRIFT — record the V<n> breach via item 1 before fixing the i
 
 ## Next
 
-1. /sdd:spec bug: V<n> violation at auth/mw.go — record the drift
-2. /sdd:spec bug: I.api DRIFT at route.go — record interface drift
+1. /sdd:spec V<n> violated at auth/mw.go — record the drift
+2. /sdd:spec I.api drifted at route.go — record interface drift
 ```
 
 Variants: clean + pending `.` task → `/sdd:build --next` + `/sdd:check` later; terminal (all closed, clean) → `/sdd:spec` to seed.

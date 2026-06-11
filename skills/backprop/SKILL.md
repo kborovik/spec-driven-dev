@@ -42,7 +42,7 @@ Protocol output = drafted delta. Writes split per write-ownership (spec = sole S
 
 ## WORKED EXAMPLE
 
-Input: `bug: refund job double-charged customer on retry`
+Input: `refund job double-charged customer on retry`
 
 1. TRACE: payment service retried on 5xx, no idempotency key → charge reversed twice. Cause: `refund(ctx, amount)` not check prior charge state.
 2. ANALYZE: recurrence class? yes — every retry-able money-mutation in payment service exposed; future endpoints hit same trap → new §V.
