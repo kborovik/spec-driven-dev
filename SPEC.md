@@ -24,7 +24,7 @@ external surface — what operator + consuming repo see.
 - explain: `/sdd:explain [§-cite|--next]` → prose expansion w/ cited siblings, zero writes
 - compact: `/sdd:compact` → six-prong token sweep, single atomic commit
 - reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep, single atomic commit
-- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, --self-test
+- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, --self-test
 - format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, compact, reorganize
 
 ## §V INVARIANTS
@@ -68,6 +68,7 @@ V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched nativel
 V61: sub-skill-flags — auto-fire sub-skills (telegraph, backprop, socratic, steno) ! `user-invocable: false`, never `disable-model-invocation: true` (hides skill from Skill tool, breaks consumer engagement).
 V62: tooling-preference — pattern scans `rg --pcre2`; JSON parse `jq`, fallback python3; audit core single-file stdlib-only python3; skill frontmatter pre-approves exactly the tools its body prescribes.
 V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
+V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:compact, /sdd:reorganize) (closes §B.6).
 
 ## §T TASKS
 
@@ -75,6 +76,7 @@ id|status|task|cites
 T1|x|add CI: script --self-test + audit dirty-verdict gate on push/PR|V40,V62
 T2|x|bump plugin version 1.1.0 + sync manifest description post-consistency-pass|-
 T3|.|create REPO-LOCAL `.claude/skills/release/SKILL.md`: gh release flow — bump `.claude-plugin/plugin.json` version + commit, tag `v<version>`, `gh release create` w/ generated notes|V24,V41,V42
+T4|.|add script `emit-overview` mode (§G/§C/§I/§T/§B bodies + §V id list, no §V bodies); check LOAD step 1 → emit-overview i/o whole-file Read|V64,V40
 
 ## §B BUGS
 
@@ -84,3 +86,4 @@ B2|2026-06-11|marketplace root source `./` lstrip-emptied → plugin dropped fro
 B3|2026-06-11|§I id derivation hardcoded dev-repo slash-bullets → zero ids in consumer repos, colon ids uncitable|V41
 B4|2026-06-11|backprop promised one commit; spec APPLY + build committed separately → 3 docs disagreed|V27
 B5|2026-06-11|compression claim drift: measured ~30% vs legacy "quarter"/"4x" in README|-
+B6|2026-06-11|check LOAD step 1 whole-file Read + step 4 `emit-v-slices` double-loaded SPEC.md every run; large spec re-hits Read pagination cap @ step 1|V64
