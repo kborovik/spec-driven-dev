@@ -11,7 +11,7 @@ LLMs write code faster than any human can read it — and faster than the agent 
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Telegraph encoding cuts tokens ~30%** vs Claude prose for the same content. The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); Distinct from `steno` (the bundled human-facing shorthand).
+- **Telegraph encoding cuts tokens ~40%** vs Claude prose for the same content (measured per-row mean 41%, median 39%, n=30 — see [`benchmarks/telegraph/`](benchmarks/telegraph/)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); Distinct from `steno` (the bundled human-facing shorthand).
 - **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
 - **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
@@ -206,7 +206,7 @@ Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/s
 | `explain`    | telegraph → prose decoder                                         |
 | `compact`    | token-budget compaction sweep                                     |
 | `reorganize` | §V cluster + renumber + cite sweep                                |
-| `telegraph`  | telegraph encoder (~30% reduction vs prose); auto-fires on writes |
+| `telegraph`  | telegraph encoder (~40% reduction vs prose); auto-fires on writes |
 | `backprop`   | bug → spec protocol; fires on non-code-bug verification failures  |
 | `socratic`   | single-question intent gate; invoked by `/sdd:spec`               |
 | `steno`      | human-facing terse-prose register for reviewer-read text          |
@@ -256,7 +256,7 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 `telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol earns its place only where it reads clearer than the word.
 
-Result: every spec write lands ~30% leaner in tokens than the equivalent prose (the measured per-row mean) while staying machine- and human-readable. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
+Result: every spec write lands ~40% leaner in tokens than the equivalent prose while staying machine- and human-readable. The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
 Rules:
 
@@ -296,7 +296,7 @@ Triggers:
 
 **Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
 
-**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays ~1.4x the tokens for the same content (the measured ~30% cut, inverted). Optional in syntax, expensive in practice.
+**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays ~1.7x the tokens for the same content (the measured ~40% cut, inverted). Optional in syntax, expensive in practice.
 
 ## Files
 
@@ -315,6 +315,7 @@ skills/backprop/                 auto-fire bug → spec protocol on /sdd:build v
 skills/socratic/                 intent-sharpening gate invoked by /sdd:spec
 skills/steno/                    human-facing terse-prose register
 scripts/check-mechanical.py      deterministic audit core used by /sdd:check
+benchmarks/telegraph/            telegraph token-reduction benchmark — bench script + results JSON + README write-up
 SPEC-FORMAT.md                   structural format contract for every SPEC.md
 ```
 
