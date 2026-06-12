@@ -114,7 +114,7 @@ I_VOCAB = {"MATCH", "DRIFT", "MISSING", "EXTRA"}      # MATCH = §I-clean (§I r
 T_VOCAB = SILENT_CLEAN | {"STALE"}
 ADVISORY = "ADVISORY"
 
-TOKEN_BUDGET = 25000       # token-budget invariant advisory threshold
+TOKEN_BUDGET = 20000       # token-budget invariant advisory threshold
 TOKEN_RATIO = 3.4          # bytes-per-token for telegraph register (token-budget invariant)
 OVERSIZE_CELL = 300        # history-residue oversized-cell advisory (chars)
 MEMO_SCHEMA = 3            # memo schema version (memo invariant)
