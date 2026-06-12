@@ -9,7 +9,7 @@ description: |
   "write the spec for...", "new spec", "distill spec from code",
   "spec this idea", "import existing repo", "pull invariants out of code",
   "this bug keeps biting", "post-mortem on Y".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Agent, Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill
 model: fable
 ---
 
@@ -144,7 +144,7 @@ Every sweep-§T row (remediating §V-class violation) in delta ! task line decla
 
 **Sub-recipe (a) — PUBLISHED-scope ban**: grep `§[VTB]\.[0-9]+` in delta touching PUBLISHED scope (per scope-set invariant). Match → bail `pinned §-cite not allowed in PUBLISHED — use placeholder form (§V.<n>) or inline rule embedding` until rewrite. No PUBLISHED delta → no-op.
 
-**Sub-recipe (b) — SPEC.md-narrative §V resolution**: grep `§V\.[0-9]+` in delta touching SPEC.md narrative (§G/§C/§I/§V/§T/§B body). Pre-filter backtick-wrapped tokens `grep -v -E '`[^`]*§V\.[0-9]+[^`]*`'` (rg --pcre2 per tooling invariant) — historical-quote form per verbatim invariant exempt. Each surviving match resolves against current SPEC.md §V row set (parse `^V[0-9]+:` openers). Unresolved → bail `stale §V.<n> cite in delta — row absent (likely folded); backtick-wrap historical or substitute live row` until rewrite. No narrative delta → no-op.
+**Sub-recipe (b) — SPEC.md-narrative §V resolution**: grep `§V\.[0-9]+` in delta touching SPEC.md narrative (§G/§C/§I/§V/§T/§B body). Pre-filter backtick-wrapped tokens `grep -v -E '`[^`]*§V\.[0-9]+[^`]*`'` (invert scan, grep -v -E per tooling-preference invariant) — historical-quote form per verbatim invariant exempt. Each surviving match resolves against current SPEC.md §V row set (parse `^V[0-9]+:` openers). Unresolved → bail `stale §V.<n> cite in delta — row absent (likely folded); backtick-wrap historical or substitute live row` until rewrite. No narrative delta → no-op.
 
 (a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (compact prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`. Pattern-match catches what LLM prose-review missed (see §B history).
 
@@ -153,7 +153,7 @@ Every sweep-§T row (remediating §V-class violation) in delta ! task line decla
 Audits touched user-typeable `<plugin>/skills/<n>/SKILL.md` per skills-only architecture invariant. User-typeable = frontmatter lacks `disable-model-invocation: true` and `user-invocable: false` (skill dir surfaces as `/<plugin>:<n>` natively unless opted out).
 
 Each touched file in post-amend tree:
-1. `rg --pcre2 -n '^(disable-model-invocation|user-invocable):\s*' <file>` over frontmatter block.
+1. Grep `^(disable-model-invocation|user-invocable):\s*` over frontmatter block.
 2. Opt-out match → no-op for this file (auto-fire or programmatic-only, no slash-cmd surface).
 3. Else grep `## OUTPUT — "Next" block` heading in post-amend file. Match → no-op; else bail `<skill> SKILL.md lacks Next-block section per /<plugin>:<n> response-shape contract` until author adds §.
 

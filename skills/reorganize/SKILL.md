@@ -5,7 +5,7 @@ description: |
   clarity-shape pass — distinct from /sdd:compact (token reduction).
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(rg *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
 model: fable
 ---
 
@@ -40,7 +40,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 Pre-CLUSTER. §V rows w/ body opening `retired YYYY-MM-DD` → migrate to `SPEC.archive.md ## §V.retired` block per archive-sibling schema. Flagged rows skip cluster taxonomy, not consume new ids @ renumber.
 
 1. Grep `^V[0-9]+:\s+retired\s+[0-9]{4}-[0-9]{2}-[0-9]{2}\b` in §V → flagged-set.
-2. Citer-protection probe per flagged `V<n>` via cite-resolution cite-DAG: typed columns (§T.cites, §B.fix bare `V<n>`, incl. closed `x` rows) + free-text `§V.<n>` in §V/§C/§I bodies of active SPEC.md. Backtick pre-filter `` `[^`]*(§[VTB]\.[0-9]+|\b[VTB][0-9]+\b)[^`]*` `` (rg --pcre2 per tooling-preference invariant) excludes §B/§T narrative historical refs per verbatim-preservation invariant.
+2. Citer-protection probe per flagged `V<n>` via cite-resolution cite-DAG: typed columns (§T.cites, §B.fix bare `V<n>`, incl. closed `x` rows) + free-text `§V.<n>` in §V/§C/§I bodies of active SPEC.md. Backtick pre-filter `` `[^`]*(§[VTB]\.[0-9]+|\b[VTB][0-9]+\b)[^`]*` `` (builtin Grep per tooling-preference invariant) excludes §B/§T narrative historical refs per verbatim-preservation invariant.
 3. Live citer on any flagged row → bail `cannot archive §V.<n> — live citers: <list>`. Operator resolves pre-retry (fold cited content into surviving row, rewrite citer, or drop `retired` opener).
 4. No live citers → flagged-set passes to PROPOSE (`## To archive` block) and EXECUTE (archive write + renumber-map sentinel per row).
 
