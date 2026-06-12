@@ -39,6 +39,21 @@ Not: consumer-repo code bugs, env breakage unrelated to an sdd skill, operator t
    - hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per deviation class).
    - Skip → nothing written.
 
+## DISPATCHED — `mechanization-candidate` entry path
+
+Second entry path, not auto-fire (mechanize-scan invariant). Engaged from a user-invocable recipe's MECHANIZE `## Next` item — consumer plugin-target only. Carries the observed pattern + proposed script mode, not a deviation → no CAPTURE, no WHEN trigger. Skips the dev-repo backprop hand-off: mechanize-scan routes a dev-repo candidate to /sdd:spec → §T row and a consumer repo-local one to the consumer's /sdd:spec → extras row; only the consumer-plugin-target case reaches here, so no ROUTE step.
+
+Ordered, stop on bail:
+
+1. **REDACT** — strip consumer-repo paths, code, identifiers, URLs; only the observed pattern + proposed script mode survive. Mandatory pre-publish (monitor-protocol invariant) — candidate originates in a third-party repo.
+2. **TARGET** — issue repo ← `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` `.repository`, parsed to `owner/repo` (jq). Same resolve as the auto-fire path — plugin-internal file owns the slug (parametric-recipe invariant), no hardcoded slug.
+3. **DEDUP** — `gh issue list --repo <target> --search "<skill> mech candidate <keywords>"`. Hit → comment path. Miss → new-issue path. One issue per candidate class — recurrence comments, never duplicates.
+4. **GATE** — AskUserQuestion before any gh write (decision-gate invariant). Header `Mech candidate`, question body surfaces the resolved `--repo <target>` verbatim (operator confirms exact write destination before any publish); mutually-exclusive labels: `File issue` (miss), `Comment` (hit), `Skip`. No auto-file path exists.
+5. **WRITE** — immediately pre-write assert resolved `--repo` == `<target>` (= manifest `.repository`, TARGET step); mismatch → abort, no gh write (monitor-protocol invariant). `<target>` ! derive from `.repository` only — a repo named in the candidate excerpt is never sourced as `--repo` (redaction strips it; this assertion backstops a leak). Then per gate selection:
+   - miss + File issue → `gh issue create --repo <target> --title "<skill>: mech candidate — <pattern>" --body <steno>` (github-facing-register → steno per steno skill; body = observed pattern + proposed script mode).
+   - hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per candidate class).
+   - Skip → nothing written.
+
 ## REDACTION — mandatory
 
 Survives: sdd skill name + plugin version, the quoted sdd skill-body line, deviation description.
