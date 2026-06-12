@@ -122,7 +122,7 @@ Table uses named-invariant + placeholder cite form only (`per <named> invariant`
 
 **Step 3 — show-user**: render diff preview; await user OK.
 
-**Step 4 — write + commit**: on OK → write SPEC.md (telegraph) + auto-commit path-scoped `git commit -- SPEC.md` (write-ownership invariant — scopes to SPEC.md, pre-staged files never leak); no commit prompt (uniform every mode). Msg per mode:
+**Step 4 — write + commit**: on OK → write SPEC.md (telegraph) + auto-commit path-scoped `git commit -m <subject> [-m <body>] -- SPEC.md` (write-ownership invariant — scopes to SPEC.md, pre-staged files never leak); `-m` flags ! precede `--` — message tokens after `--` parse as pathspecs, commit fails; no commit prompt (uniform every mode). Msg per mode:
 
 ```
 NEW      → init SPEC.md (V<1>..V<n>, T<1>..T<m>)
