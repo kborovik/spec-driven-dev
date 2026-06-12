@@ -59,6 +59,21 @@ Mid-loop spec dispatch here is the sole exclusion from the operator-dispatch rul
 
 Build flips §T status cells only. Every other SPEC.md edit → spec skill.
 
+## MECHANIZE — script-candidate scan
+
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+
+- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
+- LLM-side join / sort / count / dedup over script-emittable data
+- multi-step parse collapsible to one script emit mode
+- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
+
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+
+- dev repo (this plugin) → /sdd:spec → new §T row
+- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
+- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+
 ## OUTPUT — "Next" block
 
 Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. PLAN not wait-state → no execute/revise/abort items. Pass auto-commits → `/sdd:check` leads (cascade scan over just-closed §T row; not silent close):

@@ -66,6 +66,21 @@ Bottom line: implement a middleware that enforces §V.<n> without altering §I.a
 2. /sdd:explain §V.<n> — read the cited invariant in prose
 ```
 
+## MECHANIZE — script-candidate scan
+
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+
+- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
+- LLM-side join / sort / count / dedup over script-emittable data
+- multi-step parse collapsible to one script emit mode
+- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
+
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+
+- dev repo (this plugin) → /sdd:spec → new §T row
+- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
+- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+
 ## OUTPUT — "Next" block
 
 Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases). Read-only → items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.

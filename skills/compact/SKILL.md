@@ -86,6 +86,21 @@ Single atomic commit:
 
 EXECUTE ends @ commit. Rollback `git revert <compact-sha>`. Drift cascade → Next-block item #1; operator dispatches next turn.
 
+## MECHANIZE — script-candidate scan
+
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+
+- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
+- LLM-side join / sort / count / dedup over script-emittable data
+- multi-step parse collapsible to one script emit mode
+- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
+
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+
+- dev repo (this plugin) → /sdd:spec → new §T row
+- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
+- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+
 ## OUTPUT — "Next" block
 
 Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. State-mutator → post-EXECUTE prefer `/sdd:check` (confirm cite-DAG + format-layer + token-budget clean).

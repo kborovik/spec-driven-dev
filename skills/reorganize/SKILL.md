@@ -94,6 +94,21 @@ EXECUTE ends @ commit. Rollback `git revert <reorganize-sha>` per single-commit 
 
 Map is append-only history of all runs; stacked runs admit duplicate `old:` keys: run-1 `{old:V<a>, new:V<b>}`, run-2 `{old:V<b>, new:V<c>}` → `V<a>` resolves via newest-first walk `V<a> → V<b> → V<c>`, terminating when no further `old:` match. Walk landing on `archive` sentinel → emit `archived → SPEC.archive.md ## §V.retired V<n>`, not resolve to live row — distinct terminus from "no further mapping" (current live id). Consumers: reorganize re-runs + explain skill LOAD (historical-id resolution); both walk newest-first, read-only per cite-resolution invariant.
 
+## MECHANIZE — script-candidate scan
+
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+
+- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
+- LLM-side join / sort / count / dedup over script-emittable data
+- multi-step parse collapsible to one script emit mode
+- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
+
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+
+- dev repo (this plugin) → /sdd:spec → new §T row
+- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
+- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+
 ## OUTPUT — "Next" block
 
 Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state. State-mutator → post-EXECUTE prefer /sdd:check (confirm cite-DAG + format-layer clean post-renumber).
