@@ -31,7 +31,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 
 ## MECHANICAL CORE — audit script
 
-Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`. Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract).
+Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`. Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — the MECHANIZE-block check supersedes any hand-run `awk|md5|uniq` block sweep.
 
 Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
 
@@ -45,13 +45,14 @@ Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBL
 - `cite|UNRESOLVED|<citer> <id> …` / `cite|TYPE-MISMATCH|…` — cite-DAG. `cite|ambiguous|…` = bare-form phase-label / gate-ID collision subset → LLM adjudicates per CHECK §-cite.
 - `history|VIOLATE|<row> … history: <pattern>` — inlined-history residue. `history|ADVISORY|oversized cells …` = smell, not VIOLATE.
 - `pinned-header|VIOLATE|<file:line> …` — PUBLISHED body pins invariant number in header.
+- `mechanize|DRIFT|<path> … md5 <a> != <b>` / `mechanize|MISSING|<path> …` — user-invocable `skills/*/SKILL.md` (minus frontmatter `user-invocable: false`) carries the byte-identical canonical MECHANIZE block per mechanize-scan invariant; DRIFT = divergent block, MISSING = absent sentinel. Script-owned byte-identity check — never hand-run `awk|md5|uniq` per run.
 - `token|ADVISORY|SPEC.md ~<n>k tokens > budget …` — estimate `bytes/3.4` per token-budget invariant.
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
 - `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
 - `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` rows → their REPORT blocks; `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` rows → their REPORT blocks (`mechanize` DRIFT/MISSING → invariant drift); `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
 
 ## MEMO
 
@@ -120,7 +121,7 @@ Invariant audit MAY parallelize via Explore sub-agents:
 4. **Aggregate** — main thread concatenates per-batch tables → REPORT invariant drift block.
 5. **Failure** — agent error or timeout → re-run that range serially (strict fallback, not retry); other batch results retained.
 
-Cite-DAG, format, history, pinned-header stay w/ the script — never delegated to §V batches.
+Cite-DAG, format, history, pinned-header, mechanize-block stay w/ the script — never delegated to §V batches.
 
 #### Canonical agent prompt block
 
@@ -188,6 +189,7 @@ V<n> VIOLATE: auth/mw.go:47 uses `<` not `≤`. see §B.<n>.
 V<n> VIOLATE-CAPTURED: <commit-sha> body contains heavy math operators; see §B.<n>.
 V<n> UNVERIFIABLE: no test covers every req path.
 §T.<n> VIOLATE: history: dated-retirement in task body — prune per freshness-contract invariant.
+mechanize DRIFT: skills/explain/SKILL.md MECHANIZE block diverges from canonical.
 
 ## cite drift
 T<n>.cites V<m> UNRESOLVED: V<m> absent from invariants section.

@@ -11,6 +11,12 @@ standardized `id|verdict|evidence` pipe-table the skill merges into its REPORT.
 Modes:
   audit       — read SPEC.md (+ sibling archive if present), run every mechanical
                 audit, print the pipe-table. Optionally probe a REPO-LOCAL hook.
+                Emits `mechanize|DRIFT|…` / `mechanize|MISSING|…` — the
+                mechanize-scan invariant's verbatim-block check: every
+                user-invocable `skills/*/SKILL.md` (minus frontmatter
+                `user-invocable: false`) carries the byte-identical canonical
+                MECHANIZE block (DRIFT divergent, MISSING absent), realized once
+                here so the drift-detector retires its hand-run `awk|md5|uniq`.
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -723,6 +729,115 @@ def audit_pinned_header(published_md):
     return out
 
 
+# --- mechanize-block identity ------------------------------------------------
+
+MECHANIZE_HDR = re.compile(r'^## MECHANIZE\b')
+H2_HDR = re.compile(r'^## ')
+UI_FALSE = re.compile(r'^user-invocable:\s*false\s*$', re.MULTILINE)
+
+
+def parse_frontmatter(text):
+    """Return the YAML frontmatter block (between the leading `---` fences), or
+    '' when absent. Shallow — the audits need only line-presence checks, so the
+    flag scan stays scoped to the frontmatter, never a body mention."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return ""
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            return "\n".join(lines[1:i])
+    return ""
+
+
+def is_user_invocable(text):
+    """A SKILL.md is user-invocable unless its frontmatter declares
+    `user-invocable: false` (sub-skill-flags invariant — auto-fire sub-skills are
+    flagged false). Frontmatter-only so a body mention of the flag never flips
+    the verdict."""
+    return UI_FALSE.search(parse_frontmatter(text)) is None
+
+
+def extract_mechanize_block(text):
+    """Canonical MECHANIZE block: the `## MECHANIZE` header line through the line
+    before the next H2 (or EOF), trailing blank lines trimmed. Returns None when
+    the sentinel is absent. Trailing-blank trim canonicalizes the inter-section
+    gap so byte-identity reflects block content, not the blank-line count before
+    the following section."""
+    lines = text.splitlines()
+    start = None
+    for i, line in enumerate(lines):
+        if MECHANIZE_HDR.match(line):
+            start = i
+            break
+    if start is None:
+        return None
+    end = len(lines)
+    for j in range(start + 1, len(lines)):
+        if H2_HDR.match(lines[j]):
+            end = j
+            break
+    block = lines[start:end]
+    while block and block[-1].strip() == "":
+        block = block[:-1]
+    return "\n".join(block)
+
+
+def classify_mechanize_blocks(skill_texts):
+    """Mechanize-block audit core over {path: text} — pure, unit-testable without
+    the filesystem (mechanize-scan + mechanical-realization invariants). The
+    user-invocable set is the input minus frontmatter `user-invocable: false`
+    (auto-fire sub-skills). Emits MISSING for a user-invocable skill lacking the
+    MECHANIZE sentinel, DRIFT for a block diverging from the set's canonical
+    (majority) md5. Uniform set → no rows (clean, silent). < 2 blocks → no
+    comparison possible, no rows."""
+    out = []
+    blocks = {}
+    for path in sorted(skill_texts):
+        txt = skill_texts[path]
+        if not is_user_invocable(txt):
+            continue
+        block = extract_mechanize_block(txt)
+        if block is None:
+            out.append(("mechanize", "MISSING",
+                        f"mechanize MISSING: {path} user-invocable, "
+                        f"no MECHANIZE block"))
+            continue
+        blocks[path] = block
+    if len(blocks) < 2:
+        return out
+    by_hash = {}
+    for path in sorted(blocks):
+        h = hashlib.md5(blocks[path].encode("utf-8")).hexdigest()
+        by_hash.setdefault(h, []).append(path)
+    if len(by_hash) == 1:
+        return out
+    # canonical = most-populated md5; ties → lexicographically smallest hash
+    # (sorted iteration + max-by-count is deterministic, run-stable).
+    canonical = max(sorted(by_hash), key=lambda h: len(by_hash[h]))
+    for h in sorted(by_hash):
+        if h == canonical:
+            continue
+        for path in by_hash[h]:
+            out.append(("mechanize", "DRIFT",
+                        f"mechanize DRIFT: {path} MECHANIZE block diverges from "
+                        f"canonical (md5 {h[:8]} != {canonical[:8]})"))
+    return out
+
+
+def audit_mechanize_block(skill_md):
+    """File-reading wrapper around classify_mechanize_blocks (mechanize-scan +
+    mechanical-realization invariants). Asserts every user-invocable
+    `skills/*/SKILL.md` carries the byte-identical canonical MECHANIZE block —
+    realized once here, retiring the hand-run `awk|md5|uniq` verbatim check."""
+    texts = {}
+    for path in skill_md:
+        try:
+            texts[path] = read_text(path)
+        except OSError:
+            continue
+    return classify_mechanize_blocks(texts)
+
+
 # --- token estimate ----------------------------------------------------------
 
 def audit_token_estimate(spec_bytes):
@@ -929,27 +1044,52 @@ def plugin_source_dirs(repo_root, plugins):
     return dirs
 
 
-def discover_published_md(repo_root):
-    """PUBLISHED markdown bodies — discovered from the marketplace manifest
-    (plugin sources), single plugin.json, else empty. Repo-agnostic."""
-    dirs = []
+def plugin_dirs(repo_root):
+    """PUBLISHED plugin source dirs — from the marketplace manifest
+    (`plugins[].source`, root `./` → repo root), else a single plugin.json repo
+    root, else empty. Repo-agnostic; shared by the published-md + skill-md
+    discovery so the PUBLISHED-scope root is resolved once."""
     mp = os.path.join(repo_root, ".claude-plugin", "marketplace.json")
     pj = os.path.join(repo_root, ".claude-plugin", "plugin.json")
     if os.path.exists(mp):
         try:
             data = json.loads(read_text(mp))
-            dirs = plugin_source_dirs(repo_root, data.get("plugins", []))
+            return plugin_source_dirs(repo_root, data.get("plugins", []))
         except (OSError, ValueError):
-            pass
-    elif os.path.exists(pj):
-        dirs.append(repo_root)
+            return []
+    if os.path.exists(pj):
+        return [repo_root]
+    return []
+
+
+def discover_published_md(repo_root):
+    """PUBLISHED markdown bodies — every `.md` under a plugin source dir.
+    Repo-agnostic."""
     md = []
-    for d in dirs:
+    for d in plugin_dirs(repo_root):
         for root, _, files in os.walk(d):
             for fn in files:
                 if fn.endswith(".md"):
                     md.append(os.path.join(root, fn))
     return sorted(md)
+
+
+def discover_skill_md(repo_root):
+    """PUBLISHED skill bodies — `<plugin-source>/skills/*/SKILL.md` for each
+    plugin source dir. The plugin skills dir is conventionally `skills/` (Claude
+    Code plugin layout), so REPO-LOCAL `.claude/skills/**` is excluded by
+    construction — it is not a plugin source skills dir. Repo-agnostic; feeds the
+    mechanize-block audit's user-invocable set."""
+    out = []
+    for d in plugin_dirs(repo_root):
+        skills_dir = os.path.join(d, "skills")
+        if not os.path.isdir(skills_dir):
+            continue
+        for name in sorted(os.listdir(skills_dir)):
+            p = os.path.join(skills_dir, name, "SKILL.md")
+            if os.path.isfile(p):
+                out.append(p)
+    return sorted(out)
 
 
 def discover_repo_local(repo_root):
@@ -1037,6 +1177,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
                                       oversized_ack=oversized_ack)
     published_md = discover_published_md(repo_root)
     findings += audit_pinned_header(published_md)
+    findings += audit_mechanize_block(discover_skill_md(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -1587,6 +1728,66 @@ def selftest():
           == [("batch", ADVISORY, "recommended: 1 agents")],
           "batch: advisory honors narrow-scope override")
 
+    # mechanize-block audit (mechanize-scan + mechanical-realization invariants):
+    # every user-invocable SKILL.md carries the byte-identical canonical block;
+    # sub-skills (user-invocable: false) excluded. Replaces hand-run awk|md5|uniq.
+    mblock = "## MECHANIZE — scan\n\nscan body\n\n- rule a\n- rule b\n"
+    mblock2 = "## MECHANIZE — scan\n\nscan body\n\n- rule a\n- rule DIFFERENT\n"
+
+    def _mk(fm_extra="", block=mblock, tail="\n## OUTPUT\n\nnext\n"):
+        return ("---\nname: s\n" + fm_extra + "---\n\n# s\n\nintro\n\n"
+                + block + tail)
+
+    # frontmatter parse + user-invocable detection (frontmatter-only)
+    check("user-invocable: false"
+          in parse_frontmatter(_mk("user-invocable: false\n")),
+          "parse_frontmatter: returns frontmatter block")
+    check(parse_frontmatter("no fence\nbody") == "",
+          "parse_frontmatter: absent fence → empty")
+    check(is_user_invocable(_mk()) is True, "is_user_invocable: default true")
+    check(is_user_invocable(_mk("user-invocable: false\n")) is False,
+          "is_user_invocable: frontmatter false → false")
+    body_mention = _mk(block="## MECHANIZE — scan\n\nsets `user-invocable: "
+                             "false` in prose\n\n- rule a\n- rule b\n")
+    check(is_user_invocable(body_mention) is True,
+          "is_user_invocable: body mention of flag ignored (frontmatter-only)")
+    # block extraction: header → next H2, trailing blank trimmed; absent → None
+    check(extract_mechanize_block(_mk()) == mblock.rstrip("\n"),
+          "extract_mechanize_block: header to next H2, trailing blank trimmed")
+    check(extract_mechanize_block(_mk(block="## NOPE\n\nx\n")) is None,
+          "extract_mechanize_block: sentinel absent → None")
+    check(extract_mechanize_block(_mk(tail="")) == mblock.rstrip("\n"),
+          "extract_mechanize_block: block at EOF extracts")
+    # uniform set → clean (silent)
+    check(classify_mechanize_blocks({"a/SKILL.md": _mk(), "b/SKILL.md": _mk()})
+          == [], "mechanize: uniform blocks → clean")
+    # divergent block → DRIFT on the minority only
+    dr = classify_mechanize_blocks({"a/SKILL.md": _mk(), "b/SKILL.md": _mk(),
+                                    "c/SKILL.md": _mk(block=mblock2)})
+    check(len(dr) == 1 and dr[0][1] == "DRIFT" and "c/SKILL.md" in dr[0][2],
+          "mechanize: divergent block flagged DRIFT on minority")
+    # user-invocable skill missing the block → MISSING
+    mr = classify_mechanize_blocks({"a/SKILL.md": _mk(),
+                                    "b/SKILL.md": _mk(block="## OTHER\n\nx\n")})
+    check(any(v == "MISSING" and "b/SKILL.md" in e for _, v, e in mr),
+          "mechanize: user-invocable skill missing block → MISSING")
+    # sub-skill (user-invocable: false) without block excluded — no MISSING
+    check(classify_mechanize_blocks(
+        {"a/SKILL.md": _mk(), "b/SKILL.md": _mk(),
+         "sub/SKILL.md": _mk("user-invocable: false\n",
+                             block="## OTHER\n\nx\n")}) == [],
+          "mechanize: sub-skill without block excluded")
+    # single user-invocable block → no comparison possible, clean
+    check(classify_mechanize_blocks({"a/SKILL.md": _mk()}) == [],
+          "mechanize: single block → no divergence possible")
+    # DRIFT + MISSING make the run dirty; pseudo-id row unrestricted vocab
+    check(compute_clean([("mechanize", "DRIFT", "")])[0] is False,
+          "mechanize: DRIFT is dirty")
+    check(compute_clean([("mechanize", "MISSING", "")])[0] is False,
+          "mechanize: MISSING is dirty")
+    check(validate_vocab([("mechanize", "DRIFT", "")]) == [],
+          "mechanize: pseudo-id unrestricted vocab")
+
     # clean-set + vocab
     clean_rows = [(f"V{1}", "HOLD", ""), (f"V{2}", "VIOLATE-CAPTURED", ""),
                   ("token", ADVISORY, "")]
@@ -1638,7 +1839,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 108
+    return 124
 
 
 # --- entry -------------------------------------------------------------------
