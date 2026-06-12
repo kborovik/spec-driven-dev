@@ -41,7 +41,7 @@ Guard chain — bail w/ the named reason on first fail, nothing mutated:
 In order, stop on any non-zero exit:
 
 1. Edit `.claude-plugin/plugin.json` `"version"` field → new value (sole edited field; leave the rest byte-for-byte).
-2. path-scoped commit: `git commit -- .claude-plugin/plugin.json`, subject verbatim `release: v<version>` (fixed template per github-facing-register; body steno only if a note is warranted, else subject-only). Path-scoped per write-ownership invariant — owned file only, pre-existing dirty tree never bundled.
+2. path-scoped commit: `git commit -m "release: v<version>" -- .claude-plugin/plugin.json` — `-m` (+ any `-m` body line) ! precede `--`; flags after `--` parse as pathspecs (`error: pathspec '-m' did not match`). Subject verbatim `release: v<version>` (fixed template per github-facing-register; body steno only if a note is warranted, else subject-only). Path-scoped per write-ownership invariant — owned file only, pre-existing dirty tree never bundled.
 3. annotated tag: `git tag -a v<version> -m v<version>`.
 4. push commit + tag: `git push origin main --follow-tags`.
 5. publish: `gh release create v<version> --verify-tag --generate-notes`.
