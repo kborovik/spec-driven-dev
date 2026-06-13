@@ -32,7 +32,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 
 ## MECHANICAL CORE — audit script
 
-Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, auto-fire sub-skill slash-dispatch ban, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`. Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — the MECHANIZE-block check supersedes any hand-run `awk|md5|uniq` block sweep, the dispatch-target check any hand-run skill-body slash grep.
+Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, auto-fire sub-skill slash-dispatch ban, allowed-tools grant-use (no zero-body-use grant), memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`. Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — the MECHANIZE-block check supersedes any hand-run `awk|md5|uniq` block sweep, the dispatch-target check any hand-run skill-body slash grep, the grant-use check any hand-run `allowed-tools` grant sweep.
 
 Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
 
@@ -48,13 +48,14 @@ Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBL
 - `pinned-header|VIOLATE|<file:line> …` — PUBLISHED body pins invariant number in header.
 - `mechanize|DRIFT|<path> … md5 <a> != <b>` / `mechanize|MISSING|<path> …` — user-invocable `skills/*/SKILL.md` (minus frontmatter `user-invocable: false`) carries the byte-identical canonical MECHANIZE block per mechanize-scan invariant; DRIFT = divergent block, MISSING = absent sentinel. Script-owned byte-identity check — never hand-run `awk|md5|uniq` per run.
 - `dispatch|VIOLATE|<path:line> … slash-dispatches auto-fire sub-skill <cmd>` — a skill body names an auto-fire sub-skill (`user-invocable: false`) in `/<plugin>:<sub-skill>` slash form per response-shape invariant; the slash form is never a valid dispatch target (backtick-wrapped exempt). Sub-skill set derived frontmatter-only, plugin name from manifest — script-owned, never hand-grep skill bodies per run (closes §B.14).
+- `grant|VIOLATE|<path:line> grants <tool> zero body use …` — a frontmatter `allowed-tools` grant the skill body never invokes per tooling-preference invariant (zero-body-use grant banned, nothing to pre-approve). Sound by construction: flagged only on total body-absence — canonical token, alias (`Explore` for the sub-agent spawner), the operation verb a body uses for the tool (`rewrite` for the editor), or a `Bash` command anchor; `Glob` matched case-sensitively so wildcard prose (`mid-glob`) never masks a missing grant. Spans the PUBLISHED + REPO-LOCAL skill set — script-owned, never hand-run the grant sweep per run (a manual sweep misses rows).
 - `token|ADVISORY|SPEC.md ~<n>k tokens > budget …` — estimate `bytes/3.4` per token-budget invariant.
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
 - `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
 - `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE → invariant drift); `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE → invariant drift); `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
 
 ## MEMO
 
@@ -123,7 +124,7 @@ Invariant audit MAY parallelize via Explore sub-agents:
 4. **Aggregate** — main thread concatenates per-batch tables → REPORT invariant drift block.
 5. **Failure** — agent error or timeout → re-run that range serially (strict fallback, not retry); other batch results retained.
 
-Cite-DAG, format, history, pinned-header, mechanize-block, dispatch-target stay w/ the script — never delegated to §V batches.
+Cite-DAG, format, history, pinned-header, mechanize-block, dispatch-target, grant-use stay w/ the script — never delegated to §V batches.
 
 #### Canonical agent prompt block
 
@@ -193,6 +194,7 @@ V<n> UNVERIFIABLE: no test covers every req path.
 §T.<n> VIOLATE: history: dated-retirement in task body — prune per freshness-contract invariant.
 mechanize DRIFT: skills/explain/SKILL.md MECHANIZE block diverges from canonical.
 dispatch VIOLATE: skills/build/SKILL.md:96 slash-dispatches auto-fire sub-skill /<plugin>:<sub-skill>.
+grant VIOLATE: skills/explain/SKILL.md:8 grants Grep zero body use.
 
 ## cite drift
 T<n>.cites V<m> UNRESOLVED: V<m> absent from invariants section.

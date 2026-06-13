@@ -24,6 +24,14 @@ Modes:
                 derived frontmatter-only, plugin name from the manifest,
                 backtick-wrapped forms exempt — realized once here so the
                 drift-detector retires its hand-run skill-body slash grep.
+                Emits `grant|VIOLATE|…` — the tooling-preference invariant's
+                grant-use rule: no frontmatter `allowed-tools` grant is
+                zero-body-use (a granted tool the skill body never invokes).
+                Sound by construction — flagged only on total body-absence
+                (token, alias, operation verb, or Bash command anchor), spanning
+                the PUBLISHED + REPO-LOCAL skill set — realized once here so the
+                drift-detector retires its hand-run allowed-tools grant sweep
+                (a manual sweep misses rows).
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -905,6 +913,142 @@ def audit_dispatch_targets(skill_md, plugins):
     return classify_dispatch_targets_from_texts(texts, plugins)
 
 
+# --- allowed-tools grant-use audit -------------------------------------------
+
+# Per-tool body-reference set (tooling-preference invariant: a frontmatter grant
+# pre-approves a body-prescribed tool invocation, so a granted tool the body never
+# invokes is banned — nothing to pre-approve). SOUND by construction: a grant is
+# flagged only when the body carries NO reference of any kind — the canonical
+# token, an alias (Explore for the sub-agent spawner), the operation verb a body
+# uses in place of the tool name (skills name operations: "rewrite" for the editor,
+# "spawn" for the agent), or (Bash) a command anchor. Generous sets never
+# false-positive a genuine use; the accepted cost is a false negative on a tool
+# whose reference word saturates every body (the skill-dispatcher — "skill" is
+# ubiquitous). The wildcard-pattern tool matches case-sensitively so wildcard prose
+# ("mid-glob") never masks a missing grant for it.
+
+GRANT_REFERENCE = {
+    "Read":  [(r'\bread', re.I)],
+    "Edit":  [(r'\bedit|\brewrite|\bpatch\b|\bprune|\btrim|\brenumber|\boverwrite',
+               re.I)],
+    "Write": [(r'\bwrite', re.I)],
+    "Grep":  [(r'\bgrep', re.I)],
+    "Glob":  [(r'\bGlob\b', 0)],                         # case-sensitive: prose-safe
+    "Agent": [(r'\bagent|\bExplore\b', re.I)],
+    "Skill": [(r'\bskill', re.I)],                       # generous (accepted limit)
+    "TaskCreate": [(r'TaskCreate', 0)],
+    "TaskUpdate": [(r'TaskUpdate', 0)],
+    "AskUserQuestion": [(r'AskUserQuestion|\bask\b|\bquestion', re.I)],
+}
+# bare `Bash` grant (no arg pattern) pre-approves any command — used when the body
+# prescribes a command (fenced block or a known command token).
+BARE_BASH_CMD = re.compile(r'```|\b(?:git|python3|gh|jq|grep|rg|npm|make|cargo'
+                           r'|sed|awk|cat|test)\b')
+ALLOWED_TOOLS_LINE = re.compile(r'^allowed-tools:\s*(.*)$')
+
+
+def split_grant_tokens(value):
+    """Split an `allowed-tools` value into grant tokens on top-level commas only —
+    paren-depth-aware so a `Bash(...)` arg pattern keeps any inner comma and stays
+    a single token."""
+    toks, depth, cur = [], 0, ""
+    for ch in value:
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        if ch == "," and depth == 0:
+            toks.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    if cur.strip():
+        toks.append(cur.strip())
+    return [t for t in toks if t]
+
+
+def find_allowed_tools(text):
+    """Locate the frontmatter `allowed-tools:` line: return (grant tokens, 1-based
+    line number), or (None, None) when absent. Scans only the frontmatter region
+    (between the leading `---` fences) so a body mention never registers."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None, None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            break
+        m = ALLOWED_TOOLS_LINE.match(lines[i])
+        if m:
+            return split_grant_tokens(m.group(1)), i + 1
+    return None, None
+
+
+def body_after_frontmatter(text):
+    """Text after the closing frontmatter `---` fence (the skill body) — grant use
+    is a body claim, so the grant's own frontmatter line never self-satisfies it."""
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        for i in range(1, len(lines)):
+            if lines[i].strip() == "---":
+                return "\n".join(lines[i + 1:])
+    return text
+
+
+def grant_used(token, body):
+    """True when the skill body prescribes an invocation of the granted tool
+    (tooling-preference invariant). `Bash(<pattern>)` → any literal command anchor
+    of the pattern is present; bare `Bash` → any command token / fenced block;
+    a catalogued tool → its body-reference set; an uncatalogued tool → its bare
+    token (case-insensitive, so a never-mentioned future grant still flags)."""
+    base = token.split("(", 1)[0].strip()
+    if base == "Bash":
+        inner = token[token.find("(") + 1:token.rfind(")")] if "(" in token else ""
+        if not inner.strip():
+            return bool(BARE_BASH_CMD.search(body))
+        anchors = [a for a in re.split(r'[*\s]', inner) if a]
+        return any(a in body for a in anchors)
+    pats = GRANT_REFERENCE.get(base, [(r'\b' + re.escape(base) + r'\b', re.I)])
+    return any(re.search(p, body, f) for p, f in pats)
+
+
+def classify_grants(skill_texts):
+    """Grant-use audit core over {path: text} — pure, unit-testable without the
+    filesystem (tooling-preference invariant). For each skill's frontmatter
+    `allowed-tools` grant, emit `grant|VIOLATE|…` when the body prescribes no
+    invocation of that tool (zero-body-use grant banned). Skills without an
+    `allowed-tools` line carry no grants → no rows. Realized once here so the
+    drift-detector retires its hand-run grant sweep — a manual sweep misses rows,
+    the recurrence class this closes."""
+    out = []
+    for path in sorted(skill_texts):
+        text = skill_texts[path]
+        tokens, lineno = find_allowed_tools(text)
+        if not tokens:
+            continue
+        body = body_after_frontmatter(text)
+        for tok in tokens:
+            if not grant_used(tok, body):
+                out.append(("grant", "VIOLATE",
+                            f"grant VIOLATE: {path}:{lineno} grants {tok} "
+                            f"zero body use (drop per tooling-preference invariant)"))
+    return out
+
+
+def audit_grants(skill_md):
+    """File-reading wrapper around classify_grants (tooling-preference invariant).
+    Asserts no frontmatter `allowed-tools` grant is zero-body-use across the
+    PUBLISHED + REPO-LOCAL skill set — realized once here so the drift-detector
+    retires its hand-run allowed-tools grant sweep, where a manual sweep misses
+    rows (the recurrence class this closes)."""
+    texts = {}
+    for path in skill_md:
+        try:
+            texts[path] = read_text(path)
+        except OSError:
+            continue
+    return classify_grants(texts)
+
+
 # --- token estimate ----------------------------------------------------------
 
 def audit_token_estimate(spec_bytes):
@@ -1182,6 +1326,21 @@ def discover_skill_md(repo_root):
     return sorted(out)
 
 
+def discover_grant_skills(repo_root):
+    """SKILL.md set the grant-use audit spans: PUBLISHED `<src>/skills/*/SKILL.md`
+    (discover_skill_md) plus REPO-LOCAL `.claude/skills/*/SKILL.md` — a REPO-LOCAL
+    skill (e.g. release) carries `allowed-tools` grants too, so the grant-use
+    audit covers it. Repo-agnostic."""
+    paths = list(discover_skill_md(repo_root))
+    local = os.path.join(repo_root, ".claude", "skills")
+    if os.path.isdir(local):
+        for name in sorted(os.listdir(local)):
+            p = os.path.join(local, name, "SKILL.md")
+            if os.path.isfile(p):
+                paths.append(p)
+    return sorted(set(paths))
+
+
 def discover_repo_local(repo_root):
     """REPO-LOCAL files holding pinned cites — conventional default set."""
     files = []
@@ -1270,6 +1429,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     skill_md = discover_skill_md(repo_root)
     findings += audit_mechanize_block(skill_md)
     findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
+    findings += audit_grants(discover_grant_skills(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -1931,6 +2091,64 @@ def selftest():
     # plugin name from the manifest (plugin-shape invariant)
     check(plugin_names("/no/such/repo") == [], "plugin_names: absent manifest → empty")
 
+    # allowed-tools grant-use audit (tooling-preference invariant): a frontmatter
+    # grant the body never invokes is zero-body-use → VIOLATE. Sound — flagged only
+    # on total body-absence. Realized once here, retiring the hand-run grant sweep.
+    def _gk(tools, body):
+        return f"---\nname: s\nallowed-tools: {tools}\n---\n\n# s\n\n{body}\n"
+
+    # token split keeps a Bash arg pattern (commas inside parens) as one token
+    check(split_grant_tokens("Read, Bash(python3 */check-mechanical.py *), Grep")
+          == ["Read", "Bash(python3 */check-mechanical.py *)", "Grep"],
+          "grant: paren-aware token split")
+    # find_allowed_tools: frontmatter-only, with line number; body line ignored
+    toks_g, ln_g = find_allowed_tools(_gk("Read, Grep", "allowed-tools: Edit here"))
+    check(toks_g == ["Read", "Grep"] and ln_g == 3,
+          "grant: allowed-tools parsed w/ lineno, body line ignored")
+    check(find_allowed_tools("no fence\nallowed-tools: Read\n") == (None, None),
+          "grant: no frontmatter → no grants")
+    # grant_used: token / lowercase token / alias / operation verb / absence
+    check(grant_used("Read", "first Read `SPEC.md`"), "grant_used: token present")
+    check(grant_used("Grep", "we grep the files"), "grant_used: lowercase token")
+    check(grant_used("Agent", "spawn Explore sub-agents"),
+          "grant_used: alias Explore → agent-spawner")
+    check(grant_used("Edit", "rewrite the rows in place"),
+          "grant_used: operation verb rewrite → editor")
+    check(not grant_used("Grep", "this body never searches"),
+          "grant_used: absent tool → unused")
+    # wildcard-pattern tool matches case-sensitively: 'mid-glob' prose never masks
+    check(not grant_used("Glob", "the mid-glob `Bash(python3 *)` form"),
+          "grant_used: wildcard prose does not mask a missing pattern-lister grant")
+    check(grant_used("Glob", "the Glob tool lists files"),
+          "grant_used: PascalCase pattern-lister counts")
+    # Bash: arg-pattern anchor vs bare-Bash command presence
+    check(grant_used("Bash(git *)", "run `git commit -- paths`"),
+          "grant_used: Bash arg anchor present")
+    check(not grant_used("Bash(jq *)", "no json tooling here"),
+          "grant_used: Bash arg anchor absent → unused")
+    check(grant_used("Bash", "the recipe runs `python3 scripts/x.py`"),
+          "grant_used: bare Bash + command token")
+    check(not grant_used("Bash", "pure prose, no commands"),
+          "grant_used: bare Bash, no command → unused")
+    # dispatcher reference word is ubiquitous → generous (accepted false-negative)
+    check(grant_used("Skill", "follows the telegraph skill rules"),
+          "grant_used: dispatcher generous (any mention)")
+    # classify_grants: VIOLATE on the unused grant only, line-numbered
+    rows_g = classify_grants({"skills/x/SKILL.md": _gk("Read, Glob",
+                                                       "Read `SPEC.md` then bail")})
+    check(len(rows_g) == 1 and rows_g[0][0] == "grant" and rows_g[0][1] == "VIOLATE"
+          and "Glob" in rows_g[0][2] and "skills/x/SKILL.md:3" in rows_g[0][2],
+          "classify_grants: unused grant flagged, used grant silent, line-numbered")
+    check(classify_grants({"skills/y/SKILL.md": _gk("Read", "Read the file")}) == [],
+          "classify_grants: all-used → clean")
+    check(classify_grants({"skills/z/SKILL.md": "# no frontmatter\nbody\n"}) == [],
+          "classify_grants: no allowed-tools → no rows")
+    # pseudo-id row: VIOLATE is dirty, unrestricted vocab
+    check(compute_clean([("grant", "VIOLATE", "")])[0] is False,
+          "grant: VIOLATE is dirty")
+    check(validate_vocab([("grant", "VIOLATE", "")]) == [],
+          "grant: pseudo-id unrestricted vocab")
+
     # clean-set + vocab
     clean_rows = [(f"V{1}", "HOLD", ""), (f"V{2}", "VIOLATE-CAPTURED", ""),
                   ("token", ADVISORY, "")]
@@ -1982,7 +2200,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 135
+    return 154
 
 
 # --- entry -------------------------------------------------------------------
