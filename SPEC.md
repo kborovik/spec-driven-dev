@@ -97,6 +97,7 @@ T20|x|script: audit asserts no skill body slash-dispatches an auto-fire sub-skil
 T21|x|reframe `skills/backprop/SKILL.md` frontmatter description — drop user-entry trigger phrasings colliding w/ /sdd:spec (`X broke`, `we got bit by`, `post-mortem on Y`, `this should never recur`, `add a §V for`); restate sub-skill engaged via /sdd:spec BACKPROP mode (socratic-desc form: caller-engaged, not user-invoked); skill body byte-untouched|V24,V61,B14
 T22|x|sweep frontmatter allowed-tools grants — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md .claude/skills/release/SKILL.md`: drop inert zero-body-use `Skill` grant (telegraph, steno, socratic); narrow release `Bash` → body-prescribed subset; build `Bash` stays broad (consumer verify cmds unpinnable) + inline note|V62
 T23|x|patch read-only skill frontmatter — scope vocab {check, explain} (zero-writes per write-ownership invariant): add `disallowed-tools: Edit, Write` (`allowed-tools` omission only prompts, never denies); script-routed memo write + reads unaffected|V20,V62
+T24|.|drop zero-body-use frontmatter grants left by prior grant sweep — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md`: grant ∉ body invocation → drop (backprop `Skill`, design `Skill`, explain `Glob`+`Skill`)|V62
 
 ## §B BUGS
 
@@ -116,3 +117,4 @@ B12|2026-06-11|/sdd:check-created `.claude/.gitignore` guard swept into next bac
 B13|2026-06-12|path-scoped commit recipe `git commit -- <paths>` gave msg separately → `-m` appended after `--` parsed as pathspec, commit aborts; bit release (fixed) + spec|V20
 B14|2026-06-13|Next-block + "route through" prose named `/sdd:backprop F5` as user dispatch; backprop read-only + `user-invocable: false`, real route `/sdd:spec <intent>`→BACKPROP|V24
 B15|2026-06-13|`allowed-tools` cast as access-restriction (least-privilege) in tooling-preference invariant; CC 2.1.177 = pre-approval grant (auto-run, never denies) — real tool denial = `disallowed-tools`|V62
+B16|2026-06-13|grant sweep scoped to {telegraph,steno,socratic}, left zero-body-use `Skill`/`Glob` grants in backprop/design/explain unenforced|V62
