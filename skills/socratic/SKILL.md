@@ -2,7 +2,7 @@
 name: socratic
 description: |
   Parameterized single-question intent-sharpening gate. Not user-invoked — engaged from consumer cmd pre-apply gate (e.g. /sdd:spec).
-allowed-tools: AskUserQuestion, Read, Grep, Skill
+allowed-tools: AskUserQuestion, Read, Grep
 user-invocable: false
 ---
 

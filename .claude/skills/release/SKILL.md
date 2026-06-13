@@ -5,7 +5,7 @@ description: |
   version, commit, tag `v<version>`, publish GitHub release w/ generated notes.
   Triggers: "/release", "cut a release", "publish a release", "bump version and tag",
   "ship a new sdd version", "gh release".
-allowed-tools: Read, Edit, Bash, AskUserQuestion
+allowed-tools: Read, Edit, Bash(git *), Bash(gh *), Bash(python3 */check-mechanical.py *), AskUserQuestion
 ---
 
 # release — gh release flow (REPO-LOCAL)
