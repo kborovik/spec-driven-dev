@@ -2,7 +2,7 @@
 name: design
 description: |
   Propose-then-critique structural design loop → draft to `designs/<slug>.md`. Distinct from socratic (which sharpens vague intent). Use when user wants to design a structural change, weigh tradeoffs between named alternatives, propose an architecture, or shape a subsystem before implementation. Triggers: "/sdd:design", "design the X", "shape the X subsystem", "tradeoffs between A and B", "how should we structure", "propose an architecture for".
-allowed-tools: AskUserQuestion, Read, Grep, Write, Skill
+allowed-tools: AskUserQuestion, Read, Grep, Write
 model: opus
 ---
 
