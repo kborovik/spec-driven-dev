@@ -5,7 +5,7 @@ description: |
   inverse of telegraph skill (telegraph encoder). Triggers: "/sdd:explain",
   "what does §V.<n> mean", "decompress this", "explain in prose", "I don't
   read telegraph". Writes → /sdd:spec.
-allowed-tools: Read, Grep
+allowed-tools: Read
 disallowed-tools: Edit, Write
 model: sonnet
 ---
