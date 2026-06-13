@@ -1,11 +1,10 @@
 ---
 name: backprop
 description: |
-  Bug → spec protocol. Bug found or test fail → trace cause, decide if new
-  §V invariant catches recurrence, append §B. Triggers: test failure, bug
-  report, post-mortem, "X broke", "we got bit by", "post-mortem on Y",
-  "this should never recur", "add a §V for". Not for mechanical typo or
-  one-off fix w/ no recurrence class — pure code fix only.
+  Bug → spec protocol: trace cause, decide if a new §V invariant catches the
+  recurrence class, append §B. Not user-invoked — engaged from /sdd:spec
+  BACKPROP mode (bug → spec user route = `/sdd:spec <intent>`). Not for
+  mechanical typo or one-off fix w/ no recurrence class — pure code fix only.
 allowed-tools: Read, Grep, Glob, Skill
 user-invocable: false
 ---
