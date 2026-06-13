@@ -17,6 +17,13 @@ Modes:
                 `user-invocable: false`) carries the byte-identical canonical
                 MECHANIZE block (DRIFT divergent, MISSING absent), realized once
                 here so the drift-detector retires its hand-run `awk|md5|uniq`.
+                Emits `dispatch|VIOLATE|…` — the response-shape invariant's
+                dispatch-target rule: no skill body slash-dispatches an auto-fire
+                sub-skill (`/<plugin>:<sub-skill>` for a `user-invocable: false`
+                sub-skill is never a valid dispatch target). Sub-skill set is
+                derived frontmatter-only, plugin name from the manifest,
+                backtick-wrapped forms exempt — realized once here so the
+                drift-detector retires its hand-run skill-body slash grep.
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -838,6 +845,66 @@ def audit_mechanize_block(skill_md):
     return classify_mechanize_blocks(texts)
 
 
+# --- dispatch-target audit ---------------------------------------------------
+
+
+def classify_dispatch_targets(skill_texts, plugins, subskills):
+    """Dispatch-target audit core over {path: text} — pure, unit-testable
+    without the filesystem (response-shape + sub-skill-flags invariants, closes
+    §B.14). No skill body may slash-dispatch an auto-fire sub-skill: the slash
+    form `/<plugin>:<sub-skill>` names a dispatch target, but auto-fire
+    sub-skills are `user-invocable: false` so are never a valid dispatch (the
+    bug→spec route is `/<plugin>:spec <intent>`, never the sub-skill slash form).
+    `plugins` = manifest plugin names (plugin-shape invariant — never assumed
+    equal to a dir name), `subskills` = auto-fire sub-skill dir names
+    (frontmatter `user-invocable: false`). Backtick-wrapped tokens exempt per the
+    verbatim-preservation invariant — code-span prose documenting the banned form
+    is fine; a live non-backtick slash form is VIOLATE, one row per hit,
+    line-numbered. Empty plugin or sub-skill set → no audit (nothing to match)."""
+    out = []
+    if not plugins or not subskills:
+        return out
+    pat = re.compile(r'/(?:' + '|'.join(re.escape(p) for p in sorted(plugins))
+                     + r'):(?:'
+                     + '|'.join(re.escape(s) for s in sorted(subskills))
+                     + r')\b')
+    for path in sorted(skill_texts):
+        for i, line in enumerate(skill_texts[path].splitlines(), start=1):
+            for m in pat.finditer(strip_backticks(line)):
+                out.append(("dispatch", "VIOLATE",
+                            f"dispatch VIOLATE: {path}:{i} slash-dispatches "
+                            f"auto-fire sub-skill {m.group(0)} "
+                            f"(never user-invocable)"))
+    return out
+
+
+def classify_dispatch_targets_from_texts(skill_texts, plugins):
+    """Derive the auto-fire sub-skill set from {path: text} then run the
+    dispatch-target audit — pure, unit-testable without the filesystem. The
+    sub-skill set is the skills whose frontmatter declares `user-invocable: false`
+    (frontmatter-only — a body prose mention of the flag never enrolls a
+    user-invocable skill); the dir name (`skills/<name>/SKILL.md`) is the banned
+    dispatch target."""
+    subskills = {os.path.basename(os.path.dirname(p))
+                 for p, t in skill_texts.items() if not is_user_invocable(t)}
+    return classify_dispatch_targets(skill_texts, plugins, subskills)
+
+
+def audit_dispatch_targets(skill_md, plugins):
+    """File-reading wrapper around classify_dispatch_targets_from_texts
+    (response-shape + sub-skill-flags invariants, closes §B.14). Realized once
+    here so the drift-detector retires its hand-run skill-body slash grep — the
+    sub-skill set is derived frontmatter-only and the plugin name from the
+    manifest, where a hand grep would over-match a prose mention of the flag."""
+    texts = {}
+    for path in skill_md:
+        try:
+            texts[path] = read_text(path)
+        except OSError:
+            continue
+    return classify_dispatch_targets_from_texts(texts, plugins)
+
+
 # --- token estimate ----------------------------------------------------------
 
 def audit_token_estimate(spec_bytes):
@@ -1062,6 +1129,29 @@ def plugin_dirs(repo_root):
     return []
 
 
+def plugin_names(repo_root):
+    """PUBLISHED plugin names — from the marketplace manifest
+    (`plugins[].name`), else the single `plugin.json` `name`, else empty
+    (plugin-shape invariant — name from the manifest, never assumed equal to a
+    dir name). The dispatch-target audit builds the `/<plugin>:<sub-skill>`
+    slash form from these."""
+    mp = os.path.join(repo_root, ".claude-plugin", "marketplace.json")
+    pj = os.path.join(repo_root, ".claude-plugin", "plugin.json")
+    if os.path.exists(mp):
+        try:
+            data = json.loads(read_text(mp))
+            return [p["name"] for p in data.get("plugins", []) if p.get("name")]
+        except (OSError, ValueError):
+            return []
+    if os.path.exists(pj):
+        try:
+            data = json.loads(read_text(pj))
+            return [data["name"]] if data.get("name") else []
+        except (OSError, ValueError):
+            return []
+    return []
+
+
 def discover_published_md(repo_root):
     """PUBLISHED markdown bodies — every `.md` under a plugin source dir.
     Repo-agnostic."""
@@ -1177,7 +1267,9 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
                                       oversized_ack=oversized_ack)
     published_md = discover_published_md(repo_root)
     findings += audit_pinned_header(published_md)
-    findings += audit_mechanize_block(discover_skill_md(repo_root))
+    skill_md = discover_skill_md(repo_root)
+    findings += audit_mechanize_block(skill_md)
+    findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -1788,6 +1880,57 @@ def selftest():
     check(validate_vocab([("mechanize", "DRIFT", "")]) == [],
           "mechanize: pseudo-id unrestricted vocab")
 
+    # dispatch-target audit (response-shape + sub-skill-flags invariants, closes
+    # §B.14): no skill body slash-dispatches an auto-fire sub-skill; the slash
+    # form is never user-invocable. Plugin name from the manifest, sub-skill set
+    # frontmatter-only, backtick-wrapped form exempt (verbatim-preservation).
+    d_plugins = ["sdd"]
+    d_subs = {"backprop", "monitor"}
+    bad_d = classify_dispatch_targets(
+        {"skills/build/SKILL.md": "intro\nroute cause to /sdd:backprop F5\nend\n"},
+        d_plugins, d_subs)
+    check(len(bad_d) == 1 and bad_d[0][0] == "dispatch" and bad_d[0][1] == "VIOLATE"
+          and "skills/build/SKILL.md:2" in bad_d[0][2]
+          and "/sdd:backprop" in bad_d[0][2],
+          "dispatch: non-backtick slash form → VIOLATE, line-numbered")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "the `/sdd:backprop` skill is read-only\n"},
+        d_plugins, d_subs) == [],
+          "dispatch: backtick-wrapped slash form exempt")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "route through /sdd:spec then /sdd:build\n"},
+        d_plugins, d_subs) == [],
+          "dispatch: user-invocable slash target not flagged")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "/other:backprop elsewhere\n"}, d_plugins, d_subs) == [],
+          "dispatch: non-manifest plugin slash form not matched")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "/sdd:backproptest is a different name\n"},
+        d_plugins, d_subs) == [],
+          "dispatch: word-boundary guards sub-skill-name prefix")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "/sdd:backprop\n"}, [], d_subs) == [],
+          "dispatch: empty plugin set → no audit")
+    check(classify_dispatch_targets(
+        {"a/SKILL.md": "/sdd:backprop\n"}, d_plugins, set()) == [],
+          "dispatch: empty sub-skill set → no audit")
+    # frontmatter-only sub-skill derivation: a user-invocable skill that mentions
+    # the flag in prose stays user-invocable, and its live slash form is flagged
+    fm_sub = "---\nname: backprop\nuser-invocable: false\n---\n\nbody\n"
+    fm_ui = ("---\nname: build\n---\n\nmentions `user-invocable: false` in prose\n"
+             "then routes to /sdd:backprop live\n")
+    dd = classify_dispatch_targets_from_texts(
+        {"skills/backprop/SKILL.md": fm_sub,
+         "skills/build/SKILL.md": fm_ui}, d_plugins)
+    check(len(dd) == 1 and "skills/build/SKILL.md" in dd[0][2],
+          "dispatch: sub-skill set frontmatter-only; user-invocable body slash flagged")
+    check(compute_clean([("dispatch", "VIOLATE", "")])[0] is False,
+          "dispatch: VIOLATE is dirty")
+    check(validate_vocab([("dispatch", "VIOLATE", "")]) == [],
+          "dispatch: pseudo-id unrestricted vocab")
+    # plugin name from the manifest (plugin-shape invariant)
+    check(plugin_names("/no/such/repo") == [], "plugin_names: absent manifest → empty")
+
     # clean-set + vocab
     clean_rows = [(f"V{1}", "HOLD", ""), (f"V{2}", "VIOLATE-CAPTURED", ""),
                   ("token", ADVISORY, "")]
@@ -1839,7 +1982,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 124
+    return 135
 
 
 # --- entry -------------------------------------------------------------------
