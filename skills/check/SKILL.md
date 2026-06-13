@@ -8,6 +8,7 @@ description: |
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
 allowed-tools: Read, Grep, Glob, Bash(python3 */check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
+disallowed-tools: Edit, Write
 model: sonnet
 ---
 

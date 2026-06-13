@@ -6,6 +6,7 @@ description: |
   "what does §V.<n> mean", "decompress this", "explain in prose", "I don't
   read telegraph". Writes → /sdd:spec.
 allowed-tools: Read, Grep, Glob, Skill
+disallowed-tools: Edit, Write
 model: sonnet
 ---
 
