@@ -5,7 +5,7 @@ description: |
   recurrence class, append §B. Not user-invoked — engaged from /sdd:spec
   BACKPROP mode (bug → spec user route = `/sdd:spec <intent>`). Not for
   mechanical typo or one-off fix w/ no recurrence class — pure code fix only.
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Grep
 user-invocable: false
 ---
 
