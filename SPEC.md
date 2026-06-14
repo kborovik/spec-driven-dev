@@ -100,6 +100,7 @@ T23|x|patch read-only skill frontmatter — scope vocab {check, explain} (zero-w
 T24|x|drop zero-body-use frontmatter grants left by prior grant sweep — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md`: grant ∉ body invocation → drop (backprop `Skill`, design `Skill`, explain `Glob`+`Skill`)|V62
 T25|x|drop surviving zero-body-use grants T24 sweep missed — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md`: grant token ∉ body invocation → drop (backprop `Glob`; check `Glob`+`Skill` — `Agent` kept, Batch-protocol Explore spawns)|V62,B17
 T26|x|script: audit asserts no frontmatter `allowed-tools` grant is zero-body-use — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md .claude/skills/release/SKILL.md`, grant token ∉ skill-body invocation → VIOLATE; emit `id|verdict|evidence` row + self-test; check audit consumes row, retires hand-run grant sweep|V62,V40,B17
+T27|.|script: add `emit-token-estimate` mode — single-line `bytes/TOKEN_RATIO` estimate from SPEC.md; /sdd:compact LOAD baseline + check token-budget advisory consume it i/o `wc -c` + hand-division|V40,V48
 
 ## §B BUGS
 
