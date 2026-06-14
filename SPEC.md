@@ -23,7 +23,7 @@ external surface — what operator + consuming repo see.
 - explain: `/sdd:explain [§-cite|--next]` → prose expansion w/ cited siblings, zero writes
 - compact: `/sdd:compact` → six-prong token sweep, single atomic commit
 - reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep, single atomic commit
-- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, --self-test
+- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, --self-test
 - format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, compact, reorganize
 
 ## §V INVARIANTS
