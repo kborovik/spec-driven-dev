@@ -16,7 +16,7 @@ Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold 
 
 ## LOOP
 
-1. read `SPEC.md` @ root; absent → degrade per § below
+1. read `SPEC.md` @ root (citation context only — never written this run); absent → degrade per § below
 2. topic vague or empty → ≤ 2 questions to localize, then propose
 3. propose shape (named structures, types, key decisions) in 1 pass
 4. surface `## Open Questions` list at bottom
@@ -54,7 +54,7 @@ steno body; § citations OK when `SPEC.md` present.
 
 ## Effect on in-flight SPEC items
 
-[§T/§V deltas — superseded, narrowed, unchanged. omit § if SPEC.md absent]
+[§T/§V deltas — superseded, narrowed, unchanged — described in THIS file, never applied to SPEC.md. omit § if SPEC.md absent]
 
 ## Design decisions
 
