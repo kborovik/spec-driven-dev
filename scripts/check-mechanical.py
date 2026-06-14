@@ -1051,8 +1051,17 @@ def audit_grants(skill_md):
 
 # --- token estimate ----------------------------------------------------------
 
+def estimate_tokens(spec_bytes):
+    """Token estimate = bytes / TOKEN_RATIO (token-budget invariant). Single
+    realization of the divisor: both the audit advisory and the
+    emit-token-estimate mode consume this, so /sdd:compact LOAD baseline +
+    /sdd:check stop hand-running `wc -c` + division (mechanical-realization
+    invariant)."""
+    return int(spec_bytes / TOKEN_RATIO)
+
+
 def audit_token_estimate(spec_bytes):
-    est = int(spec_bytes / TOKEN_RATIO)
+    est = estimate_tokens(spec_bytes)
     if est > TOKEN_BUDGET:
         k = round(est / 1000)
         return [("token", ADVISORY,
@@ -1518,6 +1527,15 @@ def cmd_emit_overview(args):
     return 0
 
 
+def cmd_emit_token_estimate(args):
+    """Single-line `bytes / TOKEN_RATIO` token estimate from SPEC.md
+    (token-budget invariant). /sdd:compact LOAD baseline + post-sweep estimate
+    consume this instead of hand-running `wc -c` + division."""
+    _, spec_bytes, _ = load_spec(args.repo_root, args.spec)
+    print(estimate_tokens(spec_bytes))
+    return 0
+
+
 def parse_table(text):
     rows = []
     for line in text.splitlines():
@@ -1956,6 +1974,12 @@ def selftest():
     # token estimate
     check(audit_token_estimate(int(TOKEN_BUDGET * TOKEN_RATIO) + 1000), "token over fires")
     check(audit_token_estimate(100) == [], "token under silent")
+    # estimate_tokens: single divisor realization, shared by audit + emit mode
+    check(estimate_tokens(int(TOKEN_RATIO * 100)) == 100,
+          "estimate_tokens: bytes / TOKEN_RATIO")
+    check(estimate_tokens(0) == 0, "estimate_tokens: zero bytes → 0 tokens")
+    check(estimate_tokens(int(TOKEN_BUDGET * TOKEN_RATIO) + 1000) > TOKEN_BUDGET,
+          "estimate_tokens: over-budget bytes → est > budget")
 
     # batch agent count (batch invariant): ceil(|V|/15) clamp [1,4]; PUBLISHED
     # census < ceil(|V|/2) → 1 regardless; census deterministic (closes §B.7)
@@ -2214,7 +2238,7 @@ def main(argv=None):
     parser.add_argument("mode", choices=["audit", "write-memo", "emit-v-slices",
                                          "emit-superseded", "emit-fold-seeds",
                                          "emit-v-weights", "emit-row-ids",
-                                         "emit-overview"])
+                                         "emit-overview", "emit-token-estimate"])
     parser.add_argument("--repo-root", default=os.environ.get("CHECK_REPO_ROOT", "."))
     parser.add_argument("--spec", default="SPEC.md")
     parser.add_argument("--no-hook", action="store_true",
@@ -2245,6 +2269,8 @@ def main(argv=None):
         return cmd_emit_row_ids(args)
     if args.mode == "emit-overview":
         return cmd_emit_overview(args)
+    if args.mode == "emit-token-estimate":
+        return cmd_emit_token_estimate(args)
     return cmd_write_memo(args)
 
 
