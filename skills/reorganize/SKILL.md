@@ -2,7 +2,7 @@
 name: reorganize
 description: |
   SPEC.md §V cluster + renumber + cite-DAG sweep. Operator-triggered
-  clarity-shape pass — distinct from /sdd:compact (token reduction).
+  clarity-shape pass — distinct from /sdd:condense (token reduction).
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
@@ -17,7 +17,7 @@ Operator-triggered clarity-shape pass over SPEC.md §V. Cadence ≤ once per maj
 
 State-mutator scoped to SPEC.md + `.claude/spec-clusters.json` + `.claude/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists). Operator invokes only per recipe-step-no-dispatch rule. Owns §V renumber permission carved out of monotonic-id invariant.
 
-Distinct from /sdd:compact: compact = token reduction (folds, archives, trims); reorganize = clarity shape (cluster + renumber) — not token drop, not row folds. Writes serialize main-thread per write-serialize invariant; classification reads delegable to sub-agents. Single commit per atomic-operation discipline, not partial application; cite-DAG sweep per cite-resolution invariant rides same commit.
+Distinct from /sdd:condense: condense = token reduction (folds, archives, trims); reorganize = clarity shape (cluster + renumber) — not token drop, not row folds. Writes serialize main-thread per write-serialize invariant; classification reads delegable to sub-agents. Single commit per atomic-operation discipline, not partial application; cite-DAG sweep per cite-resolution invariant rides same commit.
 
 ## PROGRESS
 
@@ -129,7 +129,7 @@ Variants: `--taxonomy-only` exit (not commit) → swap item 1 for `/sdd:reorgani
 
 - not auto-fire — operator-triggered only per recipe-step-no-dispatch rule.
 - not partial commit — single atomic commit per atomic-operation discipline.
-- not token reduction — routes through /sdd:compact.
-- not row folds — body content preserved (collapse belongs to /sdd:compact prong 1); ARCHIVE-RETIRED drops row count via verbatim migration, not collapse.
+- not token reduction — routes through /sdd:condense.
+- not row folds — body content preserved (collapse belongs to /sdd:condense prong 1); ARCHIVE-RETIRED drops row count via verbatim migration, not collapse.
 - not cadence enforcement in /sdd:check — intent only.
 - not hardcoded plugin dir names — discovery probe drives PUBLISHED scope per plugin-name-vs-dir invariant.

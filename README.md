@@ -185,9 +185,9 @@ The inverse of `telegraph`. Given any citation, returns plain English with cited
 
 Useful for code review, onboarding, or when you'd otherwise have to translate `every req → auth check before handler` in your head.
 
-### `/sdd:compact` — token-budget sweep
+### `/sdd:condense` — token-budget sweep
 
-Operator-triggered compactor for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~25k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
+Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~25k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
 
 ### `/sdd:reorganize` — §V cluster + renumber
 
@@ -204,7 +204,7 @@ Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/s
 | `build`      | plan → execute loop                                               |
 | `check`      | drift report                                                      |
 | `explain`    | telegraph → prose decoder                                         |
-| `compact`    | token-budget compaction sweep                                     |
+| `condense`   | token-budget condensation sweep                                   |
 | `reorganize` | §V cluster + renumber + cite sweep                                |
 | `telegraph`  | telegraph encoder (~40% reduction vs prose); auto-fires on writes |
 | `backprop`   | bug → spec protocol; fires on non-code-bug verification failures  |
@@ -292,7 +292,7 @@ Triggers:
 
 **Why Markdown, not YAML / JSON?** Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting. JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
 
-**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (~25k tokens — `/sdd:check` raises an advisory), `/sdd:compact` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
+**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (~25k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
 
 **Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
 
@@ -308,7 +308,7 @@ skills/spec/                     /sdd:spec — sole SPEC.md mutator
 skills/build/                    /sdd:build — plan-execute loop
 skills/check/                    /sdd:check — read-only drift report
 skills/explain/                  /sdd:explain — telegraph → prose decoder
-skills/compact/                  /sdd:compact — token-budget compaction sweep
+skills/condense/                 /sdd:condense — token-budget condensation sweep
 skills/reorganize/               /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
 skills/telegraph/                auto-fire telegraph encoder for SPEC-adjacent writes
 skills/backprop/                 auto-fire bug → spec protocol on /sdd:build verify-fail

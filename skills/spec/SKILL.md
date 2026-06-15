@@ -2,7 +2,7 @@
 name: spec
 description: |
   Sole semantic author of SPEC.md @ repo root — create, amend, fold designs,
-  or backprop bugs (§T status-flip → build, archive → compact, §V renumber →
+  or backprop bugs (§T status-flip → build, archive → condense, §V renumber →
   reorganize; those carve-outs not authoring paths).
   Triggers when user asks to write spec, start new spec, distill spec from
   code, add invariants, amend a section, or record a bug. Common phrasings:
@@ -146,7 +146,7 @@ Every sweep-§T row (remediating §V-class violation) in delta ! task line decla
 
 **Sub-recipe (b) — SPEC.md-narrative §V resolution**: grep `§V\.[0-9]+` in delta touching SPEC.md narrative (§G/§C/§I/§V/§T/§B body). Pre-filter backtick-wrapped tokens `grep -v -E '`[^`]*§V\.[0-9]+[^`]*`'` (invert scan, grep -v -E per tooling-preference invariant) — historical-quote form per verbatim invariant exempt. Each surviving match resolves against current SPEC.md §V row set (parse `^V[0-9]+:` openers). Unresolved → bail `stale §V.<n> cite in delta — row absent (likely folded); backtick-wrap historical or substitute live row` until rewrite. No narrative delta → no-op.
 
-(a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (compact prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`. Pattern-match catches what LLM prose-review missed (see §B history).
+(a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (condense prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`. Pattern-match catches what LLM prose-review missed (see §B history).
 
 ## NEXT-BLOCK-SECTION AUDIT
 
@@ -181,7 +181,7 @@ Defends against premature-split class — small audit or enforcement-meta additi
 
 Per freshness-contract invariant (SPEC.md is clean current design; history in commit log + archive, not inlined). Auto-rewrites delta → clean current state; pruned history → auto-commit msg body (recoverable via code + `git log`). Show-user diff displays post-prune row — prune reviewed, not blind.
 
-**§V-row delta prune** (delta patches pre-existing §V row): strip inlined-history residue. Pattern set (single source per freshness-contract invariant — shared w/ /sdd:check history-residue audit + token-budget compact body-trim prong):
+**§V-row delta prune** (delta patches pre-existing §V row): strip inlined-history residue. Pattern set (single source per freshness-contract invariant — shared w/ /sdd:check history-residue audit + token-budget condense body-trim prong):
 
 - amendment-counter `(∆)` markers → drop (clean current state carries no edit tally).
 - dated-retirement `retired YYYY-MM-DD` clause in live row → drop (wholesale-retired row is reorganize archival job, not amend residue).
@@ -192,7 +192,7 @@ Pre-filters (exempt, not pruned): backtick-wrapped tokens per verbatim-preservat
 
 **§B cause trim** (delta adds/rewrites §B `cause` cell): auto-trim → one-line bug-class description; multi-line forensics (repro transcript, root-cause walk, sha lineage) → commit-msg body per APPLY step 4. Preview shows trimmed form, not raw forensics.
 
-§T body not pruned here — /sdd:build flips status cell only per status-flip invariant so §T rows authored one-line @ creation (NEW + BACKPROP drafts); pre-existing §T residue owned by token-budget compact body-trim prong + /sdd:check oversized-cell advisory backstop.
+§T body not pruned here — /sdd:build flips status cell only per status-flip invariant so §T rows authored one-line @ creation (NEW + BACKPROP drafts); pre-existing §T residue owned by token-budget condense body-trim prong + /sdd:check oversized-cell advisory backstop.
 
 ## POST-APPLY
 

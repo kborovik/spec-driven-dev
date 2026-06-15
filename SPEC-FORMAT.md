@@ -100,11 +100,11 @@ Cite-DAG edge types per cite-resolution invariant: `§T.cites → §V`, `§B.fix
 
 ## ONE-FILE RULE
 
-SPEC.md @ repo root is sole live spec file (per sole-source-of-truth invariant). not split, not docs/ tree, not JSON sidecars. Token-budget overflow → compact via archive sibling per token-budget compact mechanism (see ARCHIVE SIBLING) — archive is separate artifact carrying immutable historical rows, not split in canonical sense.
+SPEC.md @ repo root is sole live spec file (per sole-source-of-truth invariant). not split, not docs/ tree, not JSON sidecars. Token-budget overflow → condense via archive sibling per token-budget condense mechanism (see ARCHIVE SIBLING) — archive is separate artifact carrying immutable historical rows, not split in canonical sense.
 
 ## ARCHIVE SIBLING
 
-Optional `SPEC.archive.md` @ repo root is sibling file carrying verbatim archived §T and §B rows per token-budget compact mechanism and verbatim retired §V rows per reorganize archive-retired phase. Rows sorted by id ascending within each section/block. Sibling form not 7th section in SPEC.md — archive is separate artifact, not embedded.
+Optional `SPEC.archive.md` @ repo root is sibling file carrying verbatim archived §T and §B rows per token-budget condense mechanism and verbatim retired §V rows per reorganize archive-retired phase. Rows sorted by id ascending within each section/block. Sibling form not 7th section in SPEC.md — archive is separate artifact, not embedded.
 
 ### Archive marker
 

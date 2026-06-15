@@ -1,15 +1,15 @@
 ---
-name: compact
+name: condense
 description: |
-  SPEC.md compactor — token-budget sweep.
-  Triggers when user invokes `/sdd:compact` or asks to compact spec or /sdd:check
-  emits `## advisory` token-budget overflow line. Phrasings: "/sdd:compact",
-  "compact SPEC.md", "SPEC too big", "shrink the spec", "token budget".
+  SPEC.md condenser — token-budget sweep.
+  Triggers when user invokes `/sdd:condense` or asks to condense spec or /sdd:check
+  emits `## advisory` token-budget overflow line. Phrasings: "/sdd:condense",
+  "condense SPEC.md", "SPEC too big", "shrink the spec", "token budget".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 */check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
-# compact — SPEC.md compactor
+# condense — SPEC.md condenser
 
 Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.claude/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 25k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
 
@@ -19,7 +19,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 
 ## LOAD
 
-1. Read `SPEC.md`. Missing → "no spec, nothing to compact." Stop.
+1. Read `SPEC.md`. Missing → "no spec, nothing to condense." Stop.
 2. Read `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` — row schema + section catalog.
 3. Baseline tokens = bytes / `check-mechanical.py` `TOKEN_RATIO` (single source; not hardcode divisor). Record.
 
@@ -66,8 +66,8 @@ Heavy set script-computed: `check-mechanical.py emit-v-weights` emits `v_row|byt
 
 Always fires post-PROPOSE. Single bulk AskUserQuestion covers full sweep — mid-flow re-prompt not allowed:
 
-- **question**: `Compact SPEC.md: prongs {<firing-set>} firing, {<skip-set>} skipped. Baseline ~<n>k tokens, est. ~<m>k post-sweep. Apply?`
-- **header**: `Compact gate`
+- **question**: `Condense SPEC.md: prongs {<firing-set>} firing, {<skip-set>} skipped. Baseline ~<n>k tokens, est. ~<m>k post-sweep. Apply?`
+- **header**: `Condense gate`
 - **options** (4, mutually exclusive, label is action description):
   - `apply all firing prongs` → EXECUTE full firing set.
   - `force-skip prong 3` → EXECUTE minus prong 3 (archive split deferred; prong 3 load-bearing so explicit override).
@@ -82,9 +82,9 @@ Single atomic commit:
 2. Prong 3 fired → `git add SPEC.archive.md`.
 3. Prong 6 fired → `git add .claude/check-extras.md`.
 4. Prong 1 fired → cite-DAG sweep same commit; touch REPO-LOCAL citers renumbered by fold.
-5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit `git commit -m <subject> -- <staged artifacts> SPEC.md` (write-ownership invariant — commit scopes to staged owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `compact SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
+5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit `git commit -m <subject> -- <staged artifacts> SPEC.md` (write-ownership invariant — commit scopes to staged owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `condense SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
 
-EXECUTE ends @ commit. Rollback `git revert <compact-sha>`. Drift cascade → Next-block item #1; operator dispatches next turn.
+EXECUTE ends @ commit. Rollback `git revert <condense-sha>`. Drift cascade → Next-block item #1; operator dispatches next turn.
 
 ## MECHANIZE — script-candidate scan
 
@@ -110,15 +110,15 @@ Example after EXECUTE (firing-set {1,2,3,4,5}; commit auto-fired):
 ```
 ## Next
 
-1. /sdd:check — cascade scan over compacted SPEC.md
+1. /sdd:check — cascade scan over condensed SPEC.md
 2. /sdd:build --next — start the next pending §T row
-3. git revert <compact-sha> — rollback if compaction breaks downstream
+3. git revert <condense-sha> — rollback if condensation breaks downstream
 ```
 
-Variants: CONFIRM cancel (no commit) → swap item 1 for `/sdd:compact` (re-run to apply after spec review), drop item 3. CONFIRM subset → Next-block unchanged.
+Variants: CONFIRM cancel (no commit) → swap item 1 for `/sdd:condense` (re-run to apply after spec review), drop item 3. CONFIRM subset → Next-block unchanged.
 
 ## NON-GOALS
 
-- not auto-fire — /sdd:check emits advisory; operator invokes /sdd:compact next turn.
+- not auto-fire — /sdd:check emits advisory; operator invokes /sdd:condense next turn.
 - not partial commit — every firing prong applies or none.
-- not retune thresholds (25k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-compact invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.
+- not retune thresholds (25k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-condense invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.

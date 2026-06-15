@@ -58,25 +58,25 @@ Modes:
                 (default is all). Sources the §V-classification slice for the
                 drift-detector's single-agent and sub-agent batch paths without a
                 whole-file Read (large SPEC exceeds the Read token cap).
-  emit-superseded — read SPEC.md, print the compactor's prong-2 SUPERSEDED
+  emit-superseded — read SPEC.md, print the condenser's prong-2 SUPERSEDED
                 candidate set: every closed §T whose §V cite resolves only into
                 the archived §V.retired block (absent from live §V). Live-only
                 resolution, distinct from the cite-DAG audit's live+archive
                 scope. Prints a `tid|superseded_v|original_cites` table the
-                compactor consumes in place of by-hand per-cite resolution.
-  emit-fold-seeds — read SPEC.md, print the compactor's prong-1 fold-candidate
+                condenser consumes in place of by-hand per-cite resolution.
+  emit-fold-seeds — read SPEC.md, print the condenser's prong-1 fold-candidate
                 seed set: clusters of live §V rows that share a citer (a §T
                 whose cites or a §B whose fix names ≥ 2 live §V rows co-cites
                 them). Connected components over the co-citation graph. Prints a
                 `cluster_members|co_citers` table — an advisory seed only; the
-                operator confirms each fold at the compact CONFIRM gate (never
+                operator confirms each fold at the condense CONFIRM gate (never
                 auto-applied) per the fold-first-authoring invariant.
-  emit-v-weights — read SPEC.md, print the compactor's prong-6 per-§V-row
+  emit-v-weights — read SPEC.md, print the condenser's prong-6 per-§V-row
                 byte/token weight ranking plus the heavy-row set (top rows whose
                 cumulative weight first reaches ≥ 50% of the §V section; stable
                 tie-break descending weight then ascending id so run-stable).
                 Prints a `v_row|bytes|tokens|cum_pct|heavy` table sorted heaviest
-                first — the compactor extracts the heavy rows' audit recipes
+                first — the condenser extracts the heavy rows' audit recipes
                 without a by-inspection guess.
   emit-row-ids — read SPEC.md, print the canonical live id-set skeleton: every
                 live §V + §I + §T id as a verdict-table row with blank verdict
@@ -299,13 +299,13 @@ def collect_overview(sections, order):
 
 
 def emit_superseded_candidates(v_rows, t_rows):
-    """Prong-2 SUPERSEDED candidate set (token-budget-compact invariant): each
+    """Prong-2 SUPERSEDED candidate set (token-budget-condense invariant): each
     closed §T (status `x`) whose §V cite is absent from the live §V section →
     candidate — the cited invariant was amended away or folded (resolution lands
     only in the archived §V.retired block, or nowhere). Live-§V-only resolution,
     distinct from the cite-DAG audit's live+archive scope (where an archived
     cite holds resolved). Returns [{id, unresolved:[V<n>,...], cites}] — the
-    compactor builds `SUPERSEDED — §V.<m> amend` markers from it without by-hand
+    condenser builds `SUPERSEDED — §V.<m> amend` markers from it without by-hand
     per-cite resolution (operator confirms each because content-amend-away not
     cite-detectable)."""
     live_v = {r["id"] for r in v_rows}
@@ -342,14 +342,14 @@ def _live_v_cites(cites, live_v):
 
 
 def emit_fold_seeds(v_rows, t_rows, b_rows):
-    """Prong-1 fold-candidate seed (token-budget-compact invariant): cluster live
+    """Prong-1 fold-candidate seed (token-budget-condense invariant): cluster live
     §V rows that share a citer — a §T whose `cites` or a §B whose `fix` names ≥ 2
     live §V rows co-cites them so they are fold-candidate siblings. Edges run
     between every pair of live §V rows a single citer names; clusters is connected
     components over that co-citation graph. Live-§V-only — an archived or folded
     cite forms no edge. Returns [{members:[V<n>,...], citers:[T<n>|B<n>,...]}]
     sorted by lowest member id; an advisory seed only — the operator confirms
-    each fold at the compact CONFIRM gate (never auto-applied) per the
+    each fold at the condense CONFIRM gate (never auto-applied) per the
     fold-first-authoring invariant."""
     live_v = {r["id"] for r in v_rows}
     parent = {}
@@ -401,12 +401,12 @@ def emit_fold_seeds(v_rows, t_rows, b_rows):
 
 
 def emit_v_weights(v_rows):
-    """Prong-6 per-§V-row weight ranking (token-budget-compact invariant): byte
+    """Prong-6 per-§V-row weight ranking (token-budget-condense invariant): byte
     weight is utf-8 length of the full row line, token weight is byte/TOKEN_RATIO
     per the token-budget invariant. Ranks rows descending weight, tie-break
     ascending id so run-stable; the heavy set is the prefix whose cumulative weight
     first reaches ≥ 50% of the §V-section total. Returns (ranked, total_bytes)
-    where each ranked entry is {id, bytes, tokens, cum_pct, heavy}. The compactor
+    where each ranked entry is {id, bytes, tokens, cum_pct, heavy}. The condenser
     extracts heavy rows' audit recipes without a by-inspection guess."""
     weights = []
     for r in v_rows:
@@ -712,7 +712,7 @@ def audit_history_residue(v_rows, t_rows, b_rows, full=False, oversized_ack=None
                                   for p in pattern_order if p in counts)
             out.append(("history", "VIOLATE",
                         f"§{kind}: {len(items)} rows ({breakdown}) "
-                        f"→ /sdd:compact body-trim"))
+                        f"→ /sdd:condense body-trim"))
         else:
             for pattern, rid, line in items:
                 out.append(("history", "VIOLATE",
@@ -723,7 +723,7 @@ def audit_history_residue(v_rows, t_rows, b_rows, full=False, oversized_ack=None
     if advisories and oversized_cell_sha(advisories) != oversized_ack:
         out.append(("history", ADVISORY,
                     "history: oversized cells (smell): "
-                    + ", ".join(advisories) + " — consider /sdd:compact body-trim"))
+                    + ", ".join(advisories) + " — consider /sdd:condense body-trim"))
     return out
 
 
@@ -1054,7 +1054,7 @@ def audit_grants(skill_md):
 def estimate_tokens(spec_bytes):
     """Token estimate = bytes / TOKEN_RATIO (token-budget invariant). Single
     realization of the divisor: both the audit advisory and the
-    emit-token-estimate mode consume this, so /sdd:compact LOAD baseline +
+    emit-token-estimate mode consume this, so /sdd:condense LOAD baseline +
     /sdd:check stop hand-running `wc -c` + division (mechanical-realization
     invariant)."""
     return int(spec_bytes / TOKEN_RATIO)
@@ -1066,7 +1066,7 @@ def audit_token_estimate(spec_bytes):
         k = round(est / 1000)
         return [("token", ADVISORY,
                  f"SPEC.md ~{k}k tokens > {TOKEN_BUDGET // 1000}k budget; "
-                 f"consider /sdd:compact")]
+                 f"consider /sdd:condense")]
     return []
 
 
@@ -1529,7 +1529,7 @@ def cmd_emit_overview(args):
 
 def cmd_emit_token_estimate(args):
     """Single-line `bytes / TOKEN_RATIO` token estimate from SPEC.md
-    (token-budget invariant). /sdd:compact LOAD baseline + post-sweep estimate
+    (token-budget invariant). /sdd:condense LOAD baseline + post-sweep estimate
     consume this instead of hand-running `wc -c` + division."""
     _, spec_bytes, _ = load_spec(args.repo_root, args.spec)
     print(estimate_tokens(spec_bytes))

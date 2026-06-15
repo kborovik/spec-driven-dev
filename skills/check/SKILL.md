@@ -214,11 +214,11 @@ T<n> STALE: status `x`, no middleware file exists.
 
 Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown. Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
 
-**Body-row aggregation** (mechanical core): `history`-class VIOLATE rows collapse per section (§V/§T/§B) when section count > threshold (script-owned) → single summary row `§<S>: <n> rows (<count> <pattern>, ...) → /sdd:compact body-trim` w/ breakdown across {amendment-counter, dated-retirement, supersession-narration}; below-threshold sections keep per-row form. `--full` restores per-row listing.
+**Body-row aggregation** (mechanical core): `history`-class VIOLATE rows collapse per section (§V/§T/§B) when section count > threshold (script-owned) → single summary row `§<S>: <n> rows (<count> <pattern>, ...) → /sdd:condense body-trim` w/ breakdown across {amendment-counter, dated-retirement, supersession-narration}; below-threshold sections keep per-row form. `--full` restores per-row listing.
 
 ```
 ## invariant drift
-§V: 49 rows (29 amendment-counter, 12 dated-retirement, 8 supersession-narration) → /sdd:compact body-trim
+§V: 49 rows (29 amendment-counter, 12 dated-retirement, 8 supersession-narration) → /sdd:condense body-trim
 §B.<n> VIOLATE: history: amendment-counter @ SPEC.md:<line>
 ```
 
@@ -236,7 +236,7 @@ clean — memo @ 060a9d2
 
 ## advisory
 memo schema_version mismatch — memo dropped, full sweep
-SPEC.md ~30k tokens > 25k budget; consider /sdd:compact
+SPEC.md ~30k tokens > 25k budget; consider /sdd:condense
 
 ## summary
 0 violate. 1 violate-captured. 39 suppressed (18 hold-since-clean, 2 latent, 19 hold).
@@ -264,8 +264,8 @@ Populate the Next block (not a separate section) — map drift classes → candi
 
 - VIOLATE / DRIFT → `/sdd:spec <description citing §V.<n>>` (gate routes to BACKPROP).
 - VIOLATE-CAPTURED → no action; baseline `§B`-recorded, remediation forward-only.
-- `history:` VIOLATE → `/sdd:spec amend §<S>.<n>` to prune inlined history; task-row residue → `/sdd:compact` body-trim.
-- `format:` VIOLATE → `/sdd:spec amend §<S>.<n>` (or `/sdd:compact` when archive-marker / window split).
+- `history:` VIOLATE → `/sdd:spec amend §<S>.<n>` to prune inlined history; task-row residue → `/sdd:condense` body-trim.
+- `format:` VIOLATE → `/sdd:spec amend §<S>.<n>` (or `/sdd:condense` when archive-marker / window split).
 - SUPPRESSED → no action; rolls forward until trigger fires / touch intersects / scope expands.
 - MISSING → `/sdd:build <task-cite>` if task exists; else `/sdd:spec amend task` to add row.
 - STALE → `/sdd:spec amend <task-cite>` to uncheck status.

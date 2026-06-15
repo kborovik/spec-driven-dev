@@ -146,7 +146,7 @@ env: FOO_KEY ! set
 
 ## ONE FILE RULE
 
-Big project → more §s, not more files. grep ceremony kills agent speed. Token-budget overflow → /sdd:compact (folds, trims, archives), never split. Thresholds live w/ compact skill + audit script, not here.
+Big project → more §s, not more files. grep ceremony kills agent speed. Token-budget overflow → /sdd:condense (folds, trims, archives), never split. Thresholds live w/ condense skill + audit script, not here.
 
 ## EXAMPLES
 
