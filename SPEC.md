@@ -21,10 +21,10 @@ external surface — what operator + consuming repo see.
 - build: `/sdd:build [§T.n|--next|--all]` → plan → edit → verify → flip §T `.`→`x` + commit per task
 - check: `/sdd:check [--full]` → read-only drift REPORT (severity blocks, checkpoint, advisory, summary) + Next block
 - explain: `/sdd:explain [§-cite|--next]` → prose expansion w/ cited siblings, zero writes
-- compact: `/sdd:compact` → six-prong token sweep, single atomic commit
+- condense: `/sdd:condense` → six-prong token sweep, single atomic commit
 - reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep, single atomic commit
 - script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, --self-test
-- format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, compact, reorganize
+- format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, condense, reorganize
 
 ## §V INVARIANTS
 
@@ -61,13 +61,13 @@ V44: memo — → `.claude/check-extras.md §V44`
 V45: scope-feed — default-sweep scope = script-emitted rows (v_row_shas drift, flipped-since-clean, touched minus SPEC.md + archive sibling); comma-joined fields chain into `emit-v-slices --dirty`; LLM never hand-rolls `git diff`.
 V46: batch — → `.claude/check-extras.md §V46`
 V47: check-dispatch — /sdd:check accepts bare (memo-driven) or `--full` (drop memo, re-classify all) only; other args bail.
-V48: token-budget — estimate = bytes / 3.4; > 20k tokens → check advisory → operator /sdd:compact; > 50 closed §T rows → window-vs-archive split; canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
+V48: token-budget — estimate = bytes / 3.4; > 20k tokens → check advisory → operator /sdd:condense; > 50 closed §T rows → window-vs-archive split; canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
 V49: extras-hook — executable `.claude/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.claude/check-extras.md`, consulted by check + build pre-commit probe.
 V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
 V61: sub-skill-flags — → `.claude/check-extras.md §V61`
 V62: tooling-preference — → `.claude/check-extras.md §V62`
 V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
-V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:compact, /sdd:reorganize) (closes §B.6).
+V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:condense, /sdd:reorganize) (closes §B.6).
 V65: monitor-protocol — → `.claude/check-extras.md §V65`
 V66: mechanize-scan — → `.claude/check-extras.md §V66`
 
@@ -101,6 +101,7 @@ T24|x|drop zero-body-use frontmatter grants left by prior grant sweep — scope 
 T25|x|drop surviving zero-body-use grants T24 sweep missed — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md`: grant token ∉ body invocation → drop (backprop `Glob`; check `Glob`+`Skill` — `Agent` kept, Batch-protocol Explore spawns)|V62,B17
 T26|x|script: audit asserts no frontmatter `allowed-tools` grant is zero-body-use — scope `grep -nE '^allowed-tools:' skills/*/SKILL.md .claude/skills/release/SKILL.md`, grant token ∉ skill-body invocation → VIOLATE; emit `id|verdict|evidence` row + self-test; check audit consumes row, retires hand-run grant sweep|V62,V40,B17
 T27|x|script: add `emit-token-estimate` mode — single-line `bytes/TOKEN_RATIO` estimate from SPEC.md; /sdd:compact LOAD baseline + check token-budget advisory consume it i/o `wc -c` + hand-division|V40,V48
+T28|.|rename surface compact→condense: scope `grep -rln 'compact' skills/ scripts/ README.md .claude/ .claude-plugin/ SPEC-FORMAT.md`; rewrite skill-name forms (`/sdd:compact`, dir `skills/compact/`, frontmatter `name:`, prose "compactor"); leave generic-word + benchmark-fixture + SPEC.md closed-§T rows verbatim|V60
 
 ## §B BUGS
 
