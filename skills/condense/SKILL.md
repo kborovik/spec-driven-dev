@@ -11,7 +11,7 @@ model: sonnet
 
 # condense — SPEC.md condenser
 
-Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.claude/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 25k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
+Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.claude/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 20k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
 
 ## PROGRESS
 
@@ -121,4 +121,4 @@ Variants: CONFIRM cancel (no commit) → swap item 1 for `/sdd:condense` (re-run
 
 - not auto-fire — /sdd:check emits advisory; operator invokes /sdd:condense next turn.
 - not partial commit — every firing prong applies or none.
-- not retune thresholds (25k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-condense invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.
+- not retune thresholds (20k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-condense invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.

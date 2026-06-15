@@ -236,7 +236,7 @@ clean — memo @ 060a9d2
 
 ## advisory
 memo schema_version mismatch — memo dropped, full sweep
-SPEC.md ~30k tokens > 25k budget; consider /sdd:condense
+SPEC.md ~30k tokens > 20k budget; consider /sdd:condense
 
 ## summary
 0 violate. 1 violate-captured. 39 suppressed (18 hold-since-clean, 2 latent, 19 hold).
