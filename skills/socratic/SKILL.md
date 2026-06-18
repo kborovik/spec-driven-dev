@@ -63,7 +63,7 @@ overlay, not phase. answer reveals gap → surface distinction in 1–2 sentence
 
 ## CONVERGENCE
 
-converged iff some mode's triple fully present in dialogue history. ≥ 3 turns w/o convergence → offer escape: "enough for rough draft — return now and refine downstream, or keep going?"
+converged iff some mode's triple fully present in dialogue history. ≥ 3 turns w/o convergence → AskUserQuestion per decision-gate invariant (selection drives same-turn return-vs-resume; prose `or keep going?` form not allowed). header `Converge?`, mutually-exclusive labels: `Return now` (stop dialogue → return `(mode, partial-facts)` + `unmet-criteria` per ESCAPE HATCH) / `Keep going` (resume LOOP).
 
 ## ESCAPE HATCH
 
