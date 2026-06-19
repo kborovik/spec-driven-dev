@@ -16,13 +16,13 @@ The mechanics:
 - **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task produces the same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
 
-> The spec is the only artifact that earns its tokens. Everything else must save more tokens later, save the agent's context, or get cut.
+> The spec is the only artifact that always justifies its token cost. Everything else must save more tokens later, save the agent's context, or be cut.
 
 ### SPEC.md is for the LLM, not you
 
 `SPEC.md` is an LLM-facing artifact. You operate it through Claude — `/sdd:spec` writes, `/sdd:build` and `/sdd:check` read, `/sdd:explain` decodes a citation back to prose when you want to read along. The loop is `human → /sdd:* → Claude → SPEC.md`, not hand-editing in your editor.
 
-That framing is load-bearing. Telegraphic fragments over full sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
+That framing decides the format. Telegraphic fragments over full sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
 
 ## Install
 
@@ -211,7 +211,7 @@ Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` becomes
 | `socratic`   | single-question intent gate; invoked by `/sdd:spec`                    |
 | `steno`      | human-facing terse-prose register for reviewer-read text               |
 
-You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically when a `/sdd:build` verification failure smells like under-specification (clear code bugs are just fixed).
+You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically when a `/sdd:build` verification failure appears to stem from under-specification (clear code bugs are just fixed).
 
 ## Workflows
 
@@ -254,7 +254,7 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 ## Telegraph encoding
 
-`telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol earns its place only where it reads clearer than the word.
+`telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol is used only where it reads clearer than the word.
 
 Result: every spec write lands about 40% leaner in tokens than the equivalent prose while staying machine- and human-readable. The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
@@ -294,7 +294,7 @@ Triggers:
 
 **Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (about 20k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
 
-**Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
+**Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that appears to stem from under-specification routes through `backprop`.
 
 **Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays about 1.7x the tokens for the same content (the measured about 40% cut, inverted). Optional in syntax, expensive in practice.
 
