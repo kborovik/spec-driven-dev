@@ -71,6 +71,7 @@ V64: single-load — §V bodies enter run context via script `emit-v-slices` onl
 V65: monitor-protocol — → `.claude/check-extras.md §V65`
 V66: mechanize-scan — → `.claude/check-extras.md §V66`
 V67: human-clarity — → `.claude/check-extras.md §V67`
+V68: table-use — info presented as prose or short list, never `|`-table; `|`-table reserved for keyed fixed-schema data rows (§T/§B/§I row schema, spec-skill audit table, similar id-keyed sets); prose-comparison or concept table → bullet list. Spans skill bodies (telegraph) + human-facing surfaces (steno, CLAUDE.md, README, chat); register-orthogonal — sibling to symbol-set + human-clarity rows, not subordinate.
 
 ## §T TASKS
 
@@ -113,6 +114,7 @@ T35|x|author `CLAUDE.md` @ repo root — plain-imperative restatement of V67 cla
 T36|x|script: audit asserts `CLAUDE.md` present @ root, carries the direct-instruction marker block, + symbol-clean (extends T32 naked-symbol scope `[→≥≤&]` to `CLAUDE.md`, wholly human-facing — symbol outside backtick-span + fenced block → VIOLATE; absent file → MISSING); emit `id|verdict|evidence` row + self-test; check audit consumes row|V67,V40,B21
 T37|x|sweep README.md banned idiom/metaphor → literal phrasing per V67 BOUNDARIES — scope `grep -nE 'load-bearing|smell|earns its' README.md`: L19 `earns its tokens`, L25 `load-bearing`, L214/L297 `smells like`, L257 `earns its place` → plain restatement; backtick/fenced telegraph-example rows exempt|V67,B22
 T38|x|script: audit asserts human-facing surface carries no banned exact-phrase idiom/jargon-idiom — scope `discover_human_facing` set (README.md, CLAUDE.md, plugin manifest), match curated low-false-positive BOUNDARIES subset (jargon-idiom + multi-word idiom exact phrases; ambiguous single words excluded, backtick-span/fenced exempt); emit `id|verdict|evidence` row + self-test; check audit consumes row, retires hand-run idiom grep|V67,V40,B22
+T39|.|sweep leading-pipe prose tables → bullet list per table-use invariant — scope `grep -nE '^\|' skills/*/SKILL.md README.md CLAUDE.md`: pipe-table presenting prose comparison or concept set → bullet list; keyed fixed-schema data tables (§T/§B/§I schema, SPEC-FORMAT row tables, spec-skill audit table) left verbatim; fenced/backticked example tables exempt; design DISTINCTION FROM SOCRATIC table = first known target|V68,V3
 
 ## §B BUGS
 
