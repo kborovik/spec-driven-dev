@@ -19,12 +19,12 @@ Write so a reviewer reads each point once and moves on.
   background and qualifiers after it.
 - **One idea per sentence.** Keep sentences short. Break a long sentence before
   you cut words from it.
-- **Plain words.** Use literal phrasing. Do not use idiom (for example "moves
-  the needle", "low-hanging fruit"), word-level metaphor (for example "earns its
-  keep", "bite", "smell"), colloquialism (for example "gotcha", "kinda"),
-  culture-loaded shorthand (sports, military, film), or jargon-idiom (for example
-  "load-bearing", "by-construction", "hand-rolled", "clean-slate", "prior-art",
-  "carry-cost"). Write the literal meaning instead.
+- **Plain words.** Use literal phrasing. Do not use idiom (for example
+  `moves the needle`, `low-hanging fruit`), word-level metaphor (for example
+  `earns its keep`, `bite`, `smell`), colloquialism (for example `gotcha`,
+  `kinda`), culture-loaded shorthand (sports, military, film), or jargon-idiom
+  (for example `load-bearing`, `by-construction`, `hand-rolled`, `clean-slate`,
+  `prior-art`, `carry-cost`). Write the literal meaning instead.
 - **Define or avoid jargon.** Spell out a technical term the first time you use
   it, or use a plain word. Established terms `drift`, `bottleneck`, and `leak`
   are fine as is.

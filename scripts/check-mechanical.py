@@ -39,6 +39,14 @@ Modes:
                 telegraph keeps the set, so it is never scanned. Sound (fenced
                 prose treated exempt too) — realized once here so the
                 drift-detector retires its hand-run symbol grep.
+                Emits `idiom|VIOLATE|…` — the human-clarity invariant's
+                idiom-ban rule: no human-facing surface (README, CLAUDE.md, the
+                plugin manifest) carries a banned idiom / jargon-idiom phrase from
+                a curated low-false-positive subset of the steno BOUNDARIES ban
+                list (multi-word idiom + hyphenated jargon-idiom only; ambiguous
+                single words excluded). Backtick-span + fenced-block exempt —
+                realized once here so the drift-detector retires its hand-run
+                idiom grep, a fixed-pattern sweep a manual pass forgets to re-run.
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -801,6 +809,68 @@ def audit_human_symbols(human_files):
     return out
 
 
+# --- human-facing banned-idiom audit -----------------------------------------
+# human-clarity invariant: human-facing prose (README, CLAUDE.md, manifest) carries
+# no banned idiom / jargon-idiom. The phrase set is a CURATED low-false-positive
+# subset of the steno BOUNDARIES ban list — multi-word idiom + hyphenated
+# jargon-idiom exact phrases only. Ambiguous single words ("smell", "bite") are
+# deliberately excluded so legit technical prose never false-trips (the accepted
+# cost is a false negative on a bare single-word metaphor). Realized once here
+# (mechanical-realization invariant) so the drift-detector retires the hand-run
+# idiom grep — a fixed-pattern sweep a manual pass forgets to re-run (the recurrence
+# class this guards). Backtick-span + fenced-block exempt (verbatim-preservation
+# invariant): a code-span or fenced example naming a banned phrase (CLAUDE.md
+# enumerates the ban list) is fine; a live non-exempt prose use is VIOLATE.
+
+BANNED_IDIOM = [
+    "load-bearing", "by-construction", "hand-rolled", "clean-slate",
+    "prior-art", "carry-cost",                       # jargon-idiom (hyphenated)
+    "moves the needle", "low-hanging fruit", "boil the ocean",  # multi-word idiom
+    "earns its", "smells like",                      # multi-word metaphor (B22 class)
+]
+
+
+def scan_human_idiom(path, text):
+    """Flag a banned idiom / jargon-idiom phrase in one human-facing surface —
+    outside inline backtick spans and fenced code blocks. Match is a
+    case-insensitive substring over the backtick-stripped line; the curated
+    BANNED_IDIOM set is multi-word / hyphenated only so the substring test stays
+    low-false-positive. Backtick-wrapped tokens, fenced examples, and fenced
+    prose are verbatim-exempt (verbatim-preservation invariant). One VIOLATE row
+    per offending line, listing the matched phrases in set order (run-stable);
+    clean → no row (silent, sibling convention)."""
+    out = []
+    in_fence = False
+    for i, line in enumerate(text.splitlines(), start=1):
+        if FENCE_LINE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        bare = strip_backticks(line).lower()
+        hits = [p for p in BANNED_IDIOM if p in bare]
+        if hits:
+            out.append(("idiom", "VIOLATE",
+                        f"idiom VIOLATE: {path}:{i} banned idiom "
+                        f"{', '.join(hits)} in human-facing prose — write the "
+                        f"literal meaning per human-clarity invariant"))
+    return out
+
+
+def audit_human_idiom(human_files):
+    """File-reading wrapper (human-clarity invariant). Asserts no human-facing
+    surface carries a banned exact-phrase idiom / jargon-idiom — realized once
+    here, retiring the hand-run idiom grep a manual sweep forgets to re-run."""
+    out = []
+    for path in human_files:
+        try:
+            txt = read_text(path)
+        except OSError:
+            continue
+        out += scan_human_idiom(path, txt)
+    return out
+
+
 # --- CLAUDE.md presence + direct-instruction marker block --------------------
 # human-clarity invariant: repo-root CLAUDE.md carries the plain-imperative
 # restatement of the clarity standard governing chat + human-facing output,
@@ -1560,6 +1630,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
     findings += audit_grants(discover_grant_skills(repo_root))
     findings += audit_human_symbols(discover_human_facing(repo_root))
+    findings += audit_human_idiom(discover_human_facing(repo_root))
     findings += audit_claude_md(repo_root)
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
@@ -2373,6 +2444,34 @@ def selftest():
     check(classify_claude_md(end_first)[0][1] == "VIOLATE",
           "claude-md: end-before-begin marker → VIOLATE")
 
+    # human-facing banned-idiom audit (human-clarity invariant): a banned idiom /
+    # jargon-idiom phrase in prose flagged; backtick span + fenced block exempt;
+    # literal prose silent; multi-phrase line → one row listing each; ambiguous
+    # single word ("smell") excluded; scanning resumes after a fence closes.
+    idiom_naked = "that framing is load-bearing and earns its keep"
+    ir = scan_human_idiom("p", idiom_naked)
+    check(len(ir) == 1 and ir[0][0] == "idiom" and ir[0][1] == "VIOLATE"
+          and "load-bearing" in ir[0][2] and "earns its" in ir[0][2],
+          "human-idiom: banned phrases flagged, one row listing each")
+    check(scan_human_idiom("p", "the `load-bearing` token is exempt") == [],
+          "human-idiom: backtick span exempt")
+    check(scan_human_idiom("p", "```\nload-bearing\n```\nclean prose here") == [],
+          "human-idiom: fenced block exempt")
+    check(scan_human_idiom("p", "this framing matters; the term is essential") == [],
+          "human-idiom: literal prose clean")
+    check(scan_human_idiom("p", "a code smell here and a small bite") == [],
+          "human-idiom: ambiguous single words excluded")
+    check(any("smells like" in e for _, _, e
+              in scan_human_idiom("p", "this smells like under-specification")),
+          "human-idiom: multi-word metaphor 'smells like' flagged")
+    after_idiom = "```\nload-bearing\n```\nthen low-hanging fruit in plain prose"
+    check(any(v == "VIOLATE" for _, v, _ in scan_human_idiom("p", after_idiom)),
+          "human-idiom: scanning resumes after fence close")
+    check(compute_clean([("idiom", "VIOLATE", "")])[0] is False,
+          "human-idiom: VIOLATE is dirty")
+    check(validate_vocab([("idiom", "VIOLATE", "")]) == [],
+          "human-idiom: pseudo-id unrestricted vocab")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2382,7 +2481,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 164
+    return 173
 
 
 # --- entry -------------------------------------------------------------------
