@@ -6,6 +6,10 @@
 
 V20: write-ownership — /sdd:spec sole SPEC.md author; exclusions: /sdd:build flips one §T status cell per closed task; /sdd:condense + /sdd:reorganize apply operator-confirmed structural sweeps; /sdd:check + /sdd:explain write nothing; every skill auto-commit path-scoped to owned files (`git commit -m <subject> [-m <body>] -- <paths>` / `--only`; `-m` flags ! precede `--` — tokens after `--` parse as pathspecs, commit aborts) — bare `git add <paths>` + `git commit` banned (commits whole index → pre-staged file leaks into the scoped commit), subsumes per-skill `never git add -A` (closes §B.12, §B.13).
 
+## §V23 decision-gate
+
+V23: decision-gate — enumerable runtime choice ! AskUserQuestion w/ mutually-exclusive action labels; selection drives same-turn behavior; prose "or keep going?" forms banned. Discriminator: same-turn-effect choice (recipe paused mid-loop) → gate, never a passive Next list; next-turn operator-dispatch choice (recipe ended per recipe-step-no-dispatch) → Next block item.
+
 ## §V24 response-shape
 
 V24: response-shape — user-typeable skill output ends `## Next` (1–5 atomic items, no `Reply` prefix, positional dispatch `run <int>` / `run /<plugin>:<cmd> [args]`); dispatched `<cmd>` + any "route through" prose name only `user-invocable` skills — auto-fire sub-skills (telegraph, backprop, socratic, steno, monitor) never a dispatch target (read-only, `user-invocable: false` per §V.61); bug→spec user route = `/sdd:spec <intent>` (gate→BACKPROP per §V.25), never `/sdd:backprop`; optional `## Hint` ≤ 3 lines precedes; multi-phase run {check, build `--all`, condense, reorganize} ! emit live harness checklist — TaskCreate per recipe phase @ start, TaskUpdate in_progress→completed @ transition; checklist ephemeral harness UI, never repo state, never substitutes REPORT or `## Next` (closes §B.14).
@@ -41,3 +45,7 @@ V65: monitor-protocol — entry paths: auto-fire deviation (consumer-repo skill 
 ## §V66 mechanize-scan
 
 V66: mechanize-scan — user-invocable recipe ({design, spec, build, check, explain, condense, reorganize}) ends w/ MECHANIZE probe — canonical verbatim block per SKILL.md, sentinel `MECHANIZE` grep-sweepable; auto-fire sub-skills excluded; candidate = ≥ 2 same-shape deterministic calls (identical command modulo args) | LLM-side join/sort/count/dedup over script-emittable data | multi-step parse collapsible to one emit mode | fresh regex paraphrase (§V.40 class); hit → exactly one `## Next` item carrying observed pattern + proposed script mode, none → no item; never self-implement mid-run (§V.22, §V.20); routing: dev repo → /sdd:spec → §T row; consumer plugin-target → monitor dispatched path (§V.65); consumer repo-local → consumer /sdd:spec → extras row.
+
+## §V67 human-clarity
+
+V67: human-clarity — human-facing prose (steno surfaces, CLAUDE.md, chat) ! clarity standard: one idea/sentence, short sentences; plain words, no idiom/slang (per steno BOUNDARIES); symbols spelled out per symbol-set rule; technical term defined on first use or avoided; main point first, detail after; operator-asks-Claude-to-decide → state choice (1 sentence), options plainly, recommend (1 sentence). Canonical detail-carriers: steno skill body (register mechanics) + `CLAUDE.md` @ root (plain-imperative restatement governing chat/human-facing output, no telegraph). Sync obligation: any V1/V4/V67 amend ! same-commit re-sync of both carriers + sweep of skill-body register notes/examples. Spans GITHUB-FACING + REPO-LOCAL human surfaces; orthogonal to register-assignment + symbol-set rules.
