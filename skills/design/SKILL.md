@@ -29,9 +29,8 @@ never self-resolve Open Qs — resolution requires user input. never persist w/o
 
 ## DISTINCTION FROM SOCRATIC
 
-|skill|converges on|mechanism|
-|socratic|"enough"|1 question/turn, sharpen intent|
-|design|"exhausted"|propose shape, exhaust open Qs|
+- `socratic` — converges on "enough": 1 question/turn, sharpen intent.
+- `design` — converges on "exhausted": propose shape, exhaust open Qs.
 
 not merged. socratic = bug or small-feature framing. design = structural choice.
 

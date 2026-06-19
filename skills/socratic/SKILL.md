@@ -29,13 +29,12 @@ every turn: 1 question. not batched. not checklist tone. not re-ask facts alread
 
 ## QUESTION POOL
 
-|category|fires when|shape|
-|clarify|symptom vague|"what specifically — input → observed vs expected?"|
-|scope|ask epic-shaped|"smallest change that removes the pain?"|
-|boundary|unclear what stays untouched|"what works today that must keep working?"|
-|success|no acceptance criterion|"how do we know it's fixed without re-asking you?"|
-|frame|user names fix, not problem|"is that the problem, or your current guess at the solution?"|
-|first-principle|mode NEW and no foundational claim stated|"name ≥ 1 foundational claim other invariants derive from — what is this artifact, fundamentally?"|
+- `clarify` — symptom vague → "what specifically — input → observed vs expected?"
+- `scope` — ask epic-shaped → "smallest change that removes the pain?"
+- `boundary` — unclear what stays untouched → "what works today that must keep working?"
+- `success` — no acceptance criterion → "how do we know it's fixed without re-asking you?"
+- `frame` — user names fix, not problem → "is that the problem, or your current guess at the solution?"
+- `first-principle` — mode NEW and no foundational claim stated → "name ≥ 1 foundational claim other invariants derive from — what is this artifact, fundamentally?"
 
 pick by what's most missing.
 
@@ -55,11 +54,10 @@ shape: "looking at `<file>:<line>`, [observable fact] — given that, [next ques
 
 overlay, not phase. answer reveals gap → surface distinction in 1–2 sentences, then next question. not lecture.
 
-|trigger|distinction|
-|fix named as problem|symptom vs cause vs solution|
-|unfalsifiable success crit|verifiable = observable + bounded|
-|scope conflated w/ ambition|smallest-change seam vs total redesign|
-|breakage assumed w/o data|observed vs expected vs assumed|
+- fix named as problem → symptom vs cause vs solution
+- unfalsifiable success crit → verifiable = observable + bounded
+- scope conflated w/ ambition → smallest-change seam vs total redesign
+- breakage assumed w/o data → observed vs expected vs assumed
 
 ## CONVERGENCE
 

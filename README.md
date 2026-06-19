@@ -127,10 +127,8 @@ Distinct from `/sdd:spec`'s socratic gate: socratic converges on **enough** (sha
 
 The sole mutator. The argument is **free-form intent** — the socratic gate (the bundled `socratic` skill) reads what you wrote and picks a mode. You don't pick the mode yourself.
 
-| project state    | possible modes                                                         | gate behavior                                                                                                        |
-| ---------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| no `SPEC.md`     | **NEW** or **DISTILL**                                                 | concrete intent passes in at most 1 turn; vague intent triggers single-question dialogue to convergence              |
-| `SPEC.md` exists | **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init) | mode emerges from convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND |
+- no `SPEC.md` — possible modes **NEW** or **DISTILL**; concrete intent passes in at most 1 turn; vague intent triggers single-question dialogue to convergence.
+- `SPEC.md` exists — possible modes **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init); mode emerges from the convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND.
 
 Examples (all free-form — the gate classifies):
 
@@ -145,12 +143,10 @@ Examples (all free-form — the gate classifies):
 
 Plan, then execute, then verify loop. EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
 
-| arg form | scope                                      |
-| -------- | ------------------------------------------ |
-| `§T.n`   | implement that one task                    |
-| `--next` | lowest-numbered row with status `.`        |
-| `--all`  | every `.` row in §T order                  |
-| (empty)  | same as `--next`                           |
+- `§T.n` — implement that one task
+- `--next` — lowest-numbered row with status `.`
+- `--all` — every `.` row in §T order
+- (empty) — same as `--next`
 
 Loop per task:
 
@@ -165,10 +161,8 @@ Loop per task:
 
 Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §V + §I + §T together.
 
-| arg      | what it does                                                                       |
-| -------- | ---------------------------------------------------------------------------------- |
-| (empty)  | memo-driven sweep — re-audits §V rows touched since last clean run; rest HOLD-SINCE-CLEAN |
-| `--full` | force full re-classify — deletes `.claude/check-state.json` upfront, rebuilds memo  |
+- (empty) — memo-driven sweep: re-audits §V rows touched since last clean run; rest HOLD-SINCE-CLEAN.
+- `--full` — force full re-classify: deletes `.claude/check-state.json` upfront, rebuilds memo.
 
 Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
 
@@ -197,19 +191,17 @@ Operator-triggered clarity pass (at most once per major epoch): clusters §V inv
 
 Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` becomes `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
 
-| skill        | role                                                                   |
-| ------------ | ---------------------------------------------------------------------- |
-| `design`     | propose-then-critique writes `designs/<slug>.md`                       |
-| `spec`       | sole mutator                                                           |
-| `build`      | plan, then execute loop                                                |
-| `check`      | drift report                                                           |
-| `explain`    | telegraph to prose decoder                                             |
-| `condense`   | token-budget condensation sweep                                        |
-| `reorganize` | §V cluster + renumber + cite sweep                                     |
-| `telegraph`  | telegraph encoder (about 40% reduction vs prose); auto-fires on writes |
-| `backprop`   | bug to spec protocol; fires on non-code-bug verification failures      |
-| `socratic`   | single-question intent gate; invoked by `/sdd:spec`                    |
-| `steno`      | human-facing terse-prose register for reviewer-read text               |
+- `design` — propose-then-critique writes `designs/<slug>.md`
+- `spec` — sole mutator
+- `build` — plan, then execute loop
+- `check` — drift report
+- `explain` — telegraph to prose decoder
+- `condense` — token-budget condensation sweep
+- `reorganize` — §V cluster + renumber + cite sweep
+- `telegraph` — telegraph encoder (about 40% reduction vs prose); auto-fires on writes
+- `backprop` — bug to spec protocol; fires on non-code-bug verification failures
+- `socratic` — single-question intent gate; invoked by `/sdd:spec`
+- `steno` — human-facing terse-prose register for reviewer-read text
 
 You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically when a `/sdd:build` verification failure appears to stem from under-specification (clear code bugs are just fixed).
 
