@@ -32,6 +32,13 @@ Modes:
                 the PUBLISHED + REPO-LOCAL skill set — realized once here so the
                 drift-detector retires its hand-run allowed-tools grant sweep
                 (a manual sweep misses rows).
+                Emits `symbols|VIOLATE|…` — the symbol-set + human-clarity
+                invariants' spell-out rule: no human-facing surface (README,
+                CLAUDE.md, the plugin manifest) carries a naked `→ ≥ ≤ & ~`
+                symbol outside a backtick span or fenced block. SPEC-adjacent
+                telegraph keeps the set, so it is never scanned. Sound (fenced
+                prose treated exempt too) — realized once here so the
+                drift-detector retires its hand-run symbol grep.
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -744,6 +751,56 @@ def audit_pinned_header(published_md):
     return out
 
 
+# --- human-facing naked-symbol audit -----------------------------------------
+# symbol-set + human-clarity invariants: human-facing prose spells out the
+# `→ ≥ ≤ & ~` set; SPEC-adjacent telegraph KEEPS it. Realized once here
+# (mechanical-realization invariant) so the drift-detector retires the hand-run
+# `grep` symbol sweep a manual pass misses (the bug this guards).
+
+HUMAN_SYMBOLS = re.compile(r'[→≥≤&~]')
+FENCE_LINE = re.compile(r'^\s*(?:```|~~~)')
+
+
+def scan_human_symbols(path, text):
+    """Flag naked spell-out-set symbols in one human-facing surface — outside
+    inline backtick spans and fenced code blocks. Backtick-wrapped tokens,
+    fenced telegraph-examples, and ASCII-diagram rows are verbatim-exempt
+    (verbatim-preservation invariant). Sound, not complete: fenced *prose* (a
+    file-manifest block) is treated exempt too, so the check catches the
+    regular-prose recurrence class it mechanizes without false-flagging the
+    telegraph-format demo blocks. One VIOLATE row per offending line; clean → no
+    row (silent, sibling convention)."""
+    out = []
+    in_fence = False
+    for i, line in enumerate(text.splitlines(), start=1):
+        if FENCE_LINE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        hits = sorted(set(HUMAN_SYMBOLS.findall(strip_backticks(line))))
+        if hits:
+            out.append(("symbols", "VIOLATE",
+                        f"symbols VIOLATE: {path}:{i} naked {' '.join(hits)} "
+                        f"in human-facing prose — spell out per symbol-set + "
+                        f"human-clarity invariants"))
+    return out
+
+
+def audit_human_symbols(human_files):
+    """File-reading wrapper (symbol-set + human-clarity invariants). Asserts no
+    human-facing surface carries a non-exempt naked symbol — realized once here,
+    retiring the hand-run symbol grep a manual sweep misses."""
+    out = []
+    for path in human_files:
+        try:
+            txt = read_text(path)
+        except OSError:
+            continue
+        out += scan_human_symbols(path, txt)
+    return out
+
+
 # --- mechanize-block identity ------------------------------------------------
 
 MECHANIZE_HDR = re.compile(r'^## MECHANIZE\b')
@@ -1366,6 +1423,24 @@ def discover_repo_local(repo_root):
     return sorted(files)
 
 
+def discover_human_facing(repo_root):
+    """Human-facing prose surfaces (symbol-set + human-clarity invariants):
+    repo-root README.md + CLAUDE.md (GITHUB-FACING + REPO-LOCAL human surfaces)
+    plus the plugin manifest(s) (description shown in the marketplace). Excludes
+    SPEC-adjacent telegraph (SPEC.md, skill bodies, `.claude/**` overflow), which
+    KEEPS the symbol set, so those are never scanned. Repo-agnostic."""
+    out = []
+    for name in ("README.md", "CLAUDE.md"):
+        p = os.path.join(repo_root, name)
+        if os.path.isfile(p):
+            out.append(p)
+    for d in plugin_dirs(repo_root):
+        mani = os.path.join(d, ".claude-plugin", "plugin.json")
+        if os.path.isfile(mani):
+            out.append(mani)
+    return sorted(set(out))
+
+
 # --- modes -------------------------------------------------------------------
 
 def load_spec(repo_root, spec_path):
@@ -1439,6 +1514,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_mechanize_block(skill_md)
     findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
     findings += audit_grants(discover_grant_skills(repo_root))
+    findings += audit_human_symbols(discover_human_facing(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -2215,6 +2291,27 @@ def selftest():
     check(memo_exit_code([(f"V{1}", "BOGUS", ""), (f"V{2}", "VIOLATE", "")])[0] == 2,
           "write-memo: invalid vocab outranks dirty → exit 2")
 
+    # human-facing naked-symbol audit (symbol-set + human-clarity invariants):
+    # naked symbol in prose flagged; backtick span + fenced block exempt; clean
+    # spelled-out prose silent; multi-symbol line → one row listing each;
+    # scanning resumes after a fence closes
+    naked = "the loop is human → claude and a & b"
+    check(any(v == "VIOLATE" for _, v, _ in scan_human_symbols("p", naked)),
+          "human-symbols: naked arrow / ampersand flagged")
+    bt = "the `a → b` mapping costs about 40 percent"
+    check(scan_human_symbols("p", bt) == [], "human-symbols: backtick span exempt")
+    fenced = "```\na → b\n```\nclean prose here"
+    check(scan_human_symbols("p", fenced) == [], "human-symbols: fenced block exempt")
+    clean = "spelled out: at least, at most, and, about 40 percent"
+    check(scan_human_symbols("p", clean) == [], "human-symbols: spelled-out prose clean")
+    multi = "x ≥ y ≤ z ~ w"
+    rows = scan_human_symbols("p", multi)
+    check(len(rows) == 1 and all(s in rows[0][2] for s in ("≥", "≤", "~")),
+          "human-symbols: multiple symbols on a line → one row listing each")
+    after_fence = "```\na → b\n```\nthen x → y in plain prose"
+    check(any(v == "VIOLATE" for _, v, _ in scan_human_symbols("p", after_fence)),
+          "human-symbols: scanning resumes after fence close")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2224,7 +2321,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 154
+    return 160
 
 
 # --- entry -------------------------------------------------------------------
