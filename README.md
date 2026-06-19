@@ -11,9 +11,9 @@ LLMs write code faster than any human can read it — and faster than the agent 
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Telegraph encoding cuts tokens ~40%** vs Claude prose for the same content (measured per-row mean 41%, median 39%, n=30 — see [`benchmarks/telegraph/`](benchmarks/telegraph/)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (→ ≥ ≤ ! ? § |); Distinct from `steno` (the bundled human-facing shorthand).
+- **Telegraph encoding cuts tokens about 40%** vs Claude prose for the same content (measured per-row mean 41%, median 39%, n=30 — see [`benchmarks/telegraph/`](benchmarks/telegraph/)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (`→ ≥ ≤ ! ? § |`); Distinct from `steno` (the bundled human-facing shorthand).
 - **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
-- **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task → same plan.
+- **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task produces the same plan.
 - **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
 
 > The spec is the only artifact that earns its tokens. Everything else must save more tokens later, save the agent's context, or get cut.
@@ -59,7 +59,7 @@ Then in any repo:
 ```
 
 - **One spec file.** `SPEC.md`. No `docs/` tree, no JSON sidecars.
-- **One writer.** `/sdd:spec`. (`/sdd:build` may flip a `.` → `x`; nothing else writes.)
+- **One writer.** `/sdd:spec`. (`/sdd:build` may flip a `.` to `x`; nothing else writes.)
 - **Read-only commands write nothing.** `/sdd:check` (drift report) and `/sdd:explain` (decompression).
 
 ## SPEC.md format
@@ -109,7 +109,7 @@ B<n>|2026-04-21|race on write|V<n>
 ```
 
 **Status markers:** `.` todo · `x` done.
-**Cell rules:** literal `|` → `\|`. Empty cell = `-`. Backticks OK.
+**Cell rules:** literal `|` becomes `\|`. Empty cell = `-`. Backticks OK.
 
 ## Commands
 
@@ -127,10 +127,10 @@ Distinct from `/sdd:spec`'s socratic gate: socratic converges on **enough** (sha
 
 The sole mutator. The argument is **free-form intent** — the socratic gate (the bundled `socratic` skill) reads what you wrote and picks a mode. You don't pick the mode yourself.
 
-| project state    | possible modes                                                       | gate behavior                                                                                                              |
-| ---------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| no `SPEC.md`     | **NEW** or **DISTILL**                                                | concrete intent passes ≤ 1 turn; vague intent triggers single-question dialogue to convergence                             |
-| `SPEC.md` exists | **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init) | mode emerges from convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND       |
+| project state    | possible modes                                                         | gate behavior                                                                                                        |
+| ---------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| no `SPEC.md`     | **NEW** or **DISTILL**                                                 | concrete intent passes in at most 1 turn; vague intent triggers single-question dialogue to convergence              |
+| `SPEC.md` exists | **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init) | mode emerges from convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND |
 
 Examples (all free-form — the gate classifies):
 
@@ -143,7 +143,7 @@ Examples (all free-form — the gate classifies):
 
 ### `/sdd:build` — plan, then execute
 
-Plan → execute → verify loop. EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
+Plan, then execute, then verify loop. EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
 
 | arg form | scope                                      |
 | -------- | ------------------------------------------ |
@@ -156,8 +156,8 @@ Loop per task:
 
 1. **PLAN** — cite every §V / §I the task touches, then proceed to EDIT. The plan is emitted inline for transparency, not a wait-state. Gaps are annotated so you can route them back to `/sdd:spec` post-hoc; the build never invents rules.
 2. **EDIT** — make the change, run tests / build.
-3. **VERIFY** — on failure, classify: (a) code bug → fix and re-run; (b) spec wrong or unspecified edge case → invoke `backprop` (via `/sdd:spec <cause>`), let it append `§B` and usually a new `§V`, resume against the updated spec.
-4. **CLOSE** — flip `.` → `x` only when verification is green.
+3. **VERIFY** — on failure, classify: (a) code bug, then fix and re-run; (b) spec wrong or unspecified edge case, then invoke `backprop` (via `/sdd:spec <cause>`), let it append `§B` and usually a new `§V`, resume against the updated spec.
+4. **CLOSE** — flip `.` to `x` only when verification is green.
 
 **Ambiguity is a spec defect, not a coding judgement.** `/sdd:build` never silently retries and never edits `SPEC.md` beyond flipping a status cell — every rule-shaped question routes back to `/sdd:spec`.
 
@@ -172,7 +172,7 @@ Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §
 
 Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
 
-### `/sdd:explain` — telegraph → prose
+### `/sdd:explain` — telegraph to prose
 
 The inverse of `telegraph`. Given any citation, returns plain English with cited context.
 
@@ -187,7 +187,7 @@ Useful for code review, onboarding, or when you'd otherwise have to translate `e
 
 ### `/sdd:condense` — token-budget sweep
 
-Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds ~20k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
+Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds about 20k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
 
 ### `/sdd:reorganize` — §V cluster + renumber
 
@@ -195,21 +195,21 @@ Operator-triggered clarity pass (at most once per major epoch): clusters §V inv
 
 ## Skills
 
-Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` → `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
+Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` becomes `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
 
-| skill        | role                                                              |
-| ------------ | ----------------------------------------------------------------- |
-| `design`     | propose-then-critique → `designs/<slug>.md`                       |
-| `spec`       | sole mutator                                                      |
-| `build`      | plan → execute loop                                               |
-| `check`      | drift report                                                      |
-| `explain`    | telegraph → prose decoder                                         |
-| `condense`   | token-budget condensation sweep                                   |
-| `reorganize` | §V cluster + renumber + cite sweep                                |
-| `telegraph`  | telegraph encoder (~40% reduction vs prose); auto-fires on writes |
-| `backprop`   | bug → spec protocol; fires on non-code-bug verification failures  |
-| `socratic`   | single-question intent gate; invoked by `/sdd:spec`               |
-| `steno`      | human-facing terse-prose register for reviewer-read text          |
+| skill        | role                                                                   |
+| ------------ | ---------------------------------------------------------------------- |
+| `design`     | propose-then-critique writes `designs/<slug>.md`                       |
+| `spec`       | sole mutator                                                           |
+| `build`      | plan, then execute loop                                                |
+| `check`      | drift report                                                           |
+| `explain`    | telegraph to prose decoder                                             |
+| `condense`   | token-budget condensation sweep                                        |
+| `reorganize` | §V cluster + renumber + cite sweep                                     |
+| `telegraph`  | telegraph encoder (about 40% reduction vs prose); auto-fires on writes |
+| `backprop`   | bug to spec protocol; fires on non-code-bug verification failures      |
+| `socratic`   | single-question intent gate; invoked by `/sdd:spec`                    |
+| `steno`      | human-facing terse-prose register for reviewer-read text               |
 
 You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directly — Claude picks them up from the command flow. `backprop`, for example, fires automatically when a `/sdd:build` verification failure smells like under-specification (clear code bugs are just fixed).
 
@@ -256,7 +256,7 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 `telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol earns its place only where it reads clearer than the word.
 
-Result: every spec write lands ~40% leaner in tokens than the equivalent prose while staying machine- and human-readable. The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
+Result: every spec write lands about 40% leaner in tokens than the equivalent prose while staying machine- and human-readable. The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
 Rules:
 
@@ -292,26 +292,26 @@ Triggers:
 
 **Why Markdown, not YAML / JSON?** Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting. JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
 
-**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (~20k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
+**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (about 20k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
 
 **Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that smells like under-specification routes through `backprop`.
 
-**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays ~1.7x the tokens for the same content (the measured ~40% cut, inverted). Optional in syntax, expensive in practice.
+**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays about 1.7x the tokens for the same content (the measured about 40% cut, inverted). Optional in syntax, expensive in practice.
 
 ## Files
 
 ```
 .claude-plugin/plugin.json       plugin manifest (name: sdd)
 .claude-plugin/marketplace.json  marketplace manifest for direct install
-skills/design/                   /sdd:design — propose-then-critique design loop → designs/<slug>.md
+skills/design/                   /sdd:design — propose-then-critique design loop to designs/<slug>.md
 skills/spec/                     /sdd:spec — sole SPEC.md mutator
 skills/build/                    /sdd:build — plan-execute loop
 skills/check/                    /sdd:check — read-only drift report
-skills/explain/                  /sdd:explain — telegraph → prose decoder
+skills/explain/                  /sdd:explain — telegraph to prose decoder
 skills/condense/                 /sdd:condense — token-budget condensation sweep
 skills/reorganize/               /sdd:reorganize — §V cluster + renumber + cite-DAG sweep
 skills/telegraph/                auto-fire telegraph encoder for SPEC-adjacent writes
-skills/backprop/                 auto-fire bug → spec protocol on /sdd:build verify-fail
+skills/backprop/                 auto-fire bug to spec protocol on /sdd:build verify-fail
 skills/socratic/                 intent-sharpening gate invoked by /sdd:spec
 skills/steno/                    human-facing terse-prose register
 scripts/check-mechanical.py      deterministic audit core used by /sdd:check
@@ -319,7 +319,7 @@ benchmarks/telegraph/            telegraph token-reduction benchmark — bench s
 SPEC-FORMAT.md                   structural format contract for every SPEC.md
 ```
 
-## Attribution & license
+## Attribution and license
 
 SDD is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed). For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
 
