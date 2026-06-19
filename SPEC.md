@@ -107,6 +107,7 @@ T29|x|sweep stale 25k→20k token-budget advisory threshold across derivative do
 T30|x|patch skills/socratic/SKILL.md CONVERGENCE escape — replace prose "or keep going?" w/ AskUserQuestion gate (labels "Return now" / "Keep going") per V23 two-sided dispatch|V23,B18
 T31|x|sweep human-facing surfaces → spell out symbols per V4/V67 — scope `grep -nE '[→≥≤&~]' README.md .claude-plugin/plugin.json`: prose `→`→word, `≥`→at least, `≤`→at most, `&`→and, `~N%`→about N%; backtick/fenced telegraph-example + ASCII-diagram rows exempt (verbatim)|V4,V67,B19
 T32|.|script: audit asserts human-facing surface carries no non-exempt naked symbol — scope `grep -nE '[→≥≤&~]' README.md .claude-plugin/plugin.json`, symbol outside backtick-span + fenced block → VIOLATE; emit `id|verdict|evidence` row + self-test; check audit consumes row, retires hand-run symbol sweep|V4,V67,V40,B19
+T33|.|fix `.claude-plugin/plugin.json` description token-cut figure 30%→40% to match measured benchmark (benchmarks/telegraph results JSON) — scope `grep -n 'token cut' .claude-plugin/plugin.json`|B20
 
 ## §B BUGS
 
@@ -130,3 +131,4 @@ B16|2026-06-13|grant sweep scoped to {telegraph,steno,socratic}, left zero-body-
 B17|2026-06-13|T24 grant sweep under-covered — dropped backprop `Skill` but left `Glob`; check `Glob`+`Skill` never in scope; no mechanical audit enforces V62, manual sweeps miss rows|V62
 B18|2026-06-17|socratic CONVERGENCE escape used prose "or keep going?" decision form; predated V23 two-sided-dispatch amendment — same-turn-effect mid-loop choice must be AskUserQuestion gate|V23
 B19|2026-06-18|README.md + manifest description predate V4/V67 symbol-set amendment — naked `→` in prose + `~N%` approximations never swept post-amend|V67
+B20|2026-06-18|manifest description token-cut figure stale (30%) vs measured ~40%; B5-class claim drift|-
