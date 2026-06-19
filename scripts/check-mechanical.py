@@ -801,6 +801,51 @@ def audit_human_symbols(human_files):
     return out
 
 
+# --- CLAUDE.md presence + direct-instruction marker block --------------------
+# human-clarity invariant: repo-root CLAUDE.md carries the plain-imperative
+# restatement of the clarity standard governing chat + human-facing output,
+# wrapped in a stable marker block. Symbol-cleanliness rides the human-facing
+# scan (CLAUDE.md is in discover_human_facing), realized once per
+# mechanical-realization invariant — never re-checked here.
+
+CLAUDE_MD = "CLAUDE.md"
+CLAUDE_MARKER_BEGIN = "<!-- sdd:direct-instruction:begin -->"
+CLAUDE_MARKER_END = "<!-- sdd:direct-instruction:end -->"
+
+
+def classify_claude_md(text):
+    """CLAUDE.md presence + marker-block audit core (human-clarity invariant) —
+    pure, unit-testable without the filesystem. `text` is the file content, or
+    None when the file is absent @ repo root. Emits one row: MISSING when the
+    carrier is absent, VIOLATE when present but the begin/end marker block is
+    absent or mis-ordered (the block the audit anchors on). Present + well-formed
+    block → no row (silent, sibling convention). Symbol-cleanliness is NOT
+    re-checked — CLAUDE.md rides the human-facing symbol scan
+    (mechanical-realization invariant), so a naked symbol surfaces as a `symbols`
+    row, not here."""
+    if text is None:
+        return [("claude-md", "MISSING",
+                 f"claude-md MISSING: {CLAUDE_MD} absent @ repo root — "
+                 f"human-clarity invariant requires the plain-imperative "
+                 f"restatement carrier")]
+    b = text.find(CLAUDE_MARKER_BEGIN)
+    e = text.find(CLAUDE_MARKER_END)
+    if b < 0 or e < 0 or e <= b:
+        return [("claude-md", "VIOLATE",
+                 f"claude-md VIOLATE: {CLAUDE_MD} missing direct-instruction "
+                 f"marker block ({CLAUDE_MARKER_BEGIN} ... {CLAUDE_MARKER_END})")]
+    return []
+
+
+def audit_claude_md(repo_root):
+    """File-reading wrapper for the CLAUDE.md presence + marker-block audit
+    (human-clarity invariant). Reads repo-root CLAUDE.md (None when absent) and
+    delegates to the pure classifier."""
+    path = os.path.join(repo_root, CLAUDE_MD)
+    text = read_text(path) if os.path.isfile(path) else None
+    return classify_claude_md(text)
+
+
 # --- mechanize-block identity ------------------------------------------------
 
 MECHANIZE_HDR = re.compile(r'^## MECHANIZE\b')
@@ -1515,6 +1560,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
     findings += audit_grants(discover_grant_skills(repo_root))
     findings += audit_human_symbols(discover_human_facing(repo_root))
+    findings += audit_claude_md(repo_root)
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -2312,6 +2358,21 @@ def selftest():
     check(any(v == "VIOLATE" for _, v, _ in scan_human_symbols("p", after_fence)),
           "human-symbols: scanning resumes after fence close")
 
+    # CLAUDE.md presence + direct-instruction marker block (human-clarity
+    # invariant): absent → MISSING, present-without-block → VIOLATE, present
+    # with well-formed begin/end block → clean (silent); end-before-begin →
+    # VIOLATE. Symbol-cleanliness rides the human-symbol scan, not re-checked.
+    check(classify_claude_md(None)[0][1] == "MISSING",
+          "claude-md: absent file → MISSING")
+    check(classify_claude_md("# CLAUDE.md\nno marker here")[0][1] == "VIOLATE",
+          "claude-md: present without marker block → VIOLATE")
+    well_formed = f"intro\n{CLAUDE_MARKER_BEGIN}\nrules\n{CLAUDE_MARKER_END}\nrest"
+    check(classify_claude_md(well_formed) == [],
+          "claude-md: well-formed marker block → clean")
+    end_first = f"{CLAUDE_MARKER_END}\nrules\n{CLAUDE_MARKER_BEGIN}"
+    check(classify_claude_md(end_first)[0][1] == "VIOLATE",
+          "claude-md: end-before-begin marker → VIOLATE")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2321,7 +2382,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 160
+    return 164
 
 
 # --- entry -------------------------------------------------------------------
