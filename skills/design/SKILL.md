@@ -8,7 +8,7 @@ model: opus
 
 # design — propose-then-critique → designs/<slug>.md draft
 
-Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold → steno (readable symbols `→ & | §` only).
+Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold → steno: spell out `→ ≥ ≤ &` as words, keep only `|` `§` raw (per steno SYMBOLS).
 
 ## POSITION IN FUNNEL
 

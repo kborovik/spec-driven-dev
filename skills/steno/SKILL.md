@@ -46,23 +46,31 @@ Every prose sentence or bullet body:
 2. **Visible subject-verb** — subject explicit or imperative (`Add X.` OK). No symbol-chain fragments: `auth → mw → handler` → `Auth middleware runs before the handler.`
 3. **No hidden copulas** — elide `is`/`are` only when fragment unambiguous. Drop copula in `X — Y` only when Y reads as predicate, not apposition.
 4. **≤ 1 participial phrase per sentence** — nesting kills first-clause readability.
+5. **Expand an acronym on first use** — first mention spells the term, acronym in parens: `spec-driven development (SDD)`. Common web/protocol acronyms (`API`, `URL`, `JSON`, `HTTP`, `JWT`) exempt. Mirrors the define-term-on-first-use clarity rule.
+6. **Cite rides the tail** — `§V.<n>` / `§T.<n>` / `#123` closes the sentence, never opens or carries it: `§V.<n> says spell out symbols` → `Spell out symbols per §V.<n>`. Subject + verb lead; the cite is reference, not subject.
 
 Verb-headed fragments fine. Lists > paragraphs. One idea per line in lists. Break long sentences before cutting words.
 
+## QUESTION SHAPE
+
+Claude asks the operator to decide (AskUserQuestion prose, per decision-gate invariant):
+
+1. **State the choice first** — one sentence naming the decision.
+2. **List the options plainly** — one line each, mutually exclusive, no idiom.
+3. **Recommend** — one sentence: the default and why.
+
+Cite rides the tail (per SENTENCE SHAPE). No prose `or keep going?` escape — a same-turn choice is a gate, not a sentence.
+
 ## SYMBOLS
 
-Safe for GitHub readers:
+Two raw symbols safe for GitHub readers:
 
 ```
-→   leads to / becomes / produces
-≥   at least
-≤   at most
-&   and
 |   or (in lists, not prose)
 §   spec citation (`§V.<n>`, `§T.<n>`) — refs into SPEC.md only
 ```
 
-No other symbols — math operators beyond this set → write the word; mirrors `telegraph` symbol policy.
+Spell out everything else as words: `→` as "leads to" / "becomes" / "produces", `≥` as "at least", `≤` as "at most", `&` as "and". No other symbols; a math operator beyond `|` and `§` → write the word. Diverges from `telegraph` (the LLM-facing register keeps `→ ≥ ≤`): a human reader slows on a symbol, so the word wins.
 
 ## PRESERVE VERBATIM
 
@@ -99,7 +107,7 @@ Good — first fragment states both items; each bullet opens with a verb:
 
 > ## Summary
 >
-> Add auth middleware logging for prod debugging. Refactor token validation.
+> Add auth middleware logging for production debugging. Refactor token validation.
 >
 > ## Changes
 >
@@ -118,7 +126,7 @@ Good — 4-word first sentence states the replacement; 3-word second states the 
 >
 > ## Changes
 >
-> - JWT generation & validation
+> - JWT generation and validation
 > - `/auth/refresh` endpoint
 > - Middleware reads `Authorization: Bearer <jwt>`
 >
@@ -128,15 +136,16 @@ Good — 4-word first sentence states the replacement; 3-word second states the 
 
 ## BOUNDARIES
 
-Literal phrasing w/ readable symbols (per SCOPE) — idiom adds parsing cost & ambiguity. Within scope, not:
+Literal phrasing w/ the two raw symbols (per SCOPE); idiom adds parsing cost and ambiguity. Within scope, not:
 
 - idiom ("moves the needle", "low-hanging fruit", "boil the ocean").
 - word-level metaphor ("earns its keep", "bite", "smell").
 - colloquialism ("gotcha", "ish", "yeah", "kinda").
 - culture-loaded shorthand (sports, military, film references).
+- jargon-idiom ("load-bearing", "by-construction", "hand-rolled", "clean-slate", "prior-art", "carry-cost") — observed in spec prose; write the literal meaning.
 
 Exclusions:
 
 - Colloquial sentence structure — allowed where it aids reviewer flow; register applies at word level.
-- Domain-load-bearing named ops (`backprop`, `telegraph-encode`, `socratic`, `steno`).
-- Established tech vocab doubling as metaphor (`drift`, `bottleneck`, `leak`) — allowed when standard term in context.
+- Named domain operations (`backprop`, `telegraph-encode`, `socratic`, `steno`).
+- Established tech vocab — closed allowlist only: `drift`, `bottleneck`, `leak`. A term off the list → plain word.
