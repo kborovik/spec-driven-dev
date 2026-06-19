@@ -33,7 +33,7 @@ numbered, testable, named; each ! hold. ids clustered by topic; gaps = cluster s
 V1: spec-adjacent-register — SPEC.md, `skills/**/SKILL.md`, SPEC-FORMAT.md, spec-referencing prose ! telegraph per telegraph skill; /sdd:explain decodes on demand.
 V2: github-facing-register — README, issues, PRs, commit-msg bodies ! steno per steno skill; commit subjects = per-skill fixed templates, verbatim.
 V3: verbatim-preservation — code, backticked text, paths, URLs, identifiers, numbers, versions, error strings, SQL, regex, JSON, YAML, quoted strings never compressed; backtick-wrapped tokens exempt every residue + cite audit.
-V4: symbol-set — keep set `→ ≥ ≤ ! ? §` (steno adds `&`, list-`|`); heavier math operators ! ASCII words.
+V4: symbol-set — telegraph (LLM-facing: SPEC.md, skill bodies) keeps `→ ≥ ≤ ! ? §`; human-facing prose (steno surfaces, CLAUDE.md, chat) spells out `→ ≥ ≤ &` as words, retains `|` for list/table separators + `§` for cites only; heavier math operators ! ASCII words.
 V10: sole-source-of-truth — SPEC.md @ repo root is sole live spec; no docs/ tree, no sidecars; SPEC.archive.md sibling carries immutable archived rows only.
 V11: shape-semantics-split — SPEC-FORMAT.md binds row shape + section catalog + citation grammar; §V rows bind semantics + enforcement; neither restates the other.
 V12: monotonic-numbering — V/T/B ids strictly increasing in section order; gaps OK, reuse banned; sole renumber path = /sdd:reorganize (map append + cite sweep, same commit).
@@ -70,6 +70,7 @@ V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.jso
 V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:condense, /sdd:reorganize) (closes §B.6).
 V65: monitor-protocol — → `.claude/check-extras.md §V65`
 V66: mechanize-scan — → `.claude/check-extras.md §V66`
+V67: human-clarity — human-facing prose (steno surfaces, CLAUDE.md, chat) ! clarity standard: one idea/sentence, short sentences; plain words, no idiom/slang (per steno BOUNDARIES); symbols spelled out per symbol-set rule; technical term defined on first use or avoided; main point first, detail after; operator-asks-Claude-to-decide → state choice (1 sentence), options plainly, recommend (1 sentence). Detail in steno skill body + CLAUDE.md; spans GITHUB-FACING + REPO-LOCAL human surfaces; orthogonal to register-assignment + symbol-set rules.
 
 ## §T TASKS
 
