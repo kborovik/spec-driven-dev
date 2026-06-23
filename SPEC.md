@@ -32,8 +32,8 @@ numbered, testable, named; each ! hold. ids clustered by topic; gaps = cluster s
 
 V1: spec-adjacent-register — SPEC.md, `skills/**/SKILL.md`, SPEC-FORMAT.md, spec-referencing prose ! telegraph per telegraph skill; /sdd:explain decodes on demand.
 V2: github-facing-register — README, issues, PRs, commit-msg bodies ! steno per steno skill; commit subjects = per-skill fixed templates, verbatim.
-V3: verbatim-preservation — code, backticked text, paths, URLs, identifiers, numbers, versions, error strings, SQL, regex, JSON, YAML, quoted strings never compressed; backtick-wrapped tokens exempt every residue + cite audit.
-V4: symbol-set — telegraph (LLM-facing: SPEC.md, skill bodies) keeps `→ ≥ ≤ ! ? §`; human-facing prose (steno surfaces, CLAUDE.md, chat) spells out `→ ≥ ≤ &` as words, retains `|` for list/table separators + `§` for cites only; heavier math operators ! ASCII words.
+V3: verbatim-preservation — → `.claude/check-extras.md §V3`
+V4: symbol-set — → `.claude/check-extras.md §V4`
 V10: sole-source-of-truth — SPEC.md @ repo root is sole live spec; no docs/ tree, no sidecars; SPEC.archive.md sibling carries immutable archived rows only.
 V11: shape-semantics-split — SPEC-FORMAT.md binds row shape + section catalog + citation grammar; §V rows bind semantics + enforcement; neither restates the other.
 V12: monotonic-numbering — V/T/B ids strictly increasing in section order; gaps OK, reuse banned; sole renumber path = /sdd:reorganize (map append + cite sweep, same commit).
@@ -48,30 +48,31 @@ V23: decision-gate — → `.claude/check-extras.md §V23`
 V24: response-shape — → `.claude/check-extras.md §V24`
 V25: socratic-gate — /sdd:spec mode {NEW, DISTILL, BACKPROP, AMEND, FOLD-IN} = gate byproduct of free-form `$ARGUMENTS`; no mode prefixes, no skip flags; concrete intent converges ≤ 1 turn.
 V26: first-principle-probe — NEW mode fires foundational-claim question exactly once, declinable; `first-principle-asked` recorded regardless of answer.
-V27: backprop-protocol — every bug → §B row; recurrence class → new or tightened §V preferred; two commits cross-cited: spec commit (§B + §V + §T) first, build commit (failing test first, then fix) cites the new rows.
+V27: backprop-protocol — → `.claude/check-extras.md §V27`
 V28: freshness-contract — → `.claude/check-extras.md §V28`
 V29: fold-first — new §V row vs amend of closest existing row ! operator gate; split justification = §B recurrence cite or declared orthogonal concept; "mirrors existing row" alone insufficient.
 V30: sweep-scope — sweep-class §T row ! declare scope as grep pattern or vocab table; named-procedure + named-site lists rejected.
 V31: design-lifecycle — /sdd:design writes `designs/<slug>.md` only (write-new); fold-in mutates SPEC.md only; draft persists in working tree, operator disposes.
-V40: mechanical-realization — deterministic audit rules realized once in `scripts/check-mechanical.py`; skill bodies + SPEC-FORMAT state contracts, never duplicate parser pseudo-code; per-run regex paraphrase banned.
-V41: parametric-recipe — published recipes + script name no repo-literal paths beyond SPEC.md + plugin-internal files; §I ids derive from kind prefixes, never hardcoded surface shapes; repo-specific enforcement → `.claude/scripts/check-extras.sh` + `.claude/check-extras.md`.
-V42: scope-set — audit scopes: PUBLISHED (marketplace source dirs; root `./` → repo root), REPO-LOCAL (`.claude/**`, README.md, CLAUDE.md), SPEC-ADJACENT (SPEC.md, skill bodies, SPEC-FORMAT.md), GITHUB-FACING (README, issues, PRs, commit bodies); each audit names its scope.
+V40: mechanical-realization — → `.claude/check-extras.md §V40`
+V41: parametric-recipe — → `.claude/check-extras.md §V41`
+V42: scope-set — → `.claude/check-extras.md §V42`
 V43: drift-verdict-vocab — → `.claude/check-extras.md §V43`
 V44: memo — → `.claude/check-extras.md §V44`
-V45: scope-feed — default-sweep scope = script-emitted rows (v_row_shas drift, flipped-since-clean, touched minus SPEC.md + archive sibling); comma-joined fields chain into `emit-v-slices --dirty`; LLM never hand-rolls `git diff`.
+V45: scope-feed — → `.claude/check-extras.md §V45`
 V46: batch — → `.claude/check-extras.md §V46`
 V47: check-dispatch — /sdd:check accepts bare (memo-driven) or `--full` (drop memo, re-classify all) only; other args bail.
-V48: token-budget — estimate = bytes / 3.4; > 20k tokens → check advisory → operator /sdd:condense; > 50 closed §T rows → window-vs-archive split; canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
-V49: extras-hook — executable `.claude/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.claude/check-extras.md`, consulted by check + build pre-commit probe.
+V48: token-budget — → `.claude/check-extras.md §V48`
+V49: extras-hook — → `.claude/check-extras.md §V49`
 V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
 V61: sub-skill-flags — → `.claude/check-extras.md §V61`
 V62: tooling-preference — → `.claude/check-extras.md §V62`
-V63: plugin-shape — PUBLISHED discovery parses `.claude-plugin/marketplace.json` `plugins[].source` (root `./` → repo root, nested path → subdir); plugin name from manifest, never assumed equal to dir name.
-V64: single-load — §V bodies enter run context via script `emit-v-slices` only; whole-file SPEC.md Read banned where script emit mode covers need; full read reserved to operator rewrite sweeps (/sdd:condense, /sdd:reorganize) (closes §B.6).
+V63: plugin-shape — → `.claude/check-extras.md §V63`
+V64: single-load — → `.claude/check-extras.md §V64`
 V65: monitor-protocol — → `.claude/check-extras.md §V65`
 V66: mechanize-scan — → `.claude/check-extras.md §V66`
 V67: human-clarity — → `.claude/check-extras.md §V67`
-V68: table-use — info presented as prose or short list, never `|`-table; `|`-table reserved for keyed fixed-schema data rows (§T/§B/§I row schema, spec-skill audit table, similar id-keyed sets); prose-comparison or concept table → bullet list. Spans skill bodies (telegraph) + human-facing surfaces (steno, CLAUDE.md, README, chat); register-orthogonal — sibling to symbol-set + human-clarity rows, not subordinate.
+V68: table-use — → `.claude/check-extras.md §V68`
+V69: github-workflow — → `.claude/check-extras.md §V69`
 
 ## §T TASKS
 
@@ -115,6 +116,9 @@ T36|x|script: audit asserts `CLAUDE.md` present @ root, carries the direct-instr
 T37|x|sweep README.md banned idiom/metaphor → literal phrasing per V67 BOUNDARIES — scope `grep -nE 'load-bearing|smell|earns its' README.md`: L19 `earns its tokens`, L25 `load-bearing`, L214/L297 `smells like`, L257 `earns its place` → plain restatement; backtick/fenced telegraph-example rows exempt|V67,B22
 T38|x|script: audit asserts human-facing surface carries no banned exact-phrase idiom/jargon-idiom — scope `discover_human_facing` set (README.md, CLAUDE.md, plugin manifest), match curated low-false-positive BOUNDARIES subset (jargon-idiom + multi-word idiom exact phrases; ambiguous single words excluded, backtick-span/fenced exempt); emit `id|verdict|evidence` row + self-test; check audit consumes row, retires hand-run idiom grep|V67,V40,B22
 T39|x|sweep leading-pipe prose tables → bullet list per table-use invariant — scope `grep -nE '^\|' skills/*/SKILL.md README.md CLAUDE.md`: pipe-table presenting prose comparison or concept set → bullet list; keyed fixed-schema data tables (§T/§B/§I schema, SPEC-FORMAT row tables, spec-skill audit table) left verbatim; fenced/backticked example tables exempt; design DISTINCTION FROM SOCRATIC table = first known target|V68,V3
+T40|x|init `skills/github/SKILL.md`: passive (`user-invocable: false`) gh-CLI workflow governor — `gh issue create` + `gh pr create` generic structures, `gh issue develop <n> --checkout` + per-PR `git worktree`, `gh pr merge --squash --delete-branch` w/ worktree prune on merge, cleanup-only on unmerged close, `Closes #<issue>` linking|V69,V61,V2,V41
+T41|x|patch `skills/spec/SKILL.md` AMEND + APPLY step 4 — resolve §V target to its body file (SPEC.md row vs `→ .claude/check-extras.md §V<n>` stub redirect); read/show/write the actual body + path-scope `git commit -- <body-file>` there, not unconditional SPEC.md|V49,V20,B23
+T42|x|sweep `skills/github/SKILL.md` — drop git-worktree steps per §V.69 amend; scope `grep -nE 'worktree' skills/github/SKILL.md`: BRANCH `git worktree add` + path prose → `gh issue develop <n> --checkout` in-place only, MERGE `git worktree remove` → drop, CLOSE → `gh pr close` + `git branch -D`, frontmatter desc + NON-GOALS worktree mentions dropped|V69
 
 ## §B BUGS
 
@@ -141,3 +145,4 @@ B19|2026-06-18|README.md + manifest description predate V4/V67 symbol-set amendm
 B20|2026-06-18|manifest description token-cut figure stale (30%) vs measured ~40%; B5-class claim drift|-
 B21|2026-06-19|human-facing skill bodies (steno SYMBOLS+EXAMPLES, design register note `readable symbols → & §`) + absent CLAUDE.md predate/diverge from V4/V67 symbol+clarity amend; symbol-audit T32 scopes README + manifest only → clarity detail-carriers never re-synced post-amend, design emitted telegraph chat proposal (session-example.md): raw `→ ≡ ·`, bare acronyms, idiom, cite-led sentences|V67
 B22|2026-06-19|README.md prose carries banned idiom/metaphor (`load-bearing`, `smells like`, `earns its tokens`/`earns its place`) violating V67 BOUNDARIES; idiom ban human-review-only — mechanical audit scans symbol-set not enumerable banned-term sets → idiom drift undetected (B19/B21 symbol-scope sibling)|V67
+B23|2026-06-22|spec AMEND + APPLY assume §V body in SPEC.md (write + `git commit -- SPEC.md`); /sdd:condense relocates §V bodies to `.claude/check-extras.md` + leaves stub row → amending condensed body (github enum add §V.61+§V.24) fell outside recipe write-scope, write + commit redirected to check-extras.md by hand|V49
