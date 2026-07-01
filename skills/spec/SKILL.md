@@ -10,7 +10,7 @@ description: |
   "spec this idea", "import existing repo", "pull invariants out of code",
   "this bug keeps biting", "post-mortem on Y".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill
-model: opus
+model: fable
 ---
 
 # spec — spec mutator
