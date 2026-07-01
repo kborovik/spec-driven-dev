@@ -119,6 +119,7 @@ T39|x|sweep leading-pipe prose tables → bullet list per table-use invariant �
 T40|x|init `skills/github/SKILL.md`: passive (`user-invocable: false`) gh-CLI workflow governor — `gh issue create` + `gh pr create` generic structures, `gh issue develop <n> --checkout` + per-PR `git worktree`, `gh pr merge --squash --delete-branch` w/ worktree prune on merge, cleanup-only on unmerged close, `Closes #<issue>` linking|V69,V61,V2,V41
 T41|x|patch `skills/spec/SKILL.md` AMEND + APPLY step 4 — resolve §V target to its body file (SPEC.md row vs `→ .claude/check-extras.md §V<n>` stub redirect); read/show/write the actual body + path-scope `git commit -- <body-file>` there, not unconditional SPEC.md|V49,V20,B23
 T42|x|sweep `skills/github/SKILL.md` — drop git-worktree steps per §V.69 amend; scope `grep -nE 'worktree' skills/github/SKILL.md`: BRANCH `git worktree add` + path prose → `gh issue develop <n> --checkout` in-place only, MERGE `git worktree remove` → drop, CLOSE → `gh pr close` + `git branch -D`, frontmatter desc + NON-GOALS worktree mentions dropped|V69
+T43|.|script: audit emits `scope|ADVISORY|v-path-dirty: V<n>,…` row — §V row-body path tokens (quoted/backticked path-like strings) intersect touched-set, computed script-side; check SCOPE step 1 consumes row i/o hand-run grep over §V section; + self-test|V45,V40
 
 ## §B BUGS
 
