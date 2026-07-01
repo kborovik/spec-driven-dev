@@ -53,11 +53,15 @@ Modes:
                 drift-detector's batch step in place of a hand-computed heuristic.
                 Also emits the machine-side scope feed for the memo-driven default
                 sweep: `tasks|ADVISORY|flipped-since-clean: …` (§T flipped `.`→`x`
-                since the memo's clean sha) and `diff|ADVISORY|touched: …` (paths
-                changed since that sha). These plus the reshaped
-                `memo|ADVISORY|… : <ids>` row carry stable comma-joined fields
-                (no surrounding prose) so the drift-detector chains them straight
-                into `emit-v-slices --dirty` without hand-rolling `git diff`.
+                since the memo's clean sha), `diff|ADVISORY|touched: …` (paths
+                changed since that sha), and `scope|ADVISORY|v-path-dirty: …` (§V
+                rows whose body path tokens — quoted/backticked path-like strings
+                — intersect that touched-set, computed script-side so the
+                drift-detector never hand-greps the §V section). These plus the
+                reshaped `memo|ADVISORY|… : <ids>` row carry stable comma-joined
+                fields (no surrounding prose) so the drift-detector chains them
+                straight into `emit-v-slices --dirty` without hand-rolling
+                `git diff`.
   write-memo  — read the behavioral verdict table (§V/§I/§T classifications) on
                 stdin; with --from-audit, re-run the mechanical audit internally
                 and merge it (stdin = behavioral rows only, hand-merge banned).
@@ -1373,12 +1377,91 @@ def exclude_spec_paths(paths, spec_path="SPEC.md"):
     return [p for p in paths if p not in excl]
 
 
-def audit_scope_feed(repo_root, memo, t_rows, spec_path="SPEC.md"):
+# --- §V body path-token dirty scope (scope-feed + mechanical-realization) -----
+# The check SCOPE step's "§V dirty" set includes rows whose body path tokens
+# (quoted/backticked path-like strings) intersect the touched set. Mechanized
+# here so the drift-detector consumes a script row instead of hand-grepping the
+# §V section per run. Over-inclusion is safe (a spuriously dirty row
+# re-classifies to a clean hold); a missed row is the real risk, so extraction
+# leans inclusive — every quoted/backticked path-like token counts, `*`/`**`
+# globs and `<...>` placeholders act as wildcards.
+
+SPAN = re.compile(r'`([^`]*)`|"([^"]*)"|\'([^\']*)\'')
+PATHISH = re.compile(r'^[\w./*<>-]+$')
+HAS_EXT = re.compile(r'\.[A-Za-z][A-Za-z0-9]*$')
+
+
+def path_tokens(body):
+    """Path-like tokens inside quoted/backticked spans of a §V body. Each span's
+    whitespace-delimited words are kept when path-like — a `/` or a filename
+    extension; surrounding prose punctuation trimmed. Non-path spans (flag names,
+    verdict words) yield nothing."""
+    tokens = []
+    for m in SPAN.finditer(body or ""):
+        span = m.group(1) or m.group(2) or m.group(3) or ""
+        for word in span.split():
+            w = word.strip("(),;:")
+            if w and PATHISH.match(w) and ('/' in w or HAS_EXT.search(w)):
+                tokens.append(w)
+    return tokens
+
+
+def glob_to_re(tok):
+    """Compile a path token to an anchored regex. `*` matches within a path
+    segment, `**` spans segments, `<...>` placeholders match a single segment;
+    `.` is literal. The token charset is restricted to `[\\w./*<>-]` by PATHISH,
+    so the builder escapes only `.` and needs no general re.escape."""
+    out = ["^"]
+    i, n = 0, len(tok)
+    while i < n:
+        c = tok[i]
+        if c == '*':
+            if i + 1 < n and tok[i + 1] == '*':
+                out.append('.*'); i += 2
+            else:
+                out.append('[^/]*'); i += 1
+        elif c == '<':
+            j = tok.find('>', i)
+            if j != -1:
+                out.append('[^/]*'); i = j + 1
+            else:
+                out.append('<'); i += 1
+        elif c == '.':
+            out.append(r'\.'); i += 1
+        else:
+            out.append(c); i += 1
+    out.append("$")
+    return re.compile("".join(out))
+
+
+def tok_matches(tok, path):
+    """A path token intersects a touched path when its glob matches the full path,
+    or (for a bare filename, no `/`) the path's basename."""
+    rx = glob_to_re(tok)
+    if rx.match(path):
+        return True
+    return '/' not in tok and rx.match(path.rsplit('/', 1)[-1]) is not None
+
+
+def v_path_dirty(v_rows, touched):
+    """§V rows whose body path tokens intersect the touched set (scope-feed +
+    mechanical-realization invariants). Pure over parsed rows + the touched list
+    so unit-testable without git. Returns the dirty V-id list, ascending."""
+    dirty = [r["id"] for r in v_rows
+             if any(tok_matches(t, p)
+                    for t in path_tokens(r["body"]) for p in touched)]
+    dirty.sort(key=lambda x: int(x[1:]))
+    return dirty
+
+
+def audit_scope_feed(repo_root, memo, t_rows, v_rows, spec_path="SPEC.md"):
     """Machine-side scope feed for the memo-driven default sweep (memo invariant):
-    `tasks|ADVISORY|flipped-since-clean: <ids>` and `diff|ADVISORY|touched: <paths>`,
-    both keyed off the memo's `last_clean_sha`. Fields comma-joined, no prose so
-    the drift-detector chains them into `emit-v-slices --dirty` not hand-rolling
-    `git diff`. No memo or schema mismatch or unreachable sha → no rows (first-run /
+    `tasks|ADVISORY|flipped-since-clean: <ids>`, `diff|ADVISORY|touched: <paths>`,
+    and `scope|ADVISORY|v-path-dirty: <ids>` (§V rows whose body path tokens
+    intersect the touched-set), all keyed off the memo's `last_clean_sha`. Fields
+    comma-joined, no prose so the drift-detector chains them into
+    `emit-v-slices --dirty` not hand-rolling `git diff` or a hand-grep over §V
+    bodies. No memo or schema mismatch or unreachable sha → no rows (first-run /
     invalidated → full sweep, nothing to scope — mirrors the memo advisory gate).
     Touched-set drops SPEC.md + SPEC.archive.md per `exclude_spec_paths`."""
     if not memo or memo.get("schema_version") != MEMO_SCHEMA:
@@ -1389,7 +1472,9 @@ def audit_scope_feed(repo_root, memo, t_rows, spec_path="SPEC.md"):
     flipped = flipped_since(spec_t_rows_at(repo_root, sha, spec_path), t_rows)
     touched = exclude_spec_paths(git_touched_paths(repo_root, sha), spec_path)
     return [("tasks", ADVISORY, "flipped-since-clean: " + ",".join(flipped)),
-            ("diff", ADVISORY, "touched: " + ",".join(touched))]
+            ("diff", ADVISORY, "touched: " + ",".join(touched)),
+            ("scope", ADVISORY,
+             "v-path-dirty: " + ",".join(v_path_dirty(v_rows, touched)))]
 
 
 # --- REPO-LOCAL hook probe ---------------------------------------------------
@@ -1635,7 +1720,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
-    findings += audit_scope_feed(repo_root, memo, t_rows, spec_path)
+    findings += audit_scope_feed(repo_root, memo, t_rows, v_rows, spec_path)
     if run_hook:
         findings += probe_extras_hook(repo_root)
     return findings
@@ -1989,6 +2074,38 @@ def selftest():
     check(exclude_spec_paths([]) == [], "touched-set exclude: empty in → empty out")
     check(exclude_spec_paths(["sub/SPEC.md"]) == ["sub/SPEC.md"],
           "touched-set exclude: only repo-root SPEC.md, not same-basename subpath")
+    # §V body path-token dirty scope (scope-feed + mechanical-realization):
+    # quoted/backticked path tokens intersect the touched set, script-side, so
+    # the check SCOPE step consumes a row instead of hand-grepping §V bodies.
+    n_extras = 40
+    vp_rows = [
+        {"id": f"V{1}", "body": "reg — SPEC.md, `skills/**/SKILL.md`, prose"},
+        {"id": f"V{n_extras}",
+         "body": f"mech — → `.claude/check-extras.md §V{n_extras}`"},
+        {"id": f"V{31}", "body": "design — writes `designs/<slug>.md` only"},
+        {"id": f"V{22}", "body": "no path — `--from-audit` and `emit-v-slices`"},
+    ]
+    check(v_path_dirty(vp_rows, ["skills/check/SKILL.md"]) == [f"V{1}"],
+          "v-path-dirty: glob token matches touched skill path")
+    check(v_path_dirty(vp_rows, [".claude/check-extras.md"]) == [f"V{n_extras}"],
+          "v-path-dirty: stub body path token matches touched extras")
+    check(v_path_dirty(vp_rows, ["designs/foo.md"]) == [f"V{31}"],
+          "v-path-dirty: placeholder token matches touched design draft")
+    check(v_path_dirty(vp_rows, ["README.md"]) == [],
+          "v-path-dirty: no path-token intersection yields empty")
+    check(v_path_dirty(vp_rows, []) == [],
+          "v-path-dirty: empty touched-set yields empty")
+    check(path_tokens("no path — `--from-audit` and `emit-v-slices`") == [],
+          "v-path-dirty: non-path backtick spans yield no tokens")
+    check(v_path_dirty([{"id": f"V{2}", "body": "bare `SKILL.md` name"}],
+                       ["skills/build/SKILL.md"]) == [f"V{2}"],
+          "v-path-dirty: bare filename matches touched path basename")
+    multi = [{"id": f"V{n_extras}",
+              "body": f"→ `.claude/check-extras.md §V{n_extras}`"},
+             {"id": f"V{3}", "body": f"→ `.claude/check-extras.md §V{3}`"}]
+    check(v_path_dirty(multi, [".claude/check-extras.md"])
+          == [f"V{3}", f"V{n_extras}"],
+          "v-path-dirty: multiple dirty rows sorted ascending")
     # §T status + §B date cell shape
     check(audit_status_cells([{"id": f"T{1}", "body": ".|task", "line": 1}]) == [],
           "status . ok")
@@ -2481,7 +2598,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 173
+    return 181
 
 
 # --- entry -------------------------------------------------------------------

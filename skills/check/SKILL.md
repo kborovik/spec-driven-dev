@@ -56,9 +56,10 @@ Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBL
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
 - `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
+- `scope|ADVISORY|v-path-dirty: V<n>,…` — §V rows whose body path tokens (quoted/backticked path-like strings) intersect the touched-set; script-computed, consumed by SCOPE step 1 in place of a hand-run grep over the §V section.
 - `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff`. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `memo`-invalidation → `## advisory`. Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set, `scope` v-path-dirty) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff` or a hand-grep over §V bodies. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
 
 ## MEMO
 
@@ -86,7 +87,7 @@ Memo update = side-effect of every clean run, no user prompt. §V non-row conten
 
 Both scope dimensions script-emitted; LLM consumes the scope-feed rows, never hand-rolls `git diff`. Memo valid →
 
-1. **§V dirty** = rows in `memo|ADVISORY|v_row_shas drift` + rows whose body path tokens (quoted/backticked path-like strings) intersect `diff|ADVISORY|touched`. Neither source → emit `V<n> HOLD-SINCE-CLEAN`, skip.
+1. **§V dirty** = rows in `memo|ADVISORY|v_row_shas drift` + rows in `scope|ADVISORY|v-path-dirty` (script intersects §V body path tokens — quoted/backticked path-like strings — with the touched-set; no hand-grep over the §V section). Neither source → emit `V<n> HOLD-SINCE-CLEAN`, skip.
 2. **§T** re-verify scoped to `tasks|ADVISORY|flipped-since-clean` rows. Historical `x` unchanged → HOLD-SINCE-CLEAN.
 3. **§I + cite-DAG** full-sweep every run (cite-DAG owned by script; §I shape-diff cheap, no triage gain).
 
