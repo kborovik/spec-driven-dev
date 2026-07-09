@@ -136,7 +136,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

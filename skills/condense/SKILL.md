@@ -11,7 +11,7 @@ model: sonnet
 
 # condense — SPEC.md condenser
 
-Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.claude/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 20k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
+Operator-triggered six-prong sweep. Scope: SPEC.md + `SPEC.archive.md` + `.spec/check-extras.md`. Not auto-fire — /sdd:check emits advisory when token estimate > 20k; operator invokes next turn. Single atomic commit (all firing prongs or none); rollback `git revert`. Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
 
 ## PROGRESS
 
@@ -60,7 +60,7 @@ Rewrite embedded English connectives per telegraph skill. Targets: `Why:`, `For 
 
 ### Prong 6 — §V audit-recipe extraction
 
-Heavy set script-computed: `check-mechanical.py emit-v-weights` emits `v_row|bytes|tokens|cum_pct|heavy` table, heaviest first; heavy = top rows whose cumulative weight first reaches ≥ 50% of §V-section total (tie-break descending weight then ascending id — run-stable). Not by inspection. Heavy rows: extract audit-recipe content → `.claude/check-extras.md` (REPO-LOCAL extension); SPEC.md row keeps 1-line ref. Check skill loader already path-probes `.claude/check-extras.md` — no check-skill amend.
+Heavy set script-computed: `check-mechanical.py emit-v-weights` emits `v_row|bytes|tokens|cum_pct|heavy` table, heaviest first; heavy = top rows whose cumulative weight first reaches ≥ 50% of §V-section total (tie-break descending weight then ascending id — run-stable). Not by inspection. Heavy rows: extract audit-recipe content → `.spec/check-extras.md` (REPO-LOCAL extension); SPEC.md row keeps 1-line ref. Check skill loader already path-probes `.spec/check-extras.md` — no check-skill amend.
 
 ## CONFIRM
 
@@ -80,7 +80,7 @@ Single atomic commit:
 
 1. Apply firing prongs in order (1 → 6 minus skips).
 2. Prong 3 fired → `git add SPEC.archive.md`.
-3. Prong 6 fired → `git add .claude/check-extras.md`.
+3. Prong 6 fired → `git add .spec/check-extras.md`.
 4. Prong 1 fired → cite-DAG sweep same commit; touch REPO-LOCAL citers renumbered by fold.
 5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit `git commit -m <subject> -- <staged artifacts> SPEC.md` (write-ownership invariant — commit scopes to staged owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `condense SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
 
@@ -99,7 +99,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

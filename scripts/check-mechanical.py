@@ -1480,10 +1480,10 @@ def audit_scope_feed(repo_root, memo, t_rows, v_rows, spec_path="SPEC.md"):
 # --- REPO-LOCAL hook probe ---------------------------------------------------
 
 def probe_extras_hook(repo_root):
-    """Run `.claude/scripts/check-extras.sh` if present + executable; append its
+    """Run `.spec/scripts/check-extras.sh` if present + executable; append its
     pipe-table rows. Language-agnostic contract per the parametric invariant."""
     out = []
-    hook = os.path.join(repo_root, ".claude", "scripts", "check-extras.sh")
+    hook = os.path.join(repo_root, ".spec", "scripts", "check-extras.sh")
     if not (os.path.isfile(hook) and os.access(hook, os.X_OK)):
         return out
     try:
@@ -1627,7 +1627,7 @@ def discover_human_facing(repo_root):
     """Human-facing prose surfaces (symbol-set + human-clarity invariants):
     repo-root README.md + CLAUDE.md (GITHUB-FACING + REPO-LOCAL human surfaces)
     plus the plugin manifest(s) (description shown in the marketplace). Excludes
-    SPEC-adjacent telegraph (SPEC.md, skill bodies, `.claude/**` overflow), which
+    SPEC-adjacent telegraph (SPEC.md, skill bodies, `.spec/**` overflow), which
     KEEPS the symbol set, so those are never scanned. Repo-agnostic."""
     out = []
     for name in ("README.md", "CLAUDE.md"):
@@ -1686,7 +1686,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     arch_vret = archive_has_vretired(arch_text) if arch_text else False
     arch_ids = parse_archive_ids(arch_text)
 
-    memo_path = os.path.join(repo_root, ".claude", "check-state.json")
+    memo_path = os.path.join(repo_root, ".spec", "check-state.json")
     memo = load_memo(memo_path)
     oversized_ack = (memo.get("oversized_cell_ack")
                      if memo and memo.get("schema_version") == MEMO_SCHEMA else None)
@@ -1882,7 +1882,7 @@ def memo_exit_code(rows):
 
 
 def ensure_gitignore_guard(repo_root):
-    path = os.path.join(repo_root, ".claude", ".gitignore")
+    path = os.path.join(repo_root, ".spec", ".gitignore")
     line = "check-state.json"
     existing = ""
     if os.path.exists(path):
@@ -1938,7 +1938,7 @@ def cmd_write_memo(args):
             collect_oversized_cells(t_rows, b_rows)),
     }
     ensure_gitignore_guard(args.repo_root)
-    memo_path = os.path.join(args.repo_root, ".claude", "check-state.json")
+    memo_path = os.path.join(args.repo_root, ".spec", "check-state.json")
     os.makedirs(os.path.dirname(memo_path), exist_ok=True)
     with open(memo_path, "w", encoding="utf-8") as f:
         json.dump(memo, f, indent=2)
@@ -2081,13 +2081,13 @@ def selftest():
     vp_rows = [
         {"id": f"V{1}", "body": "reg — SPEC.md, `skills/**/SKILL.md`, prose"},
         {"id": f"V{n_extras}",
-         "body": f"mech — → `.claude/check-extras.md §V{n_extras}`"},
+         "body": f"mech — → `.spec/check-extras.md §V{n_extras}`"},
         {"id": f"V{31}", "body": "design — writes `designs/<slug>.md` only"},
         {"id": f"V{22}", "body": "no path — `--from-audit` and `emit-v-slices`"},
     ]
     check(v_path_dirty(vp_rows, ["skills/check/SKILL.md"]) == [f"V{1}"],
           "v-path-dirty: glob token matches touched skill path")
-    check(v_path_dirty(vp_rows, [".claude/check-extras.md"]) == [f"V{n_extras}"],
+    check(v_path_dirty(vp_rows, [".spec/check-extras.md"]) == [f"V{n_extras}"],
           "v-path-dirty: stub body path token matches touched extras")
     check(v_path_dirty(vp_rows, ["designs/foo.md"]) == [f"V{31}"],
           "v-path-dirty: placeholder token matches touched design draft")
@@ -2101,9 +2101,9 @@ def selftest():
                        ["skills/build/SKILL.md"]) == [f"V{2}"],
           "v-path-dirty: bare filename matches touched path basename")
     multi = [{"id": f"V{n_extras}",
-              "body": f"→ `.claude/check-extras.md §V{n_extras}`"},
-             {"id": f"V{3}", "body": f"→ `.claude/check-extras.md §V{3}`"}]
-    check(v_path_dirty(multi, [".claude/check-extras.md"])
+              "body": f"→ `.spec/check-extras.md §V{n_extras}`"},
+             {"id": f"V{3}", "body": f"→ `.spec/check-extras.md §V{3}`"}]
+    check(v_path_dirty(multi, [".spec/check-extras.md"])
           == [f"V{3}", f"V{n_extras}"],
           "v-path-dirty: multiple dirty rows sorted ascending")
     # §T status + §B date cell shape

@@ -162,7 +162,7 @@ Loop per task:
 Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §V + §I + §T together.
 
 - (empty) — memo-driven sweep: re-audits §V rows touched since last clean run; rest HOLD-SINCE-CLEAN.
-- `--full` — force full re-classify: deletes `.claude/check-state.json` upfront, rebuilds memo.
+- `--full` — force full re-classify: deletes `.spec/check-state.json` upfront, rebuilds memo.
 
 Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
 
@@ -185,7 +185,7 @@ Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd
 
 ### `/sdd:reorganize` — §V cluster + renumber
 
-Operator-triggered clarity pass (at most once per major epoch): clusters §V invariants by topic, renumbers them, and sweeps every citation in the same commit. Renumber history persists to `.claude/spec-renumber-map.json` so old citations still resolve via `/sdd:explain`.
+Operator-triggered clarity pass (at most once per major epoch): clusters §V invariants by topic, renumbers them, and sweeps every citation in the same commit. Renumber history persists to `.spec/spec-renumber-map.json` so old citations still resolve via `/sdd:explain`.
 
 ## Skills
 

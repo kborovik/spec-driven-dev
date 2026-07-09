@@ -14,7 +14,7 @@ model: sonnet
 
 # check — drift report
 
-Pure diagnostic. Reports violations; writes nothing to SPEC or code; user decides remedy. Only sibling state: memo + `.gitignore` guard in REPO-LOCAL `.claude/` (cache, not source of truth — code + SPEC.md are truth). Mechanical audits owned by published script per mechanical-realization invariant — never re-derive its greps per run. Behavioral judgment stays LLM. Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.claude/scripts/check-extras.sh` hook (mechanical, run by script) + `.claude/check-extras.md` (judgment-class, consulted by LLM). Read-only → sub-agent delegation safe throughout.
+Pure diagnostic. Reports violations; writes nothing to SPEC or code; user decides remedy. Only sibling state: memo + `.gitignore` guard in REPO-LOCAL `.spec/` (cache, not source of truth — code + SPEC.md are truth). Mechanical audits owned by published script per mechanical-realization invariant — never re-derive its greps per run. Behavioral judgment stays LLM. Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.spec/scripts/check-extras.sh` hook (mechanical, run by script) + `.spec/check-extras.md` (judgment-class, consulted by LLM). Read-only → sub-agent delegation safe throughout.
 
 ## PROGRESS
 
@@ -25,7 +25,7 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
 1. Load spec overview (SCOPE, not whole-file Read per single-load invariant) — `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-overview`. Prints §G/§C/§I/§T/§B bodies + §V id list (no §V bodies — those arrive via `emit-v-slices` step 4; whole-file Read here double-loads SPEC.md + re-hits the Read token cap). Script exits non-zero "no SPEC.md" → "no spec, nothing to check." Stop.
 2. Parse `$ARGUMENTS` (two forms only, per dispatch invariant):
    - bare → memo-driven default sweep: invariants + interfaces + tasks. Memo absent or invalidated → full re-classify. Fresh memo written on clean.
-   - `--full` → delete `.claude/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation). Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
+   - `--full` → delete `.spec/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation). Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
    - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full`. Legacy section-name args and multi-flag forms retired.
 3. Run audit script (MECHANICAL CORE). Its `memo|ADVISORY|…` rows report fired invalidation triggers + the `v_row_shas` dirty set that scopes §V re-classification.
 4. §V row bodies come from the script's `emit-v-slices` mode (SCOPE), never whole-file Read — large SPEC paginates past the Read token cap. Script slice is canonical §V-body source for single-agent and sub-agent paths.
@@ -40,7 +40,7 @@ Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allow
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]
 ```
 
-Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBLISHED scope from `.claude-plugin/marketplace.json`; probes `.claude/scripts/check-extras.sh` (exists + executable → run, append its `id|verdict|evidence` rows — language-agnostic contract). Emits pipe-table `id|verdict|evidence`:
+Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBLISHED scope from `.claude-plugin/marketplace.json`; probes `.spec/scripts/check-extras.sh` (exists + executable → run, append its `id|verdict|evidence` rows — language-agnostic contract). Emits pipe-table `id|verdict|evidence`:
 
 - `format|VIOLATE|format: <detail>` — SPEC-FORMAT breach.
 - `cite|UNRESOLVED|<citer> <id> …` / `cite|TYPE-MISMATCH|…` — cite-DAG. `cite|ambiguous|…` = bare-form phase-label / gate-ID collision subset → LLM adjudicates per CHECK §-cite.
@@ -63,7 +63,7 @@ Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `m
 
 ## MEMO
 
-`.claude/check-state.json`, schema v3:
+`.spec/check-state.json`, schema v3:
 
 ```json
 {
@@ -79,7 +79,7 @@ Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `m
 Script owns both ends per memo invariant:
 
 - **read** — `audit` mode emits `memo|ADVISORY|…` per fired trigger. Per-row `v_row_shas` drift → only edited §V rows re-classify; hash-stable rows carry forward HOLD-SINCE-CLEAN. `oversized_cell_ack` suppresses the oversized-cells advisory while the acknowledged set is unchanged; re-fires on new cell (acknowledged smell not re-nagged).
-- **write** — `write-memo` mode (WRITE-MEMO) computes clean-set membership, per-row hashes, ack, idempotent `.claude/.gitignore` guard. LLM never decides clean, never hand-writes memo.
+- **write** — `write-memo` mode (WRITE-MEMO) computes clean-set membership, per-row hashes, ack, idempotent `.spec/.gitignore` guard. LLM never decides clean, never hand-writes memo.
 
 Memo update = side-effect of every clean run, no user prompt. §V non-row content (archive-marker line) unhashed → no re-classify on edit; format audit covers marker shape.
 
@@ -139,7 +139,7 @@ INPUT — SPEC.md invariants slice (lines {LINE_START}–{LINE_END}):
 
 {V_SLICE}
 
-INPUT — audit recipe (CHECK invariants step 5 behavioral-claim classification + judgment-class REPO-LOCAL extras from `.claude/check-extras.md`, verbatim):
+INPUT — audit recipe (CHECK invariants step 5 behavioral-claim classification + judgment-class REPO-LOCAL extras from `.spec/check-extras.md`, verbatim):
 
 {RECIPE_EXCERPT}
 
@@ -292,7 +292,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

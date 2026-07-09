@@ -15,7 +15,7 @@ Operator-triggered clarity-shape pass over SPEC.md §V. Cadence ≤ once per maj
 
 ## PREAMBLE
 
-State-mutator scoped to SPEC.md + `.claude/spec-clusters.json` + `.claude/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists). Operator invokes only per recipe-step-no-dispatch rule. Owns §V renumber permission carved out of monotonic-id invariant.
+State-mutator scoped to SPEC.md + `.spec/spec-clusters.json` + `.spec/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists). Operator invokes only per recipe-step-no-dispatch rule. Owns §V renumber permission carved out of monotonic-id invariant.
 
 Distinct from /sdd:condense: condense = token reduction (folds, archives, trims); reorganize = clarity shape (cluster + renumber) — not token drop, not row folds. Writes serialize main-thread per write-serialize invariant; classification reads delegable to sub-agents. Single commit per atomic-operation discipline, not partial application; cite-DAG sweep per cite-resolution invariant rides same commit.
 
@@ -32,8 +32,8 @@ Multi-phase run per response-shape invariant → emit live harness checklist. Ph
    - (a) `<repo>/.claude-plugin/marketplace.json` → parse `plugins[].source` via `jq` (fallback `python3` per tooling-preference invariant; python3 here = arbitrary JSON parse, not script-sole → frontmatter `Bash(python3 *)` stays broad, no single script path to pin) → {dir-name → plugin-name} map per plugin-name-vs-dir invariant; PUBLISHED = `{<dir>/**}` over each `source` value.
    - (b) else `<repo>/.claude-plugin/plugin.json` → single-plugin map; PUBLISHED = `{<repo>/**}` minus REPO-LOCAL.
    - (c) else → empty map; sweep targets REPO-LOCAL + SPEC.md internal only.
-5. Load `.claude/spec-clusters.json` if exists, else cold-start. Shape `[{cluster:<name>, rows:[{fingerprint:<hash>, current_id:V<n>}, ...]}, ...]`. Per-row key is §V body-text fingerprint (sha256 over row body w/o `V<n>:` prefix) — stable across renumber; id-as-key invalidates persist every run.
-6. Load `.claude/spec-renumber-map.json` if exists (chain-walk semantics on subsequent runs). Shape `[{run:<iso-date>, topic:<cluster>, old:V<n>, new:V<m>}, ...]` — append-only; `new` admits sentinel `archive` (archived-terminus per archive-sibling schema). Provenance via `git log` on file, not in-file `run_sha`.
+5. Load `.spec/spec-clusters.json` if exists, else cold-start. Shape `[{cluster:<name>, rows:[{fingerprint:<hash>, current_id:V<n>}, ...]}, ...]`. Per-row key is §V body-text fingerprint (sha256 over row body w/o `V<n>:` prefix) — stable across renumber; id-as-key invalidates persist every run.
+6. Load `.spec/spec-renumber-map.json` if exists (chain-walk semantics on subsequent runs). Shape `[{run:<iso-date>, topic:<cluster>, old:V<n>, new:V<m>}, ...]` — append-only; `new` admits sentinel `archive` (archived-terminus per archive-sibling schema). Provenance via `git log` on file, not in-file `run_sha`.
 
 ## ARCHIVE-RETIRED
 
@@ -81,12 +81,12 @@ Single atomic commit:
    - Drop archived rows from active §V.
    - Emit/update marker `## archived: §V.retired → SPEC.archive.md (<n> retired rows)` under §V heading — count form, not id-range (retired ids non-contiguous).
    - Per archived row append map entry `{run:<iso-date>, topic:'retired', old:V<n>, new:'archive'}`. No paired live-renumber entry (no new id consumed).
-2. Append renumber entries to `.claude/spec-renumber-map.json` per surviving renumbered row (`{run:<iso-date>, topic:<cluster>, old:V<n>, new:V<m>}`). Append-only — never rewrite prior runs.
+2. Append renumber entries to `.spec/spec-renumber-map.json` per surviving renumbered row (`{run:<iso-date>, topic:<cluster>, old:V<n>, new:V<m>}`). Append-only — never rewrite prior runs.
 3. Rewrite §V in cluster order: body verbatim per verbatim-preservation invariant, only `V<n>:` prefix renumbered. Archived ids skipped.
-4. Overwrite `.claude/spec-clusters.json` w/ post-run state; keyed by fingerprint, `current_id` = `V<new>`. Archived rows not persisted (terminus in archive sibling).
+4. Overwrite `.spec/spec-clusters.json` w/ post-run state; keyed by fingerprint, `current_id` = `V<new>`. Archived rows not persisted (terminus in archive sibling).
 5. Cite-DAG sweep w/ renumber map: target set per PREAMBLE scope; backtick pre-filter as ARCHIVE-RETIRED step 2. Every surviving `§V.<old>` free-text or bare `V<old>` typed-column cite (§T.cites, §B.fix) → `§V.<new>` / `V<new>` per context. `new:'archive'` entries not substituted — citer-protection gate already excluded live citers.
-6. Probe `.claude/.gitignore`: both json files not gitignored (git-tracked per scope-set invariant); not guard add.
-7. Stage owned paths `git add SPEC.md SPEC.archive.md .claude/spec-clusters.json .claude/spec-renumber-map.json` + touched sweep sites (add tracks new-file artifacts), then path-scoped commit `git commit -m <subject> -- <those same paths>` (write-ownership invariant — commit scopes to the owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
+6. Probe `.spec/.gitignore`: both json files not gitignored (git-tracked per scope-set invariant); not guard add.
+7. Stage owned paths `git add SPEC.md SPEC.archive.md .spec/spec-clusters.json .spec/spec-renumber-map.json` + touched sweep sites (add tracks new-file artifacts), then path-scoped commit `git commit -m <subject> -- <those same paths>` (write-ownership invariant — commit scopes to the owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
 
 EXECUTE ends @ commit. Rollback `git revert <reorganize-sha>` per single-commit shape. Drift cascade surfaces as Next-block item per response-shape invariant — operator dispatches next turn.
 
@@ -107,7 +107,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

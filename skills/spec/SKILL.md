@@ -75,7 +75,7 @@ Rule: every bug → §B entry. Invariant optional but preferred.
 
 Input: gate §-target + delta.
 
-**Resolve body file** (§V target — condense relocates heavy §V bodies, SPEC.md row left a stub): read the target's SPEC.md §V row. Row body redirects to `.claude/check-extras.md §V<n>` (condense prong-6 stub) → live body lives there under `## §V<n>` header; body file = `.claude/check-extras.md` (multi-target AMEND → one resolved body file per §V target, stub-redirected rows collapse to the same file). Else inline-body row → body file = SPEC.md. §B/§G/§C/§I/§T targets always SPEC.md. Resolved body file feeds APPLY step 4 write + commit path-scope per extras-hook invariant.
+**Resolve body file** (§V target — condense relocates heavy §V bodies, SPEC.md row left a stub): read the target's SPEC.md §V row. Row body redirects to `.spec/check-extras.md §V<n>` (condense prong-6 stub) → live body lives there under `## §V<n>` header; body file = `.spec/check-extras.md` (multi-target AMEND → one resolved body file per §V target, stub-redirected rows collapse to the same file). Else inline-body row → body file = SPEC.md. §B/§G/§C/§I/§T targets always SPEC.md. Resolved body file feeds APPLY step 4 write + commit path-scope per extras-hook invariant.
 
 Read target § from its resolved body file. Show current in steno per steno skill if target in {§V, §B} (audience: user reviewing proposal); telegraph otherwise. Ask user what changes.
 
@@ -124,7 +124,7 @@ Table uses named-invariant + placeholder cite form only (`per <named> invariant`
 
 **Step 3 — show-user**: render diff preview; await user OK.
 
-**Step 4 — write + commit**: on OK → write delta to its resolved body file(s) (telegraph) + auto-commit path-scoped `git commit -m <subject> [-m <body>] -- <body-file(s)>` (write-ownership invariant — scopes to the owned file set, pre-staged files never leak). Body file(s) = SPEC.md every mode + target, except a stub-redirected §V AMEND → `.claude/check-extras.md` per AMEND § resolution + extras-hook invariant (the SPEC.md stub row stays untouched, so check-extras.md is the sole path-scope; mixed delta touching both an inline §V/other § and a stub-redirected §V → path list = the union). `-m` flags ! precede `--` — message tokens after `--` parse as pathspecs, commit fails; no commit prompt (uniform every mode). Msg per mode:
+**Step 4 — write + commit**: on OK → write delta to its resolved body file(s) (telegraph) + auto-commit path-scoped `git commit -m <subject> [-m <body>] -- <body-file(s)>` (write-ownership invariant — scopes to the owned file set, pre-staged files never leak). Body file(s) = SPEC.md every mode + target, except a stub-redirected §V AMEND → `.spec/check-extras.md` per AMEND § resolution + extras-hook invariant (the SPEC.md stub row stays untouched, so check-extras.md is the sole path-scope; mixed delta touching both an inline §V/other § and a stub-redirected §V → path list = the union). `-m` flags ! precede `--` — message tokens after `--` parse as pathspecs, commit fails; no commit prompt (uniform every mode). Msg per mode:
 
 ```
 NEW      → init SPEC.md (V<1>..V<n>, T<1>..T<m>)
@@ -219,7 +219,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

@@ -21,7 +21,7 @@ Inverse of `telegraph` skill. Human-facing. Reads SPEC.md, expands one citation 
    - `§T.n` / `§V.n` / `§B.n` / `§I.<key>` → that row
    - `§G` / `§C` → full section
    - `--next` or empty → lowest-numbered §T row w/ status `.`
-3. `.claude/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first to end, resolve result against current SPEC.md. Map read, never mutated (read-only-diagnostic invariant). Absent → arg resolves directly.
+3. `.spec/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first to end, resolve result against current SPEC.md. Map read, never mutated (read-only-diagnostic invariant). Absent → arg resolves directly.
 4. Citation absent → list valid ids in target section. Bail.
 
 ## EXPAND
@@ -80,7 +80,7 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.claude/check-extras` row
+- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
 
 ## OUTPUT — "Next" block
 

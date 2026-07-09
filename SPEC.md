@@ -32,8 +32,8 @@ numbered, testable, named; each ! hold. ids clustered by topic; gaps = cluster s
 
 V1: spec-adjacent-register — SPEC.md, `skills/**/SKILL.md`, SPEC-FORMAT.md, spec-referencing prose ! telegraph per telegraph skill; /sdd:explain decodes on demand.
 V2: github-facing-register — README, issues, PRs, commit-msg bodies ! steno per steno skill; commit subjects = per-skill fixed templates, verbatim.
-V3: verbatim-preservation — → `.claude/check-extras.md §V3`
-V4: symbol-set — → `.claude/check-extras.md §V4`
+V3: verbatim-preservation — → `.spec/check-extras.md §V3`
+V4: symbol-set — → `.spec/check-extras.md §V4`
 V10: sole-source-of-truth — SPEC.md @ repo root is sole live spec; no docs/ tree, no sidecars; SPEC.archive.md sibling carries immutable archived rows only.
 V11: shape-semantics-split — SPEC-FORMAT.md binds row shape + section catalog + citation grammar; §V rows bind semantics + enforcement; neither restates the other.
 V12: monotonic-numbering — V/T/B ids strictly increasing in section order; gaps OK, reuse banned; sole renumber path = /sdd:reorganize (map append + cite sweep, same commit).
@@ -41,38 +41,38 @@ V13: cite-resolution — every cite ! resolve: `cites` tokens → live/archived 
 V14: pinned-cite-ban — PUBLISHED bodies ! placeholder (`§V.<n>`) or named-invariant form, never pinned §-digit cites; SPEC.md-narrative + REPO-LOCAL pinned cites ! resolve live.
 V15: renumber-chain-walk — `.spec/spec-renumber-map.json` append-only; historical id resolves newest-first to live id or `archive` sentinel (→ SPEC.archive.md §V.retired block, never live row).
 V16: archive-semantics — archived §T/§B + retired §V rows migrate verbatim to SPEC.archive.md w/ per-section markers per SPEC-FORMAT; archived rows stay cite-resolvable, never edited.
-V20: write-ownership — → `.claude/check-extras.md §V20`
+V20: write-ownership — → `.spec/check-extras.md §V20`
 V21: write-serialize — SPEC.md + code writes serialize main-thread; reads delegable to read-only sub-agents.
 V22: recipe-step-no-dispatch — slash-cmd dispatch = operator turn only; recipes end @ commit + Next block; sole exclusion: /sdd:build verify-fail routes cause to spec skill mid-loop.
-V23: decision-gate — → `.claude/check-extras.md §V23`
-V24: response-shape — → `.claude/check-extras.md §V24`
+V23: decision-gate — → `.spec/check-extras.md §V23`
+V24: response-shape — → `.spec/check-extras.md §V24`
 V25: socratic-gate — /sdd:spec mode {NEW, DISTILL, BACKPROP, AMEND, FOLD-IN} = gate byproduct of free-form `$ARGUMENTS`; no mode prefixes, no skip flags; concrete intent converges ≤ 1 turn.
 V26: first-principle-probe — NEW mode fires foundational-claim question exactly once, declinable; `first-principle-asked` recorded regardless of answer.
-V27: backprop-protocol — → `.claude/check-extras.md §V27`
-V28: freshness-contract — → `.claude/check-extras.md §V28`
+V27: backprop-protocol — → `.spec/check-extras.md §V27`
+V28: freshness-contract — → `.spec/check-extras.md §V28`
 V29: fold-first — new §V row vs amend of closest existing row ! operator gate; split justification = §B recurrence cite or declared orthogonal concept; "mirrors existing row" alone insufficient.
 V30: sweep-scope — sweep-class §T row ! declare scope as grep pattern or vocab table; named-procedure + named-site lists rejected.
 V31: design-lifecycle — /sdd:design writes `designs/<slug>.md` only (write-new); fold-in mutates SPEC.md only; draft persists in working tree, operator disposes.
-V40: mechanical-realization — → `.claude/check-extras.md §V40`
-V41: parametric-recipe — → `.claude/check-extras.md §V41`
-V42: scope-set — → `.claude/check-extras.md §V42`
-V43: drift-verdict-vocab — → `.claude/check-extras.md §V43`
-V44: memo — → `.claude/check-extras.md §V44`
-V45: scope-feed — → `.claude/check-extras.md §V45`
-V46: batch — → `.claude/check-extras.md §V46`
+V40: mechanical-realization — → `.spec/check-extras.md §V40`
+V41: parametric-recipe — → `.spec/check-extras.md §V41`
+V42: scope-set — → `.spec/check-extras.md §V42`
+V43: drift-verdict-vocab — → `.spec/check-extras.md §V43`
+V44: memo — → `.spec/check-extras.md §V44`
+V45: scope-feed — → `.spec/check-extras.md §V45`
+V46: batch — → `.spec/check-extras.md §V46`
 V47: check-dispatch — /sdd:check accepts bare (memo-driven) or `--full` (drop memo, re-classify all) only; other args bail.
-V48: token-budget — → `.claude/check-extras.md §V48`
-V49: extras-hook — → `.claude/check-extras.md §V49`
+V48: token-budget — → `.spec/check-extras.md §V48`
+V49: extras-hook — → `.spec/check-extras.md §V49`
 V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
-V61: sub-skill-flags — → `.claude/check-extras.md §V61`
-V62: tooling-preference — → `.claude/check-extras.md §V62`
-V63: plugin-shape — → `.claude/check-extras.md §V63`
-V64: single-load — → `.claude/check-extras.md §V64`
-V65: monitor-protocol — → `.claude/check-extras.md §V65`
-V66: mechanize-scan — → `.claude/check-extras.md §V66`
-V67: human-clarity — → `.claude/check-extras.md §V67`
-V68: table-use — → `.claude/check-extras.md §V68`
-V69: github-workflow — → `.claude/check-extras.md §V69`
+V61: sub-skill-flags — → `.spec/check-extras.md §V61`
+V62: tooling-preference — → `.spec/check-extras.md §V62`
+V63: plugin-shape — → `.spec/check-extras.md §V63`
+V64: single-load — → `.spec/check-extras.md §V64`
+V65: monitor-protocol — → `.spec/check-extras.md §V65`
+V66: mechanize-scan — → `.spec/check-extras.md §V66`
+V67: human-clarity — → `.spec/check-extras.md §V67`
+V68: table-use — → `.spec/check-extras.md §V68`
+V69: github-workflow — → `.spec/check-extras.md §V69`
 
 ## §T TASKS
 
@@ -120,7 +120,7 @@ T40|x|init `skills/github/SKILL.md`: passive (`user-invocable: false`) gh-CLI wo
 T41|x|patch `skills/spec/SKILL.md` AMEND + APPLY step 4 — resolve §V target to its body file (SPEC.md row vs `→ .claude/check-extras.md §V<n>` stub redirect); read/show/write the actual body + path-scope `git commit -- <body-file>` there, not unconditional SPEC.md|V49,V20,B23
 T42|x|sweep `skills/github/SKILL.md` — drop git-worktree steps per §V.69 amend; scope `grep -nE 'worktree' skills/github/SKILL.md`: BRANCH `git worktree add` + path prose → `gh issue develop <n> --checkout` in-place only, MERGE `git worktree remove` → drop, CLOSE → `gh pr close` + `git branch -D`, frontmatter desc + NON-GOALS worktree mentions dropped|V69
 T43|x|script: audit emits `scope|ADVISORY|v-path-dirty: V<n>,…` row — §V row-body path tokens (quoted/backticked path-like strings) intersect touched-set, computed script-side; check SCOPE step 1 consumes row i/o hand-run grep over §V section; + self-test|V45,V40
-T44|.|move spec-owned files `.claude/` → `.spec/`: `git mv` check-extras.md + `.gitignore`; regenerable local check-state.json deleted; rewrite path refs — scope `grep -rn '\.claude/' skills/ scripts/ README.md SPEC.md` (25 SPEC.md stub rows + 22 skill-body refs + script strings/self-tests + 2 README lines); exempt `.claude/skills/**` (repo-local skill discovery) + backticked historical §B/closed-§T rows verbatim|V15,V41,V42,V44,V49
+T44|x|move spec-owned files `.claude/` → `.spec/`: `git mv` check-extras.md + `.gitignore`; regenerable local check-state.json deleted; rewrite path refs — scope `grep -rn '\.claude/' skills/ scripts/ README.md SPEC.md` (25 SPEC.md stub rows + 22 skill-body refs + script strings/self-tests + 2 README lines); exempt `.claude/skills/**` (repo-local skill discovery) + backticked historical §B/closed-§T rows verbatim|V15,V41,V42,V44,V49
 
 ## §B BUGS
 
