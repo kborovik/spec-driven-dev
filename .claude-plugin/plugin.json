@@ -2,7 +2,7 @@
   "name": "sdd",
   "displayName": "Spec-Driven Development (SDD)",
   "description": "Compressed spec-driven development. Seven commands (/sdd:design, /sdd:spec, /sdd:build, /sdd:check, /sdd:explain, /sdd:condense, /sdd:reorganize) over one SPEC.md. Telegraph encoding (about 40% token cut vs Claude prose re-expansion).",
-  "version": "1.1.13",
+  "version": "1.2.0",
   "author": { "name": "Konstantin Borovik", "email": "github@lab5.ca" },
   "homepage": "https://github.com/kborovik/spec-driven-dev",
   "repository": "https://github.com/kborovik/spec-driven-dev",
