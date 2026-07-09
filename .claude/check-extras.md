@@ -36,11 +36,11 @@ V40: mechanical-realization — deterministic audit rules realized once in `scri
 
 ## §V41 parametric-recipe
 
-V41: parametric-recipe — published recipes + script name no repo-literal paths beyond SPEC.md + plugin-internal files; §I ids derive from kind prefixes, never hardcoded surface shapes; repo-specific enforcement → `.claude/scripts/check-extras.sh` + `.claude/check-extras.md`.
+V41: parametric-recipe — published recipes + script name no repo-literal paths beyond SPEC.md + plugin-internal files; §I ids derive from kind prefixes, never hardcoded surface shapes; repo-specific enforcement → `.spec/scripts/check-extras.sh` + `.spec/check-extras.md`.
 
 ## §V42 scope-set
 
-V42: scope-set — audit scopes: PUBLISHED (marketplace source dirs; root `./` → repo root), REPO-LOCAL (`.claude/**`, README.md, CLAUDE.md), SPEC-ADJACENT (SPEC.md, skill bodies, SPEC-FORMAT.md), GITHUB-FACING (README, issues, PRs, commit bodies); each audit names its scope.
+V42: scope-set — audit scopes: PUBLISHED (marketplace source dirs; root `./` → repo root), REPO-LOCAL (`.spec/**`, `.claude/**`, README.md, CLAUDE.md), SPEC-ADJACENT (SPEC.md, skill bodies, SPEC-FORMAT.md), GITHUB-FACING (README, issues, PRs, commit bodies); each audit names its scope.
 
 ## §V43 drift-verdict-vocab
 
@@ -48,7 +48,7 @@ V43: drift-verdict-vocab — dirty {VIOLATE, UNVERIFIABLE, UNRESOLVED, TYPE-MISM
 
 ## §V44 memo
 
-V44: memo — `.claude/check-state.json` = cache, not truth; script owns both ends (read → invalidation advisories; write → clean runs only, per-row §V hashes, oversized-cell ack, `.gitignore` guard); `write-memo --from-audit` re-runs mechanical rows internally → stdin = behavioral verdicts only, hand-merge banned; exit 0 clean / 1 dirty (memo untouched, CI-gateable) / 2 invalid vocab; LLM never decides clean, never hand-writes memo (closes §B.9).
+V44: memo — `.spec/check-state.json` = cache, not truth; script owns both ends (read → invalidation advisories; write → clean runs only, per-row §V hashes, oversized-cell ack, `.gitignore` guard); `write-memo --from-audit` re-runs mechanical rows internally → stdin = behavioral verdicts only, hand-merge banned; exit 0 clean / 1 dirty (memo untouched, CI-gateable) / 2 invalid vocab; LLM never decides clean, never hand-writes memo (closes §B.9).
 
 ## §V45 scope-feed
 
@@ -64,7 +64,7 @@ V48: token-budget — estimate = bytes / 3.4; > 20k tokens → check advisory �
 
 ## §V49 extras-hook
 
-V49: extras-hook — executable `.claude/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.claude/check-extras.md`, consulted by check + build pre-commit probe; condense-extracted §V bodies live here too, SPEC.md row left a `→ .claude/check-extras.md §V<n>` stub — /sdd:spec AMEND of a stub-redirected §V resolves the target to its body file + path-scopes write + commit there (check-extras.md, not SPEC.md) (closes §B.23).
+V49: extras-hook — executable `.spec/scripts/check-extras.sh` runs inside script audit, rows appended verbatim (language-agnostic `id|verdict|evidence` contract); judgment-class extras live in `.spec/check-extras.md`, consulted by check + build pre-commit probe; condense-extracted §V bodies live here too, SPEC.md row left a `→ .spec/check-extras.md §V<n>` stub — /sdd:spec AMEND of a stub-redirected §V resolves the target to its body file + path-scopes write + commit there (check-extras.md, not SPEC.md) (closes §B.23).
 
 ## §V61 sub-skill-flags
 
