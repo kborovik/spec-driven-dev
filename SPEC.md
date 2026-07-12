@@ -73,6 +73,7 @@ V66: mechanize-scan — → `.spec/check-extras.md §V66`
 V67: human-clarity — → `.spec/check-extras.md §V67`
 V68: table-use — → `.spec/check-extras.md §V68`
 V69: github-workflow — → `.spec/check-extras.md §V69`
+V70: sembr — repo `.md` prose source lines ! semantic line breaks (sembr.org): one sentence per line, clause-boundary break OK; source-format only — rendered output unchanged; scope: README.md, CLAUDE.md, `designs/*.md`, `skills/**/SKILL.md`; exempt: pipe-row files (SPEC.md, SPEC.archive.md, `.spec/check-extras.md`), fenced blocks, `|`-tables, frontmatter; GitHub issue/PR/comment bodies out of scope (GFM renders single newline as hard break); register-orthogonal — sibling to table-use.
 
 ## §T TASKS
 
@@ -121,6 +122,9 @@ T41|x|patch `skills/spec/SKILL.md` AMEND + APPLY step 4 — resolve §V target t
 T42|x|sweep `skills/github/SKILL.md` — drop git-worktree steps per §V.69 amend; scope `grep -nE 'worktree' skills/github/SKILL.md`: BRANCH `git worktree add` + path prose → `gh issue develop <n> --checkout` in-place only, MERGE `git worktree remove` → drop, CLOSE → `gh pr close` + `git branch -D`, frontmatter desc + NON-GOALS worktree mentions dropped|V69
 T43|x|script: audit emits `scope|ADVISORY|v-path-dirty: V<n>,…` row — §V row-body path tokens (quoted/backticked path-like strings) intersect touched-set, computed script-side; check SCOPE step 1 consumes row i/o hand-run grep over §V section; + self-test|V45,V40
 T44|x|move spec-owned files `.claude/` → `.spec/`: `git mv` check-extras.md + `.gitignore`; regenerable local check-state.json deleted; rewrite path refs — scope `grep -rn '\.claude/' skills/ scripts/ README.md SPEC.md` (25 SPEC.md stub rows + 22 skill-body refs + script strings/self-tests + 2 README lines); exempt `.claude/skills/**` (repo-local skill discovery) + backticked historical §B/closed-§T rows verbatim|V15,V41,V42,V44,V49
+T45|.|re-anchor steno + CLAUDE.md carriers on simple-technical-language per V67 sync obligation — scope vocab {skills/steno/SKILL.md, CLAUDE.md}: steno tagline → "simple technical language for human readers", merge SKIM TEST + SENTENCE SHAPE lead-first/one-idea rules into one core §, fold SHAPES into core, drop release-commit EXAMPLE (issue + PR pairs stay); QUESTION SHAPE, SYMBOLS, PRESERVE VERBATIM, BOUNDARIES content-preserved; CLAUDE.md restatement re-synced same commit|V67,V2
+T46|.|sweep repo `.md` prose → semantic line breaks per V70 — scope `grep -rlE '[.!?] [A-Z]' README.md CLAUDE.md designs/*.md skills/*/SKILL.md`: multi-sentence source line → one sentence per line; fenced blocks, `|`-tables, frontmatter + V70-exempt files untouched|V70
+T47|.|script: audit emits sembr advisory row — scope V70 file set, prose line w/ ≥ 2 sentence terminators outside fence/`|`-table/frontmatter → ADVISORY `id|verdict|evidence` row + self-test; check audit consumes row i/o hand-run line scan|V70,V40
 
 ## §B BUGS
 
