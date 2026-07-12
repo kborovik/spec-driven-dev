@@ -47,6 +47,14 @@ Modes:
                 single words excluded). Backtick-span + fenced-block exempt —
                 realized once here so the drift-detector retires its hand-run
                 idiom grep, a fixed-pattern sweep a manual pass forgets to re-run.
+                Emits `sembr|ADVISORY|…` — the sembr invariant's
+                one-sentence-per-line rule: a prose source line in the sembr
+                file set (README, CLAUDE.md, designs drafts, skill bodies)
+                holds ≥ 2 sentences. Fenced blocks, `|`-table rows,
+                frontmatter, blockquoted example copy, and backtick spans are
+                exempt; pipe-row files never enter the set. Advisory only
+                (source-format rule, never dirty) — realized once here so the
+                drift-detector retires a hand-run multi-sentence line scan.
                 Emits `batch|ADVISORY|recommended: <n> agents` — the
                 §V-classification sub-agent count from the §V row count +
                 PUBLISHED file census (batch invariant), consumed by the
@@ -875,6 +883,74 @@ def audit_human_idiom(human_files):
     return out
 
 
+# --- sembr multi-sentence-line advisory ---------------------------------------
+# sembr invariant: repo `.md` prose source lines break per sentence (semantic
+# line breaks) — one sentence per line, clause-boundary break OK. Source-format
+# only, so a breach is ADVISORY (never dirty, CI-unaffected): a prose line
+# holding ≥ 2 sentences. A sentence boundary = terminator (+ optional bold /
+# quote / paren closers) then space then a capital, outside a backtick span,
+# not after an abbreviation (`e.g.`, `vs.`, an ellipsis), and not the leading
+# list marker itself. Fenced blocks, `|`-table rows, YAML frontmatter, and
+# blockquoted example copy (verbatim-preservation invariant) are exempt;
+# pipe-row files never enter the file set. Realized once here per the
+# mechanical-realization invariant so the drift-detector retires a hand-run
+# multi-sentence line scan.
+
+SEMBR_BOUNDARY = re.compile(r'[.!?](?:\*\*|["\')\]])* +(?=[A-Z])')
+SEMBR_ABBREV = re.compile(r'(?:\b(?:e\.g|i\.e|etc|vs|cf|incl|approx)|\.)\.$')
+SEMBR_MARKER = re.compile(r'^\s*(?:[-*+]|\d+\.)\s+')
+
+
+def scan_sembr(path, text):
+    """Flag multi-sentence prose source lines in one sembr-scoped file — one
+    ADVISORY row per offending line; clean → no row (silent, sibling
+    convention). Exemptions per the sembr invariant + verbatim-preservation:
+    frontmatter, fenced blocks, `|`-table rows, blockquotes, backtick spans."""
+    out = []
+    in_fence = False
+    in_front = False
+    for i, line in enumerate(text.splitlines(), start=1):
+        if i == 1 and line.strip() == "---":
+            in_front = True
+            continue
+        if in_front:
+            if line.strip() == "---":
+                in_front = False
+            continue
+        if FENCE_LINE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        ls = line.lstrip()
+        if ls.startswith("|") or ls.startswith(">"):
+            continue
+        bare = SEMBR_MARKER.sub('', strip_backticks(line))
+        for m in SEMBR_BOUNDARY.finditer(bare):
+            if SEMBR_ABBREV.search(bare[:m.start() + 1]):
+                continue
+            out.append(("sembr", ADVISORY,
+                        f"sembr ADVISORY: {path}:{i} multi-sentence source "
+                        f"line — break one sentence per line per sembr "
+                        f"invariant"))
+            break
+    return out
+
+
+def audit_sembr(sembr_files):
+    """File-reading wrapper (sembr invariant). Emits the multi-sentence-line
+    advisory over the sembr-scoped prose file set — realized once here,
+    retiring the hand-run line scan."""
+    out = []
+    for path in sembr_files:
+        try:
+            txt = read_text(path)
+        except OSError:
+            continue
+        out += scan_sembr(path, txt)
+    return out
+
+
 # --- CLAUDE.md presence + direct-instruction marker block --------------------
 # human-clarity invariant: repo-root CLAUDE.md carries the plain-imperative
 # restatement of the clarity standard governing chat + human-facing output,
@@ -1641,6 +1717,25 @@ def discover_human_facing(repo_root):
     return sorted(set(out))
 
 
+def discover_sembr_files(repo_root):
+    """Sembr-invariant prose file set: repo-root README.md + CLAUDE.md,
+    `designs/*.md` drafts, and the PUBLISHED skill bodies (discover_skill_md).
+    Pipe-row files (SPEC.md, the archive sibling, the extras overflow) are
+    exempt by construction — never in the set. Repo-agnostic."""
+    out = []
+    for name in ("README.md", "CLAUDE.md"):
+        p = os.path.join(repo_root, name)
+        if os.path.isfile(p):
+            out.append(p)
+    designs = os.path.join(repo_root, "designs")
+    if os.path.isdir(designs):
+        for fn in sorted(os.listdir(designs)):
+            if fn.endswith(".md"):
+                out.append(os.path.join(designs, fn))
+    out += discover_skill_md(repo_root)
+    return sorted(set(out))
+
+
 # --- modes -------------------------------------------------------------------
 
 def load_spec(repo_root, spec_path):
@@ -1717,6 +1812,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_human_symbols(discover_human_facing(repo_root))
     findings += audit_human_idiom(discover_human_facing(repo_root))
     findings += audit_claude_md(repo_root)
+    findings += audit_sembr(discover_sembr_files(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
     findings += audit_memo(memo_path, v_rows)
@@ -2589,6 +2685,39 @@ def selftest():
     check(validate_vocab([("idiom", "VIOLATE", "")]) == [],
           "human-idiom: pseudo-id unrestricted vocab")
 
+    # sembr multi-sentence-line advisory (sembr invariant): a prose line
+    # holding two sentences → one ADVISORY row; single sentence clean; fence /
+    # pipe-table / frontmatter / blockquote / backtick-span exempt; a list
+    # marker is not a boundary; abbreviation + ellipsis guarded; ADVISORY is
+    # never dirty; scanning resumes after a fence closes.
+    two = "First sentence here. Second sentence follows."
+    sr = scan_sembr("p", two)
+    check(len(sr) == 1 and sr[0][0] == "sembr" and sr[0][1] == ADVISORY,
+          "sembr: multi-sentence prose line → one ADVISORY row")
+    check(scan_sembr("p", "One sentence per line stays silent.") == [],
+          "sembr: single-sentence line clean")
+    check(scan_sembr("p", f"```\n{two}\n```") == [],
+          "sembr: fenced block exempt")
+    check(scan_sembr("p", "| a. B | c. D |") == [],
+          "sembr: pipe-table row exempt")
+    check(scan_sembr("p", f"---\ndesc: |\n  {two}\n---") == [],
+          "sembr: frontmatter exempt")
+    check(scan_sembr("p", "> Quoted copy. Two sentences fine.") == [],
+          "sembr: blockquote exempt")
+    check(scan_sembr("p", "1. Read the file per plan.") == [],
+          "sembr: list marker is not a sentence boundary")
+    check(scan_sembr("p", "guard fires on e.g. Uppercase and stops... Then") == [],
+          "sembr: abbreviation + ellipsis guarded")
+    check(scan_sembr("p", "code span `a. B` stays exempt.") == [],
+          "sembr: backtick span exempt")
+    check(any(v == ADVISORY for _, v, _ in
+              scan_sembr("p", f"```\n{two}\n```\n{two}")),
+          "sembr: scanning resumes after fence close")
+    check(compute_clean([("sembr", ADVISORY, "")])[0] is True,
+          "sembr: ADVISORY never dirty")
+    check(validate_vocab([("sembr", ADVISORY, "")]) == [],
+          "sembr: pseudo-id unrestricted vocab")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2598,7 +2727,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 181
+    return 193
 
 
 # --- entry -------------------------------------------------------------------

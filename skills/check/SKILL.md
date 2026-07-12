@@ -50,7 +50,7 @@ Checklist = ephemeral harness UI: never repo state, never the memo, never substi
 
 ## MECHANICAL CORE — audit script
 
-Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, auto-fire sub-skill slash-dispatch ban, allowed-tools grant-use (no zero-body-use grant), CLAUDE.md presence + direct-instruction marker block, human-facing naked-symbol + banned-idiom scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
+Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, auto-fire sub-skill slash-dispatch ban, allowed-tools grant-use (no zero-body-use grant), CLAUDE.md presence + direct-instruction marker block, human-facing naked-symbol + banned-idiom scan, sembr multi-sentence-line scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
 Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — the MECHANIZE-block check supersedes any hand-run `awk|md5|uniq` block sweep, the dispatch-target check any hand-run skill-body slash grep, the grant-use check any hand-run `allowed-tools` grant sweep, the human-facing scan any hand-run symbol or idiom grep.
 
 Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
@@ -81,6 +81,9 @@ Emits pipe-table `id|verdict|evidence`:
 - `idiom|VIOLATE|<file:line> banned idiom <phrase> …` — a human-facing surface carries a banned idiom / jargon-idiom phrase per human-clarity invariant, matched against a curated low-false-positive BOUNDARIES subset (multi-word idiom + hyphenated jargon-idiom; ambiguous single words excluded).
   Backtick-span + fenced-block exempt (a code-span or fenced example naming a banned phrase, e.g. CLAUDE.md's ban list, is fine).
   Script-owned, never hand-run the idiom grep per run (a manual sweep forgets to re-run it) (closes §B.22).
+- `sembr|ADVISORY|<file:line> multi-sentence source line …` — a prose source line in the sembr file set (README, CLAUDE.md, `designs/*.md`, skill bodies) holds ≥ 2 sentences per sembr invariant; fence / `|`-table / frontmatter / blockquote / backtick-span exempt, pipe-row files never in the set.
+  Advisory only (source-format rule, never dirty).
+  Script-owned, never hand-run the multi-sentence line scan per run.
 - `token|ADVISORY|SPEC.md ~<n>k tokens > budget …` — estimate `bytes/3.4` per token-budget invariant.
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
@@ -88,7 +91,7 @@ Emits pipe-table `id|verdict|evidence`:
 - `scope|ADVISORY|v-path-dirty: V<n>,…` — §V rows whose body path tokens (quoted/backticked path-like strings) intersect the touched-set; script-computed, consumed by SCOPE step 1 in place of a hand-run grep over the §V section.
 - `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `memo`-invalidation → `## advisory`.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `sembr` + `memo`-invalidation → `## advisory`.
 Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set, `scope` v-path-dirty) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff` or a hand-grep over §V bodies. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
 
 ## MEMO
@@ -284,7 +287,7 @@ Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT r
 - dirty run (any VIOLATE / DRIFT / MISSING / STALE / UNRESOLVED / TYPE-MISMATCH) → omit section.
 
 **Advisory** — fired conditions ! emit `## advisory` H2 between `## checkpoint` and `## summary` (or leading output when no checkpoint).
-One line per fired `token|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
+One line per fired `token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
 No line → omit heading.
 
 ```
