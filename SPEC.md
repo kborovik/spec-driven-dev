@@ -23,7 +23,7 @@ external surface — what operator + consuming repo see.
 - explain: `/sdd:explain [§-cite|--next]` → prose expansion w/ cited siblings, zero writes
 - condense: `/sdd:condense` → six-prong token sweep, single atomic commit
 - reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep, single atomic commit
-- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, --self-test
+- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, fix-sembr, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, --self-test
 - format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, condense, reorganize
 
 ## §V INVARIANTS
@@ -125,6 +125,7 @@ T44|x|move spec-owned files `.claude/` → `.spec/`: `git mv` check-extras.md + 
 T45|x|re-anchor steno + CLAUDE.md carriers on simple-technical-language per V67 sync obligation — scope vocab {skills/steno/SKILL.md, CLAUDE.md}: steno tagline → "simple technical language for human readers", merge SKIM TEST + SENTENCE SHAPE lead-first/one-idea rules into one core §, fold SHAPES into core, drop release-commit EXAMPLE (issue + PR pairs stay); QUESTION SHAPE, SYMBOLS, PRESERVE VERBATIM, BOUNDARIES content-preserved; CLAUDE.md restatement re-synced same commit|V67,V2
 T46|x|sweep repo `.md` prose → semantic line breaks per V70 — scope `grep -rlE '[.!?] [A-Z]' README.md CLAUDE.md designs/*.md skills/*/SKILL.md`: multi-sentence source line → one sentence per line; fenced blocks, `|`-tables, frontmatter + V70-exempt files untouched|V70
 T47|x|script: audit emits sembr advisory row — scope V70 file set, prose line w/ ≥ 2 sentence terminators outside fence/`|`-table/frontmatter → ADVISORY `id|verdict|evidence` row + self-test; check audit consumes row i/o hand-run line scan|V70,V40
+T48|.|script: add `fix-sembr` mode — rewrite flagged multi-sentence prose lines one-sentence-per-line in place over sembr file set (`--files <list>` override); reuse scan exemptions + guards (SEMBR_BOUNDARY single source, no re-derived splitter), rejoin-equivalence check per line, dry-run default `--write` to apply; + self-test; sembr-advisory remediation + T46-class sweeps consume it i/o scratchpad splitter|V70,V40
 
 ## §B BUGS
 
