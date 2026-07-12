@@ -9,7 +9,10 @@ user-invocable: false
 
 # telegraph — LLM-facing telegraph encoding
 
-Audience: LLM re-reading SPEC.md into context. Humans operate via /sdd:* cmds; /sdd:explain decodes telegraph → prose. Compression = telegraphic grammar (content words kept, function words dropped, as in telegrams), not symbols — heavy math operators cost 2–4 tokens vs 1-token word. Telegraph vs steno: telegraph drops grammar, runs in fragments; steno keeps grammar intact for GitHub reviewers.
+Audience: LLM re-reading SPEC.md into context.
+Humans operate via /sdd:* cmds; /sdd:explain decodes telegraph → prose.
+Compression = telegraphic grammar (content words kept, function words dropped, as in telegrams), not symbols — heavy math operators cost 2–4 tokens vs 1-token word.
+Telegraph vs steno: telegraph drops grammar, runs in fragments; steno keeps grammar intact for GitHub reviewers.
 
 Applies: SPEC.md writes, spec-referencing prose, backprop entries.
 Not: code, error strings, commit messages, PR descriptions, anything a human reads on GitHub → use `sdd:steno`.
@@ -19,7 +22,8 @@ Not: code, error strings, commit messages, PR descriptions, anything a human rea
 - Drop articles (a, an, the), filler (just, really, basically, simply, actually), aux verbs where fragment works (is, are, was, were, being), pleasantries, hedging (might, perhaps, could be worth).
 - Fragments fine.
 - Canonical verbs/nouns per `## VERBS` / `## NOUNS`.
-- Pipe tables compact: header row + data rows, bare `|cell|cell|` — no alignment padding, no separator row. Escape literal `|` as `\|`.
+- Pipe tables compact: header row + data rows, bare `|cell|cell|` — no alignment padding, no separator row.
+  Escape literal `|` as `\|`.
 
 ## SYMBOLS
 
@@ -35,7 +39,9 @@ Keep set — low-token, parse-clear; prefer over the word:
 |   pipe-table delimiter (no semantic meaning)
 ```
 
-No other symbols. Math operators outside keep set (for-all, exists, element-of, not-equal, and, or, …) cost 2–4 tokens each — write the ASCII word. For "or" write `or` — never bare `|`.
+No other symbols.
+Math operators outside keep set (for-all, exists, element-of, not-equal, and, or, …) cost 2–4 tokens each — write the ASCII word.
+For "or" write `or` — never bare `|`.
 
 Exclusions (apply to SYMBOLS, VERBS, NOUNS): backticks, verbatim trigger phrases, domain-load-bearing named ops (`backprop`, `telegraph-encode`, `socratic`, `steno`).
 
@@ -90,7 +96,8 @@ Use canonical form; never synonyms in `avoid` column.
 |`open`|create new tracked entity w/ initial status|start, begin, file (when opening)|
 |`close`|transition entity to terminal state|finish, complete, resolve|
 
-Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `telegraph-encode` as named encoding op). Canonical form distorts domain semantic → keep domain verb.
+Domain-load-bearing verbs override (`backprop` as bug-protocol noun, `telegraph-encode` as named encoding op).
+Canonical form distorts domain semantic → keep domain verb.
 
 ## NOUNS
 
@@ -142,11 +149,14 @@ env: FOO_KEY ! set
 
 ## ADDRESSING
 
-`§<S>.<n>` = section.item ref (e.g. `§V.<n>` = invariants §, item n). Cmd args, commits, PRs cite by § → zero ambiguity.
+`§<S>.<n>` = section.item ref (e.g. `§V.<n>` = invariants §, item n).
+Cmd args, commits, PRs cite by § → zero ambiguity.
 
 ## ONE FILE RULE
 
-Big project → more §s, not more files. grep ceremony kills agent speed. Token-budget overflow → /sdd:condense (folds, trims, archives), never split. Thresholds live w/ condense skill + audit script, not here.
+Big project → more §s, not more files. grep ceremony kills agent speed.
+Token-budget overflow → /sdd:condense (folds, trims, archives), never split.
+Thresholds live w/ condense skill + audit script, not here.
 
 ## EXAMPLES
 
@@ -161,8 +171,10 @@ Good: `api: POST /x → 200 {id}`
 
 ## BOUNDARIES
 
-Normal English when: user asks for prose explanation; external-review docs (RFC, pitch); diff comments in code. Commit messages: subject = per-skill fixed template (preserve verbatim); body = steno per steno skill (humans read git log).
+Normal English when: user asks for prose explanation; external-review docs (RFC, pitch); diff comments in code.
+Commit messages: subject = per-skill fixed template (preserve verbatim); body = steno per steno skill (humans read git log).
 
 ## WHEN UNSURE
 
-Cutting a word loses a fact → keep it. Compression, not amputation.
+Cutting a word loses a fact → keep it.
+Compression, not amputation.

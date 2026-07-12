@@ -14,9 +14,12 @@ user-invocable: false
 
 # github — gh-CLI workflow governor (auto-fire)
 
-Auto-fire sub-skill per the sub-skill-flags invariant (`user-invocable: false`, never `disable-model-invocation` — that hides the skill from the Skill tool). No hook — the skills-only invariant bans runtime interception; github = LLM-applied workflow shape on each gh issue/PR op, not a wrapper. Ships PUBLISHED to every consumer → governs the consuming repo's own gh workflow.
+Auto-fire sub-skill per the sub-skill-flags invariant (`user-invocable: false`, never `disable-model-invocation` — that hides the skill from the Skill tool).
+No hook — the skills-only invariant bans runtime interception; github = LLM-applied workflow shape on each gh issue/PR op, not a wrapper.
+Ships PUBLISHED to every consumer → governs the consuming repo's own gh workflow.
 
-Trigger lives in this frontmatter description only — fires on a GitHub issue or PR op, applies the gh-CLI shape per the github-workflow invariant. Body LLM-facing → telegraph.
+Trigger lives in this frontmatter description only — fires on a GitHub issue or PR op, applies the gh-CLI shape per the github-workflow invariant.
+Body LLM-facing → telegraph.
 
 Repo-agnostic per the parametric-recipe invariant: every gh + git command runs against the cwd repo — no hardcoded `owner/repo` slug, no `--repo` flag, no repo-literal path. github-facing bodies (issue, PR) = steno per the github-facing-register invariant; commit subjects = fixed templates, verbatim.
 
@@ -28,19 +31,24 @@ Repo-agnostic per the parametric-recipe invariant: every gh + git command runs a
 - merge a PR → MERGE
 - close a PR unmerged → CLOSE
 
-Not: plain git ops (commit, push) with no issue/PR, `gh release` (release skill owns version tag + notes). No gh issue/PR op → no fire.
+Not: plain git ops (commit, push) with no issue/PR, `gh release` (release skill owns version tag + notes).
+No gh issue/PR op → no fire.
 
 ## ISSUE — `gh issue create`
 
-`gh issue create --title "<summary>" --body <steno>` against the cwd repo (no `--repo` slug per the parametric-recipe invariant). Title = one-line summary; body = steno per the github-facing-register invariant — problem statement + acceptance lines, no fixed template scaffold assumed.
+`gh issue create --title "<summary>" --body <steno>` against the cwd repo (no `--repo` slug per the parametric-recipe invariant).
+Title = one-line summary; body = steno per the github-facing-register invariant — problem statement + acceptance lines, no fixed template scaffold assumed.
 
 ## BRANCH — issue-linked branch
 
-`gh issue develop <n> --checkout` — creates + checks out the issue-linked branch in place (native gh linkage; branch named by gh, never hand-named). One branch per session.
+`gh issue develop <n> --checkout` — creates + checks out the issue-linked branch in place (native gh linkage; branch named by gh, never hand-named).
+One branch per session.
 
 ## PR — `gh pr create`
 
-`gh pr create --title "<summary>" --body <steno>` from the linked branch. Body = steno per the github-facing-register invariant + carries `Closes #<issue>` (links PR to issue; auto-closes the issue on merge). Generic structure: change summary + verification line, no fixed template assumed.
+`gh pr create --title "<summary>" --body <steno>` from the linked branch.
+Body = steno per the github-facing-register invariant + carries `Closes #<issue>` (links PR to issue; auto-closes the issue on merge).
+Generic structure: change summary + verification line, no fixed template assumed.
 
 ## MERGE — squash + branch delete
 
@@ -55,7 +63,8 @@ PR abandoned, not merged → cleanup only, no squash:
 1. `gh pr close <n>` — closes the PR, no merge commit.
 2. `git branch -D <branch>` — local branch cleanup.
 
-No squash, no `--delete-branch` merge path. The linked issue stays open — nothing merged to close it.
+No squash, no `--delete-branch` merge path.
+The linked issue stays open — nothing merged to close it.
 
 ## NON-GOALS
 

@@ -6,23 +6,39 @@
 
 **Code consistency is the casualty of LLM agent velocity.** 
 
-LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself. SDD keeps the spec small, dense, and durable. It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
+LLMs write code faster than any human can read it — and faster than the agent can stay coherent with itself.
+SDD keeps the spec small, dense, and durable.
+It's the part the agent re-reads every turn, so task ten is built against the same constraints as task one.
 
 The mechanics:
 
 - **Every row has an address.** `§V.<n>` / `§T.<n>` / `§B.<n>` are stable cites — code comments link to the invariant they uphold, tests reference the bug they guard, commits cite the task they close. `SPEC.md` survives `/clear` and team handoff.
-- **Telegraph encoding cuts tokens about 40%** vs Claude prose for the same content (measured per-row mean 41%, median 39%, n=30 — see [`benchmarks/telegraph/`](benchmarks/telegraph/)). The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (`→ ≥ ≤ ! ? § |`); Distinct from `steno` (the bundled human-facing shorthand).
-- **Every test failure feeds back into the spec.** A `§B` row, usually a new `§V` invariant. The drift report stays trustworthy because every prior failure tightened the spec.
-- **Main Claude does all the writes.** Code edits, `SPEC.md` mutations, status flips, commits. Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents. No orchestrator. Same spec + same task produces the same plan.
-- **Re-onboarding is one command.** Come back to the repo after a week, run `/sdd:check`. You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain. No digging through old transcripts.
+- **Telegraph encoding cuts tokens about 40%** vs Claude prose for the same content (measured per-row mean 41%, median 39%, n=30 — see [`benchmarks/telegraph/`](benchmarks/telegraph/)).
+  The savings come from terse grammar — dropped articles/filler, fragments, unpadded pipe tables — plus compact `§`-refs and a curated low-token symbol set (`→ ≥ ≤ ! ? § |`); Distinct from `steno` (the bundled human-facing shorthand).
+- **Every test failure feeds back into the spec.**
+  A `§B` row, usually a new `§V` invariant.
+  The drift report stays trustworthy because every prior failure tightened the spec.
+- **Main Claude does all the writes.**
+  Code edits, `SPEC.md` mutations, status flips, commits.
+  Read-only audits (e.g. `/sdd:check`) may fan out to sub-agents.
+  No orchestrator.
+  Same spec + same task produces the same plan.
+- **Re-onboarding is one command.**
+  Come back to the repo after a week, run `/sdd:check`.
+  You get a read-only drift report: which `§V` invariants the code violates, which `§T` tasks remain.
+  No digging through old transcripts.
 
 > The spec is the only artifact that always justifies its token cost. Everything else must save more tokens later, save the agent's context, or be cut.
 
 ### SPEC.md is for the LLM, not you
 
-`SPEC.md` is an LLM-facing artifact. You operate it through Claude — `/sdd:spec` writes, `/sdd:build` and `/sdd:check` read, `/sdd:explain` decodes a citation back to prose when you want to read along. The loop is `human → /sdd:* → Claude → SPEC.md`, not hand-editing in your editor.
+`SPEC.md` is an LLM-facing artifact.
+You operate it through Claude — `/sdd:spec` writes, `/sdd:build` and `/sdd:check` read, `/sdd:explain` decodes a citation back to prose when you want to read along.
+The loop is `human → /sdd:* → Claude → SPEC.md`, not hand-editing in your editor.
 
-That framing decides the format. Telegraphic fragments over full sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it. If you want to skim it as a human, `/sdd:explain` is the front door.
+That framing decides the format.
+Telegraphic fragments over full sentences, pipe tables over bulleted lists, dropped line citations — all optimized for the model that re-parses the spec every command, not the human skimming it.
+If you want to skim it as a human, `/sdd:explain` is the front door.
 
 ## Install
 
@@ -58,13 +74,15 @@ Then in any repo:
                                      amend SPEC.md
 ```
 
-- **One spec file.** `SPEC.md`. No `docs/` tree, no JSON sidecars.
+- **One spec file.** `SPEC.md`.
+  No `docs/` tree, no JSON sidecars.
 - **One writer.** `/sdd:spec`. (`/sdd:build` may flip a `.` to `x`; nothing else writes.)
 - **Read-only commands write nothing.** `/sdd:check` (drift report) and `/sdd:explain` (decompression).
 
 ## SPEC.md format
 
-Six fixed sections, fixed order. Each row is addressable as `§<S>.<n>`.
+Six fixed sections, fixed order.
+Each row is addressable as `§<S>.<n>`.
 
 ```markdown
 # SPEC
@@ -109,13 +127,17 @@ B<n>|2026-04-21|race on write|V<n>
 ```
 
 **Status markers:** `.` todo · `x` done.
-**Cell rules:** literal `|` becomes `\|`. Empty cell = `-`. Backticks OK.
+**Cell rules:** literal `|` becomes `\|`.
+Empty cell = `-`.
+Backticks OK.
 
 ## Commands
 
 ### `/sdd:design` — propose-then-critique
 
-Use when there's a structural choice to weigh — tradeoffs, named alternatives, subsystem shape. The model proposes a shape, you critique, the loop converges only when `## Open Questions` is empty. Persists to `designs/<slug>.md`. `/sdd:spec` later folds the converged design into `§V` / `§T` rows; the draft file stays in the working tree for you to remove or keep.
+Use when there's a structural choice to weigh — tradeoffs, named alternatives, subsystem shape.
+The model proposes a shape, you critique, the loop converges only when `## Open Questions` is empty.
+Persists to `designs/<slug>.md`. `/sdd:spec` later folds the converged design into `§V` / `§T` rows; the draft file stays in the working tree for you to remove or keep.
 
 ```bash
 /sdd:design how should the release pipeline split monorepo plugins?
@@ -125,7 +147,9 @@ Distinct from `/sdd:spec`'s socratic gate: socratic converges on **enough** (sha
 
 ### `/sdd:spec` — mutate the spec
 
-The sole mutator. The argument is **free-form intent** — the socratic gate (the bundled `socratic` skill) reads what you wrote and picks a mode. You don't pick the mode yourself.
+The sole mutator.
+The argument is **free-form intent** — the socratic gate (the bundled `socratic` skill) reads what you wrote and picks a mode.
+You don't pick the mode yourself.
 
 - no `SPEC.md` — possible modes **NEW** or **DISTILL**; concrete intent passes in at most 1 turn; vague intent triggers single-question dialogue to convergence.
 - `SPEC.md` exists — possible modes **BACKPROP** or **AMEND** or **NEW** (rare, requires explicit re-init); mode emerges from the convergence triple — symptom + surface + recurrence-class for BACKPROP, §-target + delta for AMEND.
@@ -141,7 +165,8 @@ Examples (all free-form — the gate classifies):
 
 ### `/sdd:build` — plan, then execute
 
-Plan, then execute, then verify loop. EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
+Plan, then execute, then verify loop.
+EXECUTE serializes on main thread; PLAN reads may delegate to sub-agents.
 
 - `§T.n` — implement that one task
 - `--next` — lowest-numbered row with status `.`
@@ -150,7 +175,9 @@ Plan, then execute, then verify loop. EXECUTE serializes on main thread; PLAN re
 
 Loop per task:
 
-1. **PLAN** — cite every §V / §I the task touches, then proceed to EDIT. The plan is emitted inline for transparency, not a wait-state. Gaps are annotated so you can route them back to `/sdd:spec` post-hoc; the build never invents rules.
+1. **PLAN** — cite every §V / §I the task touches, then proceed to EDIT.
+   The plan is emitted inline for transparency, not a wait-state.
+   Gaps are annotated so you can route them back to `/sdd:spec` post-hoc; the build never invents rules.
 2. **EDIT** — make the change, run tests / build.
 3. **VERIFY** — on failure, classify: (a) code bug, then fix and re-run; (b) spec wrong or unspecified edge case, then invoke `backprop` (via `/sdd:spec <cause>`), let it append `§B` and usually a new `§V`, resume against the updated spec.
 4. **CLOSE** — flip `.` to `x` only when verification is green.
@@ -159,16 +186,20 @@ Loop per task:
 
 ### `/sdd:check` — drift report
 
-Read-only diagnostic. Diffs `SPEC.md` against the working tree. Always audits §V + §I + §T together.
+Read-only diagnostic.
+Diffs `SPEC.md` against the working tree.
+Always audits §V + §I + §T together.
 
 - (empty) — memo-driven sweep: re-audits §V rows touched since last clean run; rest HOLD-SINCE-CLEAN.
 - `--full` — force full re-classify: deletes `.spec/check-state.json` upfront, rebuilds memo.
 
-Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`. It never runs them itself.
+Output groups violations by severity (`VIOLATE` / `RISK` / `STALE`) and suggests a remedy — usually `/sdd:spec <intent>` or `/sdd:build`.
+It never runs them itself.
 
 ### `/sdd:explain` — telegraph to prose
 
-The inverse of `telegraph`. Given any citation, returns plain English with cited context.
+The inverse of `telegraph`.
+Given any citation, returns plain English with cited context.
 
 ```bash
 /sdd:explain §V.<n>    # expand a specific invariant
@@ -181,15 +212,19 @@ Useful for code review, onboarding, or when you'd otherwise have to translate `e
 
 ### `/sdd:condense` — token-budget sweep
 
-Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds about 20k tokens). Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes. Single atomic commit, rollback via `git revert`.
+Operator-triggered condenser for an oversized `SPEC.md` (advisory fires in `/sdd:check` when the estimate exceeds about 20k tokens).
+Six prongs — fold sibling invariants, mark superseded tasks, archive old §T/§B rows to `SPEC.archive.md`, prune inlined history, rewrite prose to telegraph, extract heavy audit recipes.
+Single atomic commit, rollback via `git revert`.
 
 ### `/sdd:reorganize` — §V cluster + renumber
 
-Operator-triggered clarity pass (at most once per major epoch): clusters §V invariants by topic, renumbers them, and sweeps every citation in the same commit. Renumber history persists to `.spec/spec-renumber-map.json` so old citations still resolve via `/sdd:explain`.
+Operator-triggered clarity pass (at most once per major epoch): clusters §V invariants by topic, renumbers them, and sweeps every citation in the same commit.
+Renumber history persists to `.spec/spec-renumber-map.json` so old citations still resolve via `/sdd:explain`.
 
 ## Skills
 
-Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` becomes `/sdd:spec`). SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
+Each skill dir surfaces directly as a slash command (e.g. `skills/spec/` becomes `/sdd:spec`).
+SKILL.md frontmatter (`description`, `allowed-tools`, `model`) is honored on dispatch.
 
 - `design` — propose-then-critique writes `designs/<slug>.md`
 - `spec` — sole mutator
@@ -246,33 +281,44 @@ You don't usually invoke `telegraph`, `backprop`, `socratic`, or `steno` directl
 
 ## Telegraph encoding
 
-`telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`). Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol is used only where it reads clearer than the word.
+`telegraph` writes telegraphic grammar — dropped articles, aux verbs, and filler, fragments, compact pipe tables — with a curated low-token symbol set (`→ ≥ ≤ ! ? §`).
+Anything heavier is written as the ASCII word: a multi-token math operator costs 2–4 tokens vs a 1-token word, so a symbol is used only where it reads clearer than the word.
 
-Result: every spec write lands about 40% leaner in tokens than the equivalent prose while staying machine- and human-readable. The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
+Result: every spec write lands about 40% leaner in tokens than the equivalent prose while staying machine- and human-readable.
+The measured per-row mean is 41% (median 39%, n=30 across §V/§T/§B rows of this repo's own `SPEC.md`), reproducible via [`benchmarks/telegraph/telegraph-bench.py`](benchmarks/telegraph/telegraph-bench.py) — **full methodology, per-row results, and caveats in the [benchmark write-up](benchmarks/telegraph/README.md)**. `steno` (bundled) handles reviewer-facing text and keeps grammar intact so reviewers don't slow down.
 
 Rules:
 
-- Drop articles (a/an/the). Drop filler. Drop aux verbs where a fragment works.
+- Drop articles (a/an/the).
+  Drop filler.
+  Drop aux verbs where a fragment works.
 - Short synonyms (`fix` over `implement`).
 - **Preserve verbatim:** code, paths, identifiers, URLs, numbers, error strings, SQL, regex.
 
 Full symbol table: `skills/telegraph/SKILL.md` SYMBOLS section.
 
-**Example.** Prose: "The authentication middleware must verify the token expiry on every request before allowing the handler to execute."
+**Example.**
+Prose: "The authentication middleware must verify the token expiry on every request before allowing the handler to execute."
 Telegraph: `V<n>: every req → auth check before handler`
 
 If telegraph encoding slows you down on review, `/sdd:explain §V.<n>` decompresses on demand.
 
 ## Backprop in detail
 
-Backprop is the one non-obvious thing SDD does that vanilla plan-then-execute doesn't. Six steps:
+Backprop is the one non-obvious thing SDD does that vanilla plan-then-execute doesn't.
+Six steps:
 
 1. **Capture** — record the failing case verbatim (test name, error, stack, repro).
 2. **Trace** — find the cause: code bug, spec wrong, or unspecified edge case.
-3. **Append §B** — add a row: `id|date|cause|fix`. Telegraph-encoded.
-4. **Decide on §V** — would an invariant have caught the _class_ of this bug? If yes, add or tighten one. Cite it from the new §B row.
-5. **Write the failing test first** — in the `/sdd:build` resume: watch it fail, then ship the fix. The test stays as a permanent guard.
-6. **Two commits, cross-cited** — the spec commit lands first (§B + §V, via `/sdd:spec`); the code commit (test + fix) follows via `/sdd:build` and cites them. The record survives even when the fix is deferred.
+3. **Append §B** — add a row: `id|date|cause|fix`.
+   Telegraph-encoded.
+4. **Decide on §V** — would an invariant have caught the _class_ of this bug?
+   If yes, add or tighten one.
+   Cite it from the new §B row.
+5. **Write the failing test first** — in the `/sdd:build` resume: watch it fail, then ship the fix.
+   The test stays as a permanent guard.
+6. **Two commits, cross-cited** — the spec commit lands first (§B + §V, via `/sdd:spec`); the code commit (test + fix) follows via `/sdd:build` and cites them.
+   The record survives even when the fix is deferred.
 
 Triggers:
 
@@ -282,13 +328,23 @@ Triggers:
 
 ## FAQ
 
-**Why Markdown, not YAML / JSON?** Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting. JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
+**Why Markdown, not YAML / JSON?**
+Markdown + pipe tables grep cleanly, diff cleanly, render in every PR tool, and don't trip on quoting.
+JSON specs invite tooling that defeats the point — the spec is for humans and one LLM, not a build system.
 
-**Why one file?** Sub-1000-line specs fit in context cheaply. Multi-file specs invite cross-file inconsistency and force `grep` ceremony. When the spec outgrows its budget (about 20k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
+**Why one file?**
+Sub-1000-line specs fit in context cheaply.
+Multi-file specs invite cross-file inconsistency and force `grep` ceremony.
+When the spec outgrows its budget (about 20k tokens — `/sdd:check` raises an advisory), `/sdd:condense` folds, trims, and archives old `§T`/`§B` rows to `SPEC.archive.md` instead of splitting.
 
-**Does `/sdd:build` always backprop on failure?** Only on failures that aren't clear code bugs. Typos and wrong loop bounds get fixed without a spec change. Anything that appears to stem from under-specification routes through `backprop`.
+**Does `/sdd:build` always backprop on failure?**
+Only on failures that aren't clear code bugs.
+Typos and wrong loop bounds get fixed without a spec change.
+Anything that appears to stem from under-specification routes through `backprop`.
 
-**Can I skip telegraph encoding and write prose specs?** Yes, but every future load of the spec into context pays about 1.7x the tokens for the same content (the measured about 40% cut, inverted). Optional in syntax, expensive in practice.
+**Can I skip telegraph encoding and write prose specs?**
+Yes, but every future load of the spec into context pays about 1.7x the tokens for the same content (the measured about 40% cut, inverted).
+Optional in syntax, expensive in practice.
 
 ## Files
 
@@ -313,6 +369,8 @@ SPEC-FORMAT.md                   structural format contract for every SPEC.md
 
 ## Attribution and license
 
-SDD is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed). For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
+SDD is adapted from [**JuliusBrussee/cavekit**](https://github.com/JuliusBrussee/cavekit) (v4.0.0, MIT-licensed).
+For the original project, history, and `v3.1.0` (full Hunt lifecycle with sub-agents, parallel workers, and design-system enforcement), see the upstream repo.
 
-MIT. See [`LICENSE`](LICENSE).
+MIT.
+See [`LICENSE`](LICENSE).

@@ -15,21 +15,28 @@ Use simple technical language: clarity comes first, compression second.
 A word that helps the reviewer skim stays in.
 Write so a reviewer reads each point once and moves on.
 
-- **Main point first.** Open each paragraph or bullet with the fact.
+- **Main point first.**
+  Open each paragraph or bullet with the fact.
   Put background and qualifiers after it.
-- **One idea per sentence.** Keep sentences short.
+- **One idea per sentence.**
+  Keep sentences short.
   Break a long sentence before you cut words from it.
-- **Plain words.** Use literal phrasing.
+- **Plain words.**
+  Use literal phrasing.
   Do not use idiom (for example `moves the needle`, `low-hanging fruit`), word-level metaphor (for example `earns its keep`, `bite`, `smell`), colloquialism (for example `gotcha`, `kinda`), culture-loaded shorthand (sports, military, film), or jargon-idiom (for example `load-bearing`, `by-construction`, `hand-rolled`, `clean-slate`, `prior-art`, `carry-cost`).
   Write the literal meaning instead.
-- **Define or avoid jargon.** Spell out a technical term the first time you use it, or use a plain word.
+- **Define or avoid jargon.**
+  Spell out a technical term the first time you use it, or use a plain word.
   Established terms `drift`, `bottleneck`, and `leak` are fine as is.
-- **Expand an acronym on first use.** Write the full term first, with the acronym in parentheses: spec-driven development (SDD).
+- **Expand an acronym on first use.**
+  Write the full term first, with the acronym in parentheses: spec-driven development (SDD).
   Common web and protocol acronyms (`API`, `URL`, `JSON`, `HTTP`, `JWT`) are exempt.
-- **Spell out symbols.** Write `→` as "leads to" or "becomes", `≥` as "at least", `≤` as "at most", `&` as "and", and a leading `~` before a number as "about".
+- **Spell out symbols.**
+  Write `→` as "leads to" or "becomes", `≥` as "at least", `≤` as "at most", `&` as "and", and a leading `~` before a number as "about".
   Keep `|` for list and table separators, and keep `§` for spec citations.
   Any other math symbol becomes its word.
-- **Put the citation at the tail.** End a sentence with the spec citation; never open or build the sentence on it.
+- **Put the citation at the tail.**
+  End a sentence with the spec citation; never open or build the sentence on it.
   Write "Spell out symbols per the symbol-set invariant", not "The symbol-set invariant says to spell out symbols".
   The same rule covers issue and pull-request references such as `#123`.
 - **When the operator asks you to decide,** state the choice in one sentence, list the options plainly with one line each, and recommend one option in one sentence.

@@ -8,11 +8,14 @@ model: fable
 
 # design — propose-then-critique → designs/<slug>.md draft
 
-Skill body SPEC-ADJACENT → telegraph. Design file body user-reviewed pre-fold → steno: spell out `→ ≥ ≤ &` as words, keep only `|` `§` raw (per steno SYMBOLS).
+Skill body SPEC-ADJACENT → telegraph.
+Design file body user-reviewed pre-fold → steno: spell out `→ ≥ ≤ &` as words, keep only `|` `§` raw (per steno SYMBOLS).
 
 ## POSITION IN FUNNEL
 
-`/sdd:design` is front door — caller named the layer mentally, wants to commit a shape. Layer / shape-space unclear → loop step 2 questions narrow. No auto-route — user-driven only.
+`/sdd:design` is front door — caller named the layer mentally, wants to commit a shape.
+Layer / shape-space unclear → loop step 2 questions narrow.
+No auto-route — user-driven only.
 
 ## LOOP
 
@@ -115,7 +118,8 @@ not commit — caller stages manually or runs `/sdd:spec designs/<slug>.md` fold
 
 ## BOUNDARY
 
-never mutate `SPEC.md` — output is `designs/<slug>.md` only. SPEC amend = `/sdd:spec <designs/<slug>.md>` post-persist (gate routes to fold-in); impl = `/sdd:build` post-amend.
+never mutate `SPEC.md` — output is `designs/<slug>.md` only.
+SPEC amend = `/sdd:spec <designs/<slug>.md>` post-persist (gate routes to fold-in); impl = `/sdd:build` post-amend.
 
 not root-cause debugging — backprop skill owns that (user route `/sdd:spec <bug intent>`, gate → BACKPROP). design = structural shape, not "why is this broken".
 
@@ -125,14 +129,17 @@ not root-cause debugging — backprop skill owns that (user route `/sdd:spec <bu
 
 ## MECHANIZE — script-candidate scan
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
+Candidate = any of:
 
 - ≥ 2 same-shape deterministic calls this run (identical command modulo args)
 - LLM-side join / sort / count / dedup over script-emittable data
 - multi-step parse collapsible to one script emit mode
 - fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
 
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
+Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
+Route by cwd:
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
@@ -140,7 +147,8 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when selection needs hidden state (e.g. fold-in leaves design file in working tree post-apply). mid-loop → items lead w/ Open-Q resolution (answer, park, abort); post-persist → items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in + escape hatches (`/sdd:design` rework).
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
+Optional `## Hint` (≤ 3 lines) precedes when selection needs hidden state (e.g. fold-in leaves design file in working tree post-apply). mid-loop → items lead w/ Open-Q resolution (answer, park, abort); post-persist → items lead w/ `/sdd:spec <designs/<slug>.md>` fold-in + escape hatches (`/sdd:design` rework).
 
 mid-loop example (Open Qs outstanding):
 

@@ -12,17 +12,25 @@ model: sonnet
 
 # explain — decompress spec into prose
 
-Inverse of `telegraph` skill. Human-facing. Reads SPEC.md, expands one citation → plain English w/ cited context. Zero writes.
+Inverse of `telegraph` skill.
+Human-facing.
+Reads SPEC.md, expands one citation → plain English w/ cited context.
+Zero writes.
 
 ## LOAD
 
-1. Read `SPEC.md`. Missing → "no spec, nothing to explain." Bail.
+1. Read `SPEC.md`.
+   Missing → "no spec, nothing to explain."
+   Bail.
 2. Parse `$ARGUMENTS`:
    - `§T.n` / `§V.n` / `§B.n` / `§I.<key>` → that row
    - `§G` / `§C` → full section
    - `--next` or empty → lowest-numbered §T row w/ status `.`
-3. `.spec/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first to end, resolve result against current SPEC.md. Map read, never mutated (read-only-diagnostic invariant). Absent → arg resolves directly.
-4. Citation absent → list valid ids in target section. Bail.
+3. `.spec/spec-renumber-map.json` exists (written by reorganize skill per §V renumber permission) → on `§V.<n>` arg, walk `old:V<n> → new:V<m>` chain newest-first to end, resolve result against current SPEC.md.
+   Map read, never mutated (read-only-diagnostic invariant).
+   Absent → arg resolves directly.
+4. Citation absent → list valid ids in target section.
+   Bail.
 
 ## EXPAND
 
@@ -69,14 +77,17 @@ Bottom line: implement a middleware that enforces §V.<n> without altering §I.a
 
 ## MECHANIZE — script-candidate scan
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate. Candidate = any of:
+Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
+Candidate = any of:
 
 - ≥ 2 same-shape deterministic calls this run (identical command modulo args)
 - LLM-side join / sort / count / dedup over script-emittable data
 - multi-step parse collapsible to one script emit mode
 - fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
 
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item. Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants). Route by cwd:
+Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
+Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
+Route by cwd:
 
 - dev repo (this plugin) → /sdd:spec → new §T row
 - consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
@@ -84,7 +95,9 @@ Hit → emit exactly one `## Next` item naming the observed pattern + proposed s
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`). Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases). Read-only → items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.
+Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
+Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases).
+Read-only → items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.
 
 Closed §T row (terminal state) — tail of output:
 
@@ -103,11 +116,16 @@ Closed rows are historical. `run 1` skips to live work; `run 2` audits whether t
 2. /sdd:check — audit whether the closed task still holds
 ```
 
-"Bottom line" stays — summarizes citation, never directs action. Action only in Next; pre-action context in optional Hint.
+"Bottom line" stays — summarizes citation, never directs action.
+Action only in Next; pre-action context in optional Hint.
 
 ## NON-GOALS
 
-- Zero writes. No SPEC.md edits, no code edits.
-- No code reads. Spec-only (spec-vs-code → `/sdd:check`).
-- No telegraph in output. Prose is the whole point.
-- One id per call. Loop for multiple.
+- Zero writes.
+  No SPEC.md edits, no code edits.
+- No code reads.
+  Spec-only (spec-vs-code → `/sdd:check`).
+- No telegraph in output.
+  Prose is the whole point.
+- One id per call.
+  Loop for multiple.
