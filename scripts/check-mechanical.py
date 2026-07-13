@@ -119,6 +119,16 @@ Modes:
                 emit-v-slices, so loading them here too would double-load SPEC.md
                 and re-hit the Read token cap on a large spec. The id list lets
                 the consumer size the classification batch from the row count.
+  fix-sembr   — rewrite flagged multi-sentence prose lines one sentence per
+                line, in place, over the sembr file set (`--files <comma-list>`
+                overrides discovery). Shares the audit scan's exemption walk +
+                boundary splitter — single source, no re-derived splitter — so
+                fix and scan can never disagree on a line. A per-line
+                rejoin-equivalence guard (whitespace-normalized join of the
+                rewrite must equal the source line) leaves any failing line
+                untouched, prints an UNVERIFIABLE row, and exits 1. Dry-run by
+                default, `--write` applies. The sembr-advisory remediation and
+                sweep-class tasks consume this instead of a scratchpad splitter.
   --self-test — run inline fixtures; exit 0 iff every assertion holds.
 
 Parametric per the published-tooling invariant: reads SPEC-FORMAT conventions and
@@ -901,12 +911,12 @@ SEMBR_ABBREV = re.compile(r'(?:\b(?:e\.g|i\.e|etc|vs|cf|incl|approx)|\.)\.$')
 SEMBR_MARKER = re.compile(r'^\s*(?:[-*+]|\d+\.)\s+')
 
 
-def scan_sembr(path, text):
-    """Flag multi-sentence prose source lines in one sembr-scoped file — one
-    ADVISORY row per offending line; clean → no row (silent, sibling
-    convention). Exemptions per the sembr invariant + verbatim-preservation:
-    frontmatter, fenced blocks, `|`-table rows, blockquotes, backtick spans."""
-    out = []
+def iter_sembr_lines(text):
+    """Yield (lineno, line) for sembr-eligible prose lines. The exemption walk
+    per the sembr invariant + verbatim-preservation — frontmatter, fenced
+    blocks, `|`-table rows, blockquotes — realized once here and shared by
+    scan_sembr (flag) + fix-sembr (rewrite), so the two modes can never
+    disagree on scope."""
     in_fence = False
     in_front = False
     for i, line in enumerate(text.splitlines(), start=1):
@@ -925,16 +935,90 @@ def scan_sembr(path, text):
         ls = line.lstrip()
         if ls.startswith("|") or ls.startswith(">"):
             continue
-        bare = SEMBR_MARKER.sub('', strip_backticks(line))
-        for m in SEMBR_BOUNDARY.finditer(bare):
-            if SEMBR_ABBREV.search(bare[:m.start() + 1]):
-                continue
+        yield i, line
+
+
+def sembr_split_points(line):
+    """Sentence-boundary offsets into the ORIGINAL line (each = the index of
+    the next sentence's first char). The single splitter shared by scan_sembr
+    + fix-sembr per the mechanical-realization invariant — no re-derived
+    splitter. Backtick spans are masked length-preserving (offsets stay
+    original-line-valid, span content can't fire a boundary); a boundary
+    inside the leading list marker or after an abbreviation / ellipsis is
+    skipped."""
+    masked = PF_BACKTICK.sub(lambda m: ' ' * len(m.group(0)), line)
+    mm = SEMBR_MARKER.match(line)
+    lead = mm.end() if mm else len(line) - len(line.lstrip())
+    points = []
+    for m in SEMBR_BOUNDARY.finditer(masked):
+        if m.start() < lead:
+            continue
+        if SEMBR_ABBREV.search(masked[:m.start() + 1]):
+            continue
+        points.append(m.end())
+    return points
+
+
+def scan_sembr(path, text):
+    """Flag multi-sentence prose source lines in one sembr-scoped file — one
+    ADVISORY row per offending line; clean → no row (silent, sibling
+    convention). Exemptions per the sembr invariant + verbatim-preservation:
+    frontmatter, fenced blocks, `|`-table rows, blockquotes, backtick spans."""
+    out = []
+    for i, line in iter_sembr_lines(text):
+        if sembr_split_points(line):
             out.append(("sembr", ADVISORY,
                         f"sembr ADVISORY: {path}:{i} multi-sentence source "
                         f"line — break one sentence per line per sembr "
                         f"invariant"))
-            break
     return out
+
+
+def split_sembr_line(line):
+    """Rewrite one flagged line into its sembr form: slice the original line
+    at its split points, continuation lines indented to the list-marker width
+    (repo convention: text column) or the line's own indent. Returns the new
+    line list, None when the line has no boundary (nothing to do), or [] when
+    the per-line rejoin-equivalence guard trips — the whitespace-normalized
+    join of the rewrite must equal the whitespace-normalized source line, so
+    a rewrite can never drop or alter non-space content."""
+    points = sembr_split_points(line)
+    if not points:
+        return None
+    mm = SEMBR_MARKER.match(line)
+    indent = ' ' * (mm.end() if mm else len(line) - len(line.lstrip()))
+    cuts = [0] + points + [len(line)]
+    segs = [line[a:b].rstrip() for a, b in zip(cuts, cuts[1:])]
+    out = [segs[0]] + [indent + s for s in segs[1:]]
+    if ' '.join(' '.join(out).split()) != ' '.join(line.split()):
+        return []
+    return out
+
+
+def fix_sembr_text(text):
+    """Pure rewrite core for fix-sembr (sembr invariant): split every eligible
+    multi-sentence prose line one sentence per line. Returns (new_text,
+    rewrites, guard_trips) — rewrites maps source lineno → replacement lines,
+    guard_trips lists linenos left untouched by the rejoin-equivalence guard.
+    Trailing-newline presence is preserved; exempt lines pass through
+    byte-identical."""
+    rewrites = {}
+    guard_trips = []
+    for i, line in iter_sembr_lines(text):
+        new = split_sembr_line(line)
+        if new is None:
+            continue
+        if not new:
+            guard_trips.append(i)
+            continue
+        rewrites[i] = new
+    if not rewrites:
+        return text, rewrites, guard_trips
+    out = []
+    for i, line in enumerate(text.splitlines(), start=1):
+        out.extend(rewrites.get(i, [line]))
+    new_text = "\n".join(out) + ("\n" if text.endswith("\n") else "")
+    return new_text, rewrites, guard_trips
 
 
 def audit_sembr(sembr_files):
@@ -1910,6 +1994,46 @@ def cmd_emit_token_estimate(args):
     return 0
 
 
+def cmd_fix_sembr(args):
+    """fix-sembr mode (sembr + mechanical-realization invariants): rewrite
+    flagged multi-sentence prose lines one sentence per line, in place, over
+    the discovered sembr file set (--files comma-list overrides). Dry-run by
+    default — --write applies. Shares the scan's exemption walk + splitter;
+    a rejoin-equivalence guard trip leaves the line untouched, prints an
+    UNVERIFIABLE row, and exits 1."""
+    if args.files:
+        files = [f if os.path.isabs(f) else os.path.join(args.repo_root, f)
+                 for f in (t.strip() for t in args.files.split(',')) if f]
+    else:
+        files = discover_sembr_files(args.repo_root)
+    verb = "split" if args.write else "would split (dry-run; --write applies)"
+    rewrote = 0
+    tripped = 0
+    print("id|verdict|evidence")
+    for path in files:
+        try:
+            text = read_text(path)
+        except OSError:
+            continue
+        rel = os.path.relpath(path, args.repo_root)
+        new_text, rewrites, guard_trips = fix_sembr_text(text)
+        for i in sorted(rewrites):
+            print(f"sembr-fix|ADVISORY|{rel}:{i} {verb} into "
+                  f"{len(rewrites[i])} lines")
+        for i in guard_trips:
+            print(f"sembr-fix|UNVERIFIABLE|{rel}:{i} rejoin-equivalence "
+                  f"guard tripped — line left untouched")
+        rewrote += len(rewrites)
+        tripped += len(guard_trips)
+        if args.write and rewrites:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new_text)
+    sys.stderr.write(f"fix-sembr: {rewrote} line(s) "
+                     f"{'rewritten' if args.write else 'flagged (dry-run)'}, "
+                     f"{tripped} guard trip(s)\n")
+    return 1 if tripped else 0
+
+
 def parse_table(text):
     rows = []
     for line in text.splitlines():
@@ -2718,6 +2842,46 @@ def selftest():
     check(validate_vocab([("sembr", ADVISORY, "")]) == [],
           "sembr: pseudo-id unrestricted vocab")
 
+    # fix-sembr splitter (sembr + mechanical-realization invariants): one
+    # splitter shared with the scan — plain / bullet / numbered / indented
+    # split shapes, marker-width continuation indent, backtick-span + abbrev
+    # guards ride the shared boundary finder, rejoin-equivalence holds, the
+    # pure rewrite core leaves exempt lines byte-identical, preserves the
+    # trailing newline, and is idempotent.
+    check(split_sembr_line(two) ==
+          ["First sentence here.", "Second sentence follows."],
+          "fix-sembr: plain two-sentence line splits at the boundary")
+    check(split_sembr_line("- One done. Two follow.") ==
+          ["- One done.", "  Two follow."],
+          "fix-sembr: bullet continuation indents to the text column")
+    check(split_sembr_line("2. Stop here. Then go on.") ==
+          ["2. Stop here.", "   Then go on."],
+          "fix-sembr: numbered-list continuation indents to the text column")
+    check(split_sembr_line("   Alpha beta. Gamma delta.") ==
+          ["   Alpha beta.", "   Gamma delta."],
+          "fix-sembr: indented prose keeps its own indent")
+    check(split_sembr_line("One sentence only stays whole.") is None,
+          "fix-sembr: single-sentence line untouched (None)")
+    check(split_sembr_line("span `a. B` holds tight. Next one starts.") ==
+          ["span `a. B` holds tight.", "Next one starts."],
+          "fix-sembr: backtick span never splits, real boundary does")
+    check(split_sembr_line("see e.g. Alpha stays put. Real split lands.") ==
+          ["see e.g. Alpha stays put.", "Real split lands."],
+          "fix-sembr: abbreviation guard rides the shared splitter")
+    check(all(bool(sembr_split_points(l)) == bool(scan_sembr("p", l))
+              for l in (two, "One sentence per line stays silent.",
+                        "1. Read the file per plan.")),
+          "fix-sembr: scan flags exactly the lines the splitter would rewrite")
+    fixture = f"```\n{two}\n```\n{two}\n"
+    fixed, rewrites, trips = fix_sembr_text(fixture)
+    check(fixed == f"```\n{two}\n```\nFirst sentence here.\n"
+                   f"Second sentence follows.\n"
+          and list(rewrites) == [4] and trips == [],
+          "fix-sembr: rewrite core splits prose only, fence + newline kept")
+    refixed, rerewrites, _ = fix_sembr_text(fixed)
+    check(refixed == fixed and rerewrites == {},
+          "fix-sembr: rewrite is idempotent")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2727,7 +2891,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 193
+    return 203
 
 
 # --- entry -------------------------------------------------------------------
@@ -2738,10 +2902,11 @@ def main(argv=None):
         return selftest()
     parser = argparse.ArgumentParser(prog="check-mechanical",
                                      description="deterministic mechanical audits")
-    parser.add_argument("mode", choices=["audit", "write-memo", "emit-v-slices",
-                                         "emit-superseded", "emit-fold-seeds",
-                                         "emit-v-weights", "emit-row-ids",
-                                         "emit-overview", "emit-token-estimate"])
+    parser.add_argument("mode", choices=["audit", "write-memo", "fix-sembr",
+                                         "emit-v-slices", "emit-superseded",
+                                         "emit-fold-seeds", "emit-v-weights",
+                                         "emit-row-ids", "emit-overview",
+                                         "emit-token-estimate"])
     parser.add_argument("--repo-root", default=os.environ.get("CHECK_REPO_ROOT", "."))
     parser.add_argument("--spec", default="SPEC.md")
     parser.add_argument("--no-hook", action="store_true",
@@ -2756,10 +2921,18 @@ def main(argv=None):
                         help="write-memo: re-run the mechanical audit internally "
                              "and merge it with the behavioral verdicts on stdin "
                              "(stdin = behavioral rows only; hand-merge banned)")
+    parser.add_argument("--files", default="",
+                        help="fix-sembr: comma-list of files to rewrite "
+                             "(default: the discovered sembr file set)")
+    parser.add_argument("--write", action="store_true",
+                        help="fix-sembr: apply rewrites in place "
+                             "(default is dry-run)")
     args = parser.parse_args(argv)
     args.repo_root = os.path.abspath(args.repo_root)
     if args.mode == "audit":
         return cmd_audit(args)
+    if args.mode == "fix-sembr":
+        return cmd_fix_sembr(args)
     if args.mode == "emit-v-slices":
         return cmd_emit_v_slices(args)
     if args.mode == "emit-superseded":
