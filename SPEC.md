@@ -135,6 +135,7 @@ T54|x|`context: fork` + `background: false` for /sdd:check — body + §V slices
 T55|x|frontmatter + description hygiene sweep over user-invocable skills — scope `grep -nE '^(model|description|argument-hint)' skills/*/SKILL.md .claude/skills/release/SKILL.md`: routing internals out of spec description → body; `argument-hint` added where body parses `$ARGUMENTS`; fable/opus model pins → `inherit` unless cost-downgrade justified|V62
 T56|x|probe `${CLAUDE_SKILL_DIR}` substitution in frontmatter Bash rules (supported v2.1.129+) — exact script-path pin expressible → sweep mid-glob `Bash(python3 */check-mechanical.py *)` grants to pinned form, amend V62 pin-inexpressible note same commit; not expressible → record result, keep mid-glob|V62
 T57|x|sweep bare `Skill` grants → `Skill(sdd:*)` prefix form per V62 narrowest-grant — scope `grep -nE '^allowed-tools:.*Skill' skills/*/SKILL.md`|V62
+T58|.|extend `discover_repo_local` walk to `.spec/**` per scope-set invariant + self-test asserting `.spec/check-extras.md` in cite-DAG file set — scope `grep -n 'def discover_repo_local' scripts/check-mechanical.py`|V42,B24
 
 ## §B BUGS
 
@@ -162,3 +163,4 @@ B20|2026-06-18|manifest description token-cut figure stale (30%) vs measured ~40
 B21|2026-06-19|human-facing skill bodies (steno SYMBOLS+EXAMPLES, design register note `readable symbols → & §`) + absent CLAUDE.md predate/diverge from V4/V67 symbol+clarity amend; symbol-audit T32 scopes README + manifest only → clarity detail-carriers never re-synced post-amend, design emitted telegraph chat proposal (session-example.md): raw `→ ≡ ·`, bare acronyms, idiom, cite-led sentences|V67
 B22|2026-06-19|README.md prose carries banned idiom/metaphor (`load-bearing`, `smells like`, `earns its tokens`/`earns its place`) violating V67 BOUNDARIES; idiom ban human-review-only — mechanical audit scans symbol-set not enumerable banned-term sets → idiom drift undetected (B19/B21 symbol-scope sibling)|V67
 B23|2026-06-22|spec AMEND + APPLY assume §V body in SPEC.md (write + `git commit -- SPEC.md`); /sdd:condense relocates §V bodies to `.claude/check-extras.md` + leaves stub row → amending condensed body (github enum add §V.61+§V.24) fell outside recipe write-scope, write + commit redirected to check-extras.md by hand|V49
+B24|2026-08-04|script REPO-LOCAL discovery hand-mirrored scope-set row w/o sync tie; T44 `.claude/`→`.spec/` move updated path strings, not the `discover_repo_local` walk → `.spec/check-extras.md` cites escaped cite-DAG sweep|V42
