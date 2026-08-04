@@ -29,6 +29,8 @@ Read on first audit-output parse; SKILL.md MECHANICAL CORE holds the run command
   Advisory only (source-format rule, never dirty).
   Script-owned, never hand-run the multi-sentence line scan per run.
 - `token|ADVISORY|SPEC.md ~<n>k tokens > budget …` — estimate `bytes/3.4` per token-budget invariant.
+- `skill-token|ADVISORY|<path> ~<n>k tokens > 5k skill-body budget …` — oversized published SKILL.md body, estimate `bytes/3.4` per token-budget invariant; remedy = split conditional detail to `references/` one level deep.
+  Script-owned, never hand-run the size check per run.
 - `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
 - `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
 - `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
@@ -37,5 +39,5 @@ Read on first audit-output parse; SKILL.md MECHANICAL CORE holds the run command
 
 ## REPORT merge rules
 
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `sembr` + `memo`-invalidation → `## advisory`.
+Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `skill-token` + `sembr` + `memo`-invalidation → `## advisory`.
 Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set, `scope` v-path-dirty) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff` or a hand-grep over §V bodies. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.

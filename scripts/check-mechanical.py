@@ -174,6 +174,7 @@ ADVISORY = "ADVISORY"
 
 TOKEN_BUDGET = 20000       # token-budget invariant advisory threshold
 TOKEN_RATIO = 3.4          # bytes-per-token for telegraph register (token-budget invariant)
+SKILL_TOKEN_BUDGET = 5000  # token-budget invariant per-skill-body advisory threshold
 OVERSIZE_CELL = 300        # history-residue oversized-cell advisory (chars)
 MEMO_SCHEMA = 3            # memo schema version (memo invariant)
 HISTORY_AGGREGATE_THRESHOLD = 10  # per-section body-row aggregation (drift-verdict-vocab invariant)
@@ -1406,6 +1407,40 @@ def audit_token_estimate(spec_bytes):
     return []
 
 
+def skill_token_rows(sizes):
+    """Per-skill-body token advisory core over [(path, bytes)] — pure,
+    unit-testable without the filesystem (token-budget invariant). A published
+    SKILL.md body whose estimate (bytes / TOKEN_RATIO) exceeds
+    SKILL_TOKEN_BUDGET emits `skill-token|ADVISORY|<path> ~<n>k > 5k …`;
+    remediation = split conditional detail to references/ one level deep.
+    Realized once here so the drift-detector retires its hand-run size check
+    (mechanical-realization invariant)."""
+    out = []
+    for path, nbytes in sizes:
+        est = int(nbytes / TOKEN_RATIO)
+        if est > SKILL_TOKEN_BUDGET:
+            k = round(est / 1000, 1)
+            out.append(("skill-token", ADVISORY,
+                        f"{path} ~{k}k tokens > "
+                        f"{SKILL_TOKEN_BUDGET // 1000}k skill-body budget; "
+                        f"split conditional detail to references/"))
+    return out
+
+
+def audit_skill_tokens(skill_md, repo_root):
+    """File-reading wrapper around skill_token_rows (token-budget invariant)
+    over the PUBLISHED skill set (discover_skill_md); paths reported
+    repo-relative."""
+    sizes = []
+    for path in skill_md:
+        try:
+            nbytes = os.path.getsize(path)
+        except OSError:
+            continue
+        sizes.append((os.path.relpath(path, repo_root), nbytes))
+    return skill_token_rows(sizes)
+
+
 # --- batch-sizing advisory ---------------------------------------------------
 
 def recommend_batch_count(v_count, published_census):
@@ -1899,6 +1934,7 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_sembr(discover_sembr_files(repo_root))
     findings += audit_batch_advisory(v_rows, published_md)
     findings += audit_token_estimate(spec_bytes)
+    findings += audit_skill_tokens(skill_md, repo_root)
     findings += audit_memo(memo_path, v_rows)
     findings += audit_scope_feed(repo_root, memo, t_rows, v_rows, spec_path)
     if run_hook:
@@ -2511,6 +2547,26 @@ def selftest():
     check(estimate_tokens(int(TOKEN_BUDGET * TOKEN_RATIO) + 1000) > TOKEN_BUDGET,
           "estimate_tokens: over-budget bytes → est > budget")
 
+    # per-skill-body token advisory (token-budget invariant): oversized
+    # published SKILL.md body fires skill-token|ADVISORY; the drift-detector
+    # consumes the row instead of hand-running the size check
+    over = int(SKILL_TOKEN_BUDGET * TOKEN_RATIO) + 3400
+    rows = skill_token_rows([("skills/x/SKILL.md", over)])
+    check(len(rows) == 1 and rows[0][0] == "skill-token"
+          and rows[0][1] == ADVISORY,
+          "skill-token: over-budget body fires advisory row")
+    check("skills/x/SKILL.md" in rows[0][2] and "> 5k" in rows[0][2]
+          and "references/" in rows[0][2],
+          "skill-token: evidence carries path, threshold, remedy")
+    check(skill_token_rows([("skills/x/SKILL.md", 1000)]) == [],
+          "skill-token: under-budget body silent")
+    check(skill_token_rows([("skills/x/SKILL.md",
+                             int(SKILL_TOKEN_BUDGET * TOKEN_RATIO))]) == [],
+          "skill-token: at-budget boundary silent")
+    check(len(skill_token_rows([("a/SKILL.md", over),
+                                ("b/SKILL.md", over)])) == 2,
+          "skill-token: one row per oversized body")
+
     # batch agent count (batch invariant): ceil(|V|/15) clamp [1,4]; PUBLISHED
     # census < ceil(|V|/2) → 1 regardless; census deterministic (closes §B.7)
     check(recommend_batch_count(0, 5) == 1, "batch: empty §V → 1 agent")
@@ -2891,7 +2947,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 203
+    return 208
 
 
 # --- entry -------------------------------------------------------------------

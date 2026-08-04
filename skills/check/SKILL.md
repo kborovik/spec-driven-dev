@@ -62,7 +62,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]
 
 Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBLISHED scope from `.claude-plugin/marketplace.json`; probes `.spec/scripts/check-extras.sh` (exists + executable → run, append its `id|verdict|evidence` rows — language-agnostic contract).
 Emits pipe-table `id|verdict|evidence` — full row catalog + REPORT merge rules: Read `references/audit-rows.md` @ first audit-output parse.
-Merge summary: dirty-class rows (`format` / `cite` / `history` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom`) → their REPORT blocks; `token` + `sembr` + `memo`-invalidation → `## advisory`; scope-feed rows (`memo` drift, `tasks`, `diff`, `scope`) + `batch` consumed machine-side, never surfaced, never hand-rolled via `git diff` or a hand-grep over §V bodies.
+Merge summary: dirty-class rows (`format` / `cite` / `history` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom`) → their REPORT blocks; `token` + `skill-token` + `sembr` + `memo`-invalidation → `## advisory`; scope-feed rows (`memo` drift, `tasks`, `diff`, `scope`) + `batch` consumed machine-side, never surfaced, never hand-rolled via `git diff` or a hand-grep over §V bodies.
 
 ## MEMO
 
@@ -175,7 +175,7 @@ Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT r
 - dirty run (any VIOLATE / DRIFT / MISSING / STALE / UNRESOLVED / TYPE-MISMATCH) → omit section.
 
 **Advisory** — fired conditions ! emit `## advisory` H2 between `## checkpoint` and `## summary` (or leading output when no checkpoint).
-One line per fired `token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
+One line per fired `token|ADVISORY` / `skill-token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
 No line → omit heading.
 
 ## WRITE-MEMO
