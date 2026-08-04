@@ -5,6 +5,7 @@ description: |
   writes. Loaded by /sdd:spec, /sdd:build, /sdd:check. Triggers on any
   write to SPEC.md or user says "telegraph", "compress this", "be brief".
 user-invocable: false
+paths: [SPEC.md, SPEC-FORMAT.md, "skills/**/SKILL.md"]
 ---
 
 # telegraph — LLM-facing telegraph encoding
