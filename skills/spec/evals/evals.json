@@ -1,0 +1,45 @@
+{
+  "skill_name": "spec",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "write the spec for a link-checker CLI: it crawls a site from a start URL, reports broken links as a table, and exits nonzero when any 404 is found. keep it stdlib-only python.",
+      "expected_output": "NEW mode: socratic gate converges, SPEC.md created at repo root with all six sections, auto-committed path-scoped.",
+      "files": [],
+      "expectations": [
+        "SPEC.md exists at the repo root after the run",
+        "SPEC.md contains the section headers §G, §C, §I, §V, §T, §B in that order",
+        "Every §T row has status cell '.' (no task pre-closed)",
+        "§B contains only the header row id|date|cause|fix",
+        "A git commit exists whose diff touches SPEC.md and no other file",
+        "The final response ends with a '## Next' block whose first item is /sdd:check"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "this bug keeps biting: our build skill committed the whole index again because someone staged files before the run. we need the spec to capture whatever rule stops that class of mistake.",
+      "expected_output": "Gate routes to BACKPROP: §B row appended with root cause, recurrence-class invariant drafted or tightened in §V, SPEC.md committed.",
+      "files": [],
+      "expectations": [
+        "A new §B row is appended with a one-line cause cell and today's date",
+        "The §B fix cell is either '-' or a V<n> id that resolves to a live §V row",
+        "If a §V row was added or amended, the commit message cites it",
+        "The commit is path-scoped: its diff touches only the resolved spec body file(s)",
+        "The diff preview was shown before any write (show-user step precedes commit in the transcript)",
+        "The final response ends with a '## Next' block whose first item is /sdd:check"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "amend §T: add a task to migrate the config loader off pyyaml to tomllib, cite the stdlib-only invariant",
+      "expected_output": "AMEND mode: single §T row appended with a resolving cite, diff previewed, SPEC.md committed alone.",
+      "files": [],
+      "expectations": [
+        "Exactly one new §T row is appended, status '.'",
+        "The new row's cites cell tokens all resolve to live §V rows or §I kinds",
+        "No other SPEC.md section was rewritten (diff confined to the §T table)",
+        "The commit subject matches the pattern 'amend §T.<n>(+): <one-line>'"
+      ]
+    }
+  ]
+}

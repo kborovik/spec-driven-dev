@@ -1,0 +1,20 @@
+[
+  {"query": "open an issue for the flaky retry test — it failed 3 times on main this week, include the CI run links I pasted above", "should_trigger": true},
+  {"query": "start work on issue #42", "should_trigger": true},
+  {"query": "ok the fix is done, open a PR for this branch against main", "should_trigger": true},
+  {"query": "merge PR #17, it's approved", "should_trigger": true},
+  {"query": "this PR is dead, close it without merging and clean up the branch", "should_trigger": true},
+  {"query": "file a bug on our repo about the config loader crashing on empty TOML files, title it something like 'loader: crash on empty file'", "should_trigger": true},
+  {"query": "can you create a pr for these changes? link it to the auth issue so it auto-closes when merged", "should_trigger": true},
+  {"query": "pick up the next open issue labeled good-first-issue and get a branch going for it", "should_trigger": true},
+  {"query": "squash-merge the dependabot PR and delete the branch", "should_trigger": true},
+  {"query": "commit these changes and push to main", "should_trigger": false},
+  {"query": "cut a release — bump minor, tag it, publish the generated notes", "should_trigger": false},
+  {"query": "what did the reviewer say on PR #12? summarize the comment threads for me", "should_trigger": false},
+  {"query": "why did the last github actions workflow run fail? pull the logs", "should_trigger": false},
+  {"query": "list the open issues assigned to me sorted by age", "should_trigger": false},
+  {"query": "clone the upstream repo and check out their v2 branch so we can compare", "should_trigger": false},
+  {"query": "review this PR diff and tell me if the error handling is sound before I approve", "should_trigger": false},
+  {"query": "add a git tag v2.0.1 on this commit and push the tag", "should_trigger": false},
+  {"query": "draft release notes covering what changed since v1.2", "should_trigger": false}
+]

@@ -1,0 +1,31 @@
+{
+  "skill_name": "reorganize",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "reorganize the spec — regroup §V by topic and renumber, the ids are all over the place after last month's folds",
+      "expected_output": "§V clustered by topic, ids renumbered monotonically, renumber map appended, every citer swept in the same commit.",
+      "files": [],
+      "expectations": [
+        "Post-run §V ids are strictly increasing in section order",
+        "A mapping entry for every renumbered id was appended to .spec/spec-renumber-map.json (append-only: prior entries untouched)",
+        "Every cite of a renumbered id across SPEC.md and REPO-LOCAL files was swept to the new id in the same commit",
+        "The mechanical audit exits clean after the sweep (no UNRESOLVED or TYPE-MISMATCH cite rows)",
+        "Exactly one commit carries the cluster, renumber, and cite sweep together",
+        "The final response ends with a '## Next' block"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/sdd:reorganize --taxonomy-only",
+      "expected_output": "Cluster-shape pass without renumbering: rows regrouped, ids untouched, no citer sweep needed.",
+      "files": [],
+      "expectations": [
+        "No §V id changed during the run",
+        ".spec/spec-renumber-map.json is byte-identical before and after",
+        "Row bodies are byte-identical (only ordering/grouping changed)",
+        "The final response ends with a '## Next' block"
+      ]
+    }
+  ]
+}

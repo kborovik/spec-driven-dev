@@ -1,0 +1,155 @@
+{
+  "skill_name": "github",
+  "description": "Auto-fire gh-CLI workflow governor. Fires when an sdd skill or the operator runs a GitHub issue or pull-request operation \u2014 open an issue, start work on one, open a PR, merge a PR, or close one unmerged. Shapes the gh workflow: generic issue/PR structures, per-PR issue-linked branch, squash-merge with branch cleanup, `Closes #<issue>` linkage. Not for plain git ops (commit, push) nor `gh release` \u2014 the release skill owns version tag + release notes.",
+  "results": [
+    {
+      "query": "merge PR #17, it's approved",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "start work on issue #42",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "ok the fix is done, open a PR for this branch against main",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "open an issue for the flaky retry test \u2014 it failed 3 times on main this week, include the CI run links I pasted above",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "this PR is dead, close it without merging and clean up the branch",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "file a bug on our repo about the config loader crashing on empty TOML files, title it something like 'loader: crash on empty file'",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "pick up the next open issue labeled good-first-issue and get a branch going for it",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "can you create a pr for these changes? link it to the auth issue so it auto-closes when merged",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "squash-merge the dependabot PR and delete the branch",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "commit these changes and push to main",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "cut a release \u2014 bump minor, tag it, publish the generated notes",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what did the reviewer say on PR #12? summarize the comment threads for me",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "why did the last github actions workflow run fail? pull the logs",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "list the open issues assigned to me sorted by age",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "clone the upstream repo and check out their v2 branch so we can compare",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "add a git tag v2.0.1 on this commit and push the tag",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "draft release notes covering what changed since v1.2",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "review this PR diff and tell me if the error handling is sound before I approve",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 9,
+    "failed": 9
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "skill_name": "condense",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/sdd:condense",
+      "expected_output": "Six-prong token sweep over SPEC.md, operator-confirmed, single atomic commit; token estimate strictly lower after.",
+      "files": [],
+      "expectations": [
+        "The script's emit-token-estimate mode was used for the before and after baseline (no hand-run wc -c)",
+        "The post-sweep token estimate is strictly lower than the pre-sweep estimate",
+        "Exactly one commit was created for the whole sweep",
+        "Every live §V/§T/§B id present before the sweep either remains live, or is archived/stubbed per the archive and extras rules (no silent deletion)",
+        "The final response ends with a '## Next' block"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "SPEC too big — the check advisory says we're over the token budget, shrink the spec",
+      "expected_output": "Advisory-driven condense run: heavy §V bodies relocated to the extras file with stub rows, closed §T/§B rows archived past the window split.",
+      "files": [],
+      "expectations": [
+        "Relocated §V bodies leave a stub row in SPEC.md pointing at the extras file",
+        "Archived rows moved verbatim to SPEC.archive.md with the per-section markers",
+        "The mechanical audit exits clean after the sweep (no UNRESOLVED cites introduced)",
+        "A single atomic commit carries the whole sweep"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "skill_name": "explain",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "what does §V.13 mean? I don't read telegraph",
+      "expected_output": "Prose expansion of the cited row with its cited siblings, zero writes, plain English throughout.",
+      "files": [],
+      "expectations": [
+        "The response expands the cited row into plain prose (no telegraph register in the explanation body)",
+        "Sibling rows cited by or citing the target are named in the expansion",
+        "No file was written or edited during the run",
+        "The final response ends with a '## Next' block",
+        "Any suggested edit routes to /sdd:spec, never applied inline"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/sdd:explain --next",
+      "expected_output": "The lowest-numbered pending §T row expanded: what the task will do, which invariants and interfaces it touches, in prose.",
+      "files": [],
+      "expectations": [
+        "The expanded row is the lowest-numbered §T row with status '.'",
+        "Every cite token in that row is resolved and explained (none skipped)",
+        "No file writes occurred",
+        "The final response ends with a '## Next' block offering /sdd:build for the explained task"
+      ]
+    }
+  ]
+}

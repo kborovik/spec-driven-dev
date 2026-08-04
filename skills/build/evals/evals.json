@@ -1,0 +1,43 @@
+{
+  "skill_name": "build",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "build --next",
+      "expected_output": "Lowest-numbered pending §T row implemented: plan emitted inline, code edited, verification run, status cell flipped, path-scoped auto-commit.",
+      "files": [],
+      "expectations": [
+        "An inline plan citing the applicable §V invariants precedes any edit",
+        "Exactly one §T status cell flipped from '.' to 'x'",
+        "The named verification command was run and exited 0 before the flip",
+        "The commit subject matches 'T<n>: <goal line>'",
+        "The commit diff touches only the task's listed paths plus SPEC.md",
+        "The final response ends with a '## Next' block whose first item is /sdd:check"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "is §T.3 done? if not, build it",
+      "expected_output": "Status read from SPEC.md; pending row leads to plan-then-execute for that row only; closed row leads to a no-op report.",
+      "files": [],
+      "expectations": [
+        "The run scopes work to §T.3 only (no other §T row's files touched)",
+        "If §T.3 was already 'x', no commit is created and the response says so plainly",
+        "If §T.3 was pending, verification ran before the status flip",
+        "No SPEC.md edit other than the single status cell occurred"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "run the build for the whole backlog",
+      "expected_output": "--all chain: plan once, then per-row edit-verify-commit autonomously with a live harness checklist; failures backprop instead of blind retry.",
+      "files": [],
+      "expectations": [
+        "One task-tracker task was created per pending §T row at plan start",
+        "Each closed row produced its own path-scoped commit (one commit per §T row)",
+        "No pending row was skipped silently: every unclosed row has a stated reason",
+        "A verification failure led to FAIL classification, not an unverified commit"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "skill_name": "monitor",
+  "description": "Auto-fire skill-deviation capture. Fires when, mid-skill-run, an sdd skill misbehaves: instruction ambiguous or self-contradictory, a recipe loop step impossible as written, a prescribed tool/flag fails, or the user corrects the skill's behavior. Redacts, dedups, then operator-gates a GitHub issue on the plugin repo; a dev-repo deviation routes to backprop instead. Not for consumer code bugs or env breakage unrelated to an sdd skill.",
+  "results": [
+    {
+      "query": "that's wrong \u2014 the spec skill committed without showing me the diff preview first",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "step 3 of the condense skill is impossible as written \u2014 it wants the \u00a7V weight table before the script has emitted it",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "the build recipe says to run check-mechanical.py audit --dirty but the script rejects --dirty outside emit-v-slices, it just errored",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "hold on \u2014 the check skill just tried to edit SPEC.md, isn't it supposed to be read-only?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "your skill told you to grep with a lookahead but the Grep tool rejected the pattern, the recipe step can't run as written",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "the reorganize skill contradicts itself: one section says renumber, its NON-GOALS says never renumber \u2014 which is it?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "the socratic gate asked me the identical question twice in a row \u2014 the convergence rule isn't behaving as documented",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "why did /sdd:explain write a file? its description says zero writes",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "check told me to hand-merge the verdict tables into the memo, but the memo invariant says hand-merge is banned \u2014 the skill text looks stale",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "my test suite is failing after the refactor, can you dig into why",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "python3: command not found when the audit runs \u2014 I think my venv is broken again",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "this bug keeps biting, record it in the spec so the class can't recur",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the check skill found a real violation in our auth module \u2014 help me fix the code it flagged",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I think the sdd plugin should also ship a /sdd:lint command \u2014 can we request that as a feature",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "explain what the memo invariant actually means, the telegraph row is too dense for me",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the audit takes 40 seconds on our monorepo, can we make it faster",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "our repo's .spec/scripts/check-extras.sh exits 2 because of a typo I made in it yesterday, fix my script",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "claude code dropped the connection mid-run with an API timeout \u2014 just rerun the check",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 9,
+    "failed": 9
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {"query": "hold on — the check skill just tried to edit SPEC.md, isn't it supposed to be read-only?", "should_trigger": true},
+  {"query": "the build recipe says to run check-mechanical.py audit --dirty but the script rejects --dirty outside emit-v-slices, it just errored", "should_trigger": true},
+  {"query": "step 3 of the condense skill is impossible as written — it wants the §V weight table before the script has emitted it", "should_trigger": true},
+  {"query": "that's wrong — the spec skill committed without showing me the diff preview first", "should_trigger": true},
+  {"query": "your skill told you to grep with a lookahead but the Grep tool rejected the pattern, the recipe step can't run as written", "should_trigger": true},
+  {"query": "the reorganize skill contradicts itself: one section says renumber, its NON-GOALS says never renumber — which is it?", "should_trigger": true},
+  {"query": "why did /sdd:explain write a file? its description says zero writes", "should_trigger": true},
+  {"query": "the socratic gate asked me the identical question twice in a row — the convergence rule isn't behaving as documented", "should_trigger": true},
+  {"query": "check told me to hand-merge the verdict tables into the memo, but the memo invariant says hand-merge is banned — the skill text looks stale", "should_trigger": true},
+  {"query": "my test suite is failing after the refactor, can you dig into why", "should_trigger": false},
+  {"query": "python3: command not found when the audit runs — I think my venv is broken again", "should_trigger": false},
+  {"query": "the check skill found a real violation in our auth module — help me fix the code it flagged", "should_trigger": false},
+  {"query": "this bug keeps biting, record it in the spec so the class can't recur", "should_trigger": false},
+  {"query": "I think the sdd plugin should also ship a /sdd:lint command — can we request that as a feature", "should_trigger": false},
+  {"query": "the audit takes 40 seconds on our monorepo, can we make it faster", "should_trigger": false},
+  {"query": "explain what the memo invariant actually means, the telegraph row is too dense for me", "should_trigger": false},
+  {"query": "our repo's .spec/scripts/check-extras.sh exits 2 because of a typo I made in it yesterday, fix my script", "should_trigger": false},
+  {"query": "claude code dropped the connection mid-run with an API timeout — just rerun the check", "should_trigger": false}
+]

@@ -1,0 +1,43 @@
+{
+  "skill_name": "check",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "check drift",
+      "expected_output": "Read-only sweep: mechanical audit script run, behavioral rows classified, severity-grouped REPORT with summary, memo written only via the script.",
+      "files": [],
+      "expectations": [
+        "The check-mechanical.py script was invoked in audit mode (not re-derived greps)",
+        "The REPORT groups findings under severity blocks and ends with '## summary'",
+        "No file outside .spec/ was written (git status clean apart from .spec/check-state.json and .spec/.gitignore)",
+        "SPEC.md is byte-identical before and after the run",
+        "Silence-class verdicts appear only in the summary suppressed count, not as body rows",
+        "The final response ends with a '## Next' block"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "did the code drift from the spec? do a full re-check, don't trust the cache",
+      "expected_output": "--full semantics: memo dropped upfront, all §V rows re-classified, per-row history listing restored.",
+      "files": [],
+      "expectations": [
+        ".spec/check-state.json was deleted before classification began",
+        "Every live §V row received a verdict (none carried forward as HOLD-SINCE-CLEAN)",
+        "The audit script was invoked with --full",
+        "The REPORT ends with '## summary' and the response with '## Next'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "is the spec still accurate? we merged a big refactor of the CLI entrypoints yesterday",
+      "expected_output": "Memo-driven scoped sweep; interface rows diffed against the refactored surface; drifted §I rows surfaced with file:line evidence.",
+      "files": [],
+      "expectations": [
+        "Each §I row was classified into MATCH, DRIFT, MISSING, or EXTRA",
+        "Every surfaced drift row carries file:line evidence",
+        "No fix was applied: the response only reports and suggests /sdd:spec or /sdd:build items",
+        "The final response ends with a '## Next' block"
+      ]
+    }
+  ]
+}

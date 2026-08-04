@@ -1,0 +1,31 @@
+{
+  "skill_name": "design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "design the cache layer for our CLI — we keep re-fetching the same registry metadata on every run. I'm torn between sqlite and a flat-file json cache, maybe there's a third option. walk me through tradeoffs and land on one.",
+      "expected_output": "Propose-then-critique loop over named alternatives, converged draft persisted to designs/<slug>.md, SPEC.md untouched.",
+      "files": [],
+      "expectations": [
+        "A new file exists under designs/ with a kebab-case slug related to caching",
+        "The draft file contains a decision among explicitly named alternatives (sqlite, flat-file json, and any third option raised)",
+        "The draft file's Open Questions section is empty or absent at persist time",
+        "SPEC.md is byte-identical before and after the run (git status shows no SPEC.md change)",
+        "The final response ends with a '## Next' block of 1-5 items",
+        "The '## Next' block offers folding the draft via /sdd:spec designs/<slug>.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "shape the retry subsystem for the API client before we implement it — we need to decide between exponential backoff with jitter vs a token-bucket approach, and whether retry state lives in the client or a wrapper.",
+      "expected_output": "Structural design loop weighing both named alternatives plus the state-placement axis; draft written to designs/, no SPEC.md write.",
+      "files": [],
+      "expectations": [
+        "A new designs/*.md draft exists naming both retry strategies and a chosen one",
+        "The draft records at least one rejected alternative with the reason for rejection",
+        "No writes occurred outside designs/ (git status clean except the new draft)",
+        "The final response ends with a '## Next' block"
+      ]
+    }
+  ]
+}
