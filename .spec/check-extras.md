@@ -60,7 +60,7 @@ V46: batch — §V classification MAY parallelize; count = script audit `batch|A
 
 ## §V48 token-budget
 
-V48: token-budget — estimate = bytes / 3.4; > 20k tokens → check advisory → operator /sdd:condense; > 50 closed §T rows → window-vs-archive split; canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
+V48: token-budget — estimate = bytes / 3.4; SPEC.md > 20k tokens → check advisory → operator /sdd:condense; > 50 closed §T rows → window-vs-archive split; published SKILL.md body > 5k tokens → check advisory → conditional detail splits to `references/` one level deep (harness compaction re-attaches first 5k tokens per skill); canonical values here, mirrored as script constants, retuned via AMEND + script sync same commit.
 
 ## §V49 extras-hook
 
