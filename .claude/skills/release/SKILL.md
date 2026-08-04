@@ -21,12 +21,24 @@ REPO-LOCAL operator skill, not part of the published `sdd` surface. Cuts a GitHu
 
 ## PREFLIGHT
 
-Guard chain — bail w/ the named reason on first fail, nothing mutated:
+Guard chain — outputs injected below (`!` preprocessing, pre-model; `disableSkillShellExecution` consumers see disabled-by-policy markers → run each guard cmd manually). Bail w/ the named reason on first fail, nothing mutated:
 
-1. working tree clean: `git status --porcelain` empty → else bail "commit or stash first".
-2. on `main`: `git rev-parse --abbrev-ref HEAD` = `main` → else bail "release from main".
-3. self-test green: `python3 scripts/check-mechanical.py --self-test` exits 0.
-4. audit clean: `python3 scripts/check-mechanical.py audit` shows no dirty verdict → else bail "resolve drift via /sdd:check first".
+1. working tree clean — output empty → else bail "commit or stash first":
+
+!`git status --porcelain`
+
+2. on `main` — output = `main` → else bail "release from main":
+
+!`git rev-parse --abbrev-ref HEAD`
+
+3. self-test green — output ends `self-test OK (…)` → else bail:
+
+!`python3 scripts/check-mechanical.py --self-test`
+
+4. audit clean — no dirty verdict row (VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA) → else bail "resolve drift via /sdd:check first":
+
+!`python3 scripts/check-mechanical.py audit`
+
 5. read current version from `.claude-plugin/plugin.json`.
 
 ## VERSION

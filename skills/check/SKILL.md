@@ -32,9 +32,15 @@ Checklist = ephemeral harness UI: never repo state, never the memo, never substi
 
 ## LOAD
 
-1. Load spec overview (SCOPE, not whole-file Read per single-load invariant) — `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-overview`.
-   Prints §G/§C/§I/§T/§B bodies + §V id list (no §V bodies — those arrive via `emit-v-slices` step 4; whole-file Read here double-loads SPEC.md + re-hits the Read token cap).
-   Script exits non-zero "no SPEC.md" → "no spec, nothing to check."
+Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disableSkillShellExecution` consumers see a disabled-by-policy marker instead → run the per-step fallback cmd manually.
+
+1. Spec overview (SCOPE, not whole-file Read per single-load invariant):
+
+!`python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-overview`
+
+   Fallback: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-overview`.
+   Prints §G/§C/§I/§T/§B bodies + §V id list; §V bodies arrive via `emit-v-slices` only (step 4).
+   Script error "no SPEC.md" → "no spec, nothing to check."
    Stop.
 2. Parse `$ARGUMENTS` (two forms only, per dispatch invariant):
    - bare → memo-driven default sweep: invariants + interfaces + tasks.
@@ -44,7 +50,11 @@ Checklist = ephemeral harness UI: never repo state, never the memo, never substi
      Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
    - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full`.
      Legacy section-name args and multi-flag forms retired.
-3. Run audit script (MECHANICAL CORE).
+3. Audit output (MECHANICAL CORE):
+
+!`python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py audit $ARGUMENTS`
+
+   Fallback: the MECHANICAL CORE fenced cmd.
    Its `memo|ADVISORY|…` rows report fired invalidation triggers + the `v_row_shas` dirty set that scopes §V re-classification.
 4. §V row bodies come from the script's `emit-v-slices` mode (SCOPE), never whole-file Read — large SPEC paginates past the Read token cap.
    Script slice is canonical §V-body source for single-agent and sub-agent paths.
@@ -54,7 +64,7 @@ Checklist = ephemeral harness UI: never repo state, never the memo, never substi
 Deterministic audit set — SPEC-FORMAT structural rules, cite + fix grammar, monotonic-ID, cite-DAG, history-residue + oversized-cell advisory, pinned-invariant-header, MECHANIZE-block byte-identity, auto-fire slash-dispatch ban, grant-use, CLAUDE.md marker block, human-facing symbol + idiom scan, sembr scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
 Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — each script row supersedes any hand-run sweep of the same rule (MECHANIZE `awk|md5|uniq` check, dispatch grep, grant sweep, symbol grep, idiom grep).
 
-Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
+Output injected @ LOAD step 3; fallback cmd (mid-glob grant pin per tooling-preference invariant; git ops all run inside the script):
 
 ```
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]

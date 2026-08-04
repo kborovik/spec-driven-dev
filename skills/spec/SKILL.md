@@ -19,7 +19,11 @@ model: fable
 
 ## DISPATCH
 
-**Step 0 (precondition):** `git status --porcelain SPEC.md` empty → continue; else bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit assumes clean baseline; porcelain catches staged + untracked, which `git diff --quiet` misses).
+**Step 0 (precondition):** porcelain state injected below (`!` preprocessing; `disableSkillShellExecution` consumers see a disabled-by-policy marker → run `git status --porcelain SPEC.md` manually):
+
+!`git status --porcelain SPEC.md`
+
+Empty output → continue; else bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit assumes clean baseline; porcelain catches staged + untracked, which `git diff --quiet` misses).
 
 **Step 1 (fold-in shortcut):** `$ARGUMENTS` matches `designs/*.md`, file exists, SPEC.md exists @ repo root → FOLD-IN (skip socratic gate — design skill Open-Questions-empty rule already enforced convergence pre-persist).
 Design path w/o SPEC.md → bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first" (design skill degrades gracefully sans SPEC.md so converged drafts can predate it).
