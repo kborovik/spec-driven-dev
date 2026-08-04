@@ -21,6 +21,7 @@ Mechanical audits owned by published script per mechanical-realization invariant
 Behavioral judgment stays LLM.
 Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.spec/scripts/check-extras.sh` hook (mechanical, run by script) + `.spec/check-extras.md` (judgment-class, consulted by LLM).
 Read-only → sub-agent delegation safe throughout.
+Conditional detail lives in `references/` one level deep per token-budget invariant (skill-body budget) — each pointer names its load moment; Read on that moment only.
 
 ## PROGRESS
 
@@ -50,8 +51,8 @@ Checklist = ephemeral harness UI: never repo state, never the memo, never substi
 
 ## MECHANICAL CORE — audit script
 
-Deterministic audit set — SPEC-FORMAT structural rules (section catalog + order, row grammar, rightmost-`|` column extraction, archive markers + sibling shape), `§T` cite / `§B` fix grammar, monotonic-ID, cite-DAG resolution + edge-type, history-residue patterns + pre-filters + oversized-cell advisory, pinned-invariant-header grep, MECHANIZE-block byte-identity across the user-invocable SKILL.md set, auto-fire sub-skill slash-dispatch ban, allowed-tools grant-use (no zero-body-use grant), CLAUDE.md presence + direct-instruction marker block, human-facing naked-symbol + banned-idiom scan, sembr multi-sentence-line scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
-Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — the MECHANIZE-block check supersedes any hand-run `awk|md5|uniq` block sweep, the dispatch-target check any hand-run skill-body slash grep, the grant-use check any hand-run `allowed-tools` grant sweep, the human-facing scan any hand-run symbol or idiom grep.
+Deterministic audit set — SPEC-FORMAT structural rules, cite + fix grammar, monotonic-ID, cite-DAG, history-residue + oversized-cell advisory, pinned-invariant-header, MECHANIZE-block byte-identity, auto-fire slash-dispatch ban, grant-use, CLAUDE.md marker block, human-facing symbol + idiom scan, sembr scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
+Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — each script row supersedes any hand-run sweep of the same rule (MECHANIZE `awk|md5|uniq` check, dispatch grep, grant sweep, symbol grep, idiom grep).
 
 Run at audit start (`${CLAUDE_PLUGIN_ROOT}` doesn't expand in frontmatter `allowed-tools` → script-path pin uses mid-glob `Bash(python3 */check-mechanical.py *)`; leading `*` absorbs the unexpanded plugin-root prefix, per tooling-preference invariant. git stays unused — all rev-parse/show/diff run inside the script):
 
@@ -60,54 +61,12 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]
 ```
 
 Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBLISHED scope from `.claude-plugin/marketplace.json`; probes `.spec/scripts/check-extras.sh` (exists + executable → run, append its `id|verdict|evidence` rows — language-agnostic contract).
-Emits pipe-table `id|verdict|evidence`:
-
-- `format|VIOLATE|format: <detail>` — SPEC-FORMAT breach.
-- `cite|UNRESOLVED|<citer> <id> …` / `cite|TYPE-MISMATCH|…` — cite-DAG. `cite|ambiguous|…` = bare-form phase-label / gate-ID collision subset → LLM adjudicates per CHECK §-cite.
-- `history|VIOLATE|<row> … history: <pattern>` — inlined-history residue. `history|ADVISORY|oversized cells …` = smell, not VIOLATE.
-- `pinned-header|VIOLATE|<file:line> …` — PUBLISHED body pins invariant number in header.
-- `mechanize|DRIFT|<path> … md5 <a> != <b>` / `mechanize|MISSING|<path> …` — user-invocable `skills/*/SKILL.md` (minus frontmatter `user-invocable: false`) carries the byte-identical canonical MECHANIZE block per mechanize-scan invariant; DRIFT = divergent block, MISSING = absent sentinel.
-  Script-owned byte-identity check — never hand-run `awk|md5|uniq` per run.
-- `dispatch|VIOLATE|<path:line> … slash-dispatches auto-fire sub-skill <cmd>` — a skill body names an auto-fire sub-skill (`user-invocable: false`) in `/<plugin>:<sub-skill>` slash form per response-shape invariant; the slash form is never a valid dispatch target (backtick-wrapped exempt).
-  Sub-skill set derived frontmatter-only, plugin name from manifest — script-owned, never hand-grep skill bodies per run (closes §B.14).
-- `grant|VIOLATE|<path:line> grants <tool> zero body use …` — a frontmatter `allowed-tools` grant the skill body never invokes per tooling-preference invariant (zero-body-use grant banned, nothing to pre-approve).
-  Sound by construction: flagged only on total body-absence — canonical token, alias (`Explore` for the sub-agent spawner), the operation verb a body uses for the tool (`rewrite` for the editor), or a `Bash` command anchor; `Glob` matched case-sensitively so wildcard prose (`mid-glob`) never masks a missing grant.
-  Spans the PUBLISHED + REPO-LOCAL skill set — script-owned, never hand-run the grant sweep per run (a manual sweep misses rows).
-- `claude-md|MISSING|CLAUDE.md absent …` / `claude-md|VIOLATE|CLAUDE.md missing … marker block …` — repo-root `CLAUDE.md` (the human-clarity carrier) present + carries the `sdd:direct-instruction` begin/end marker block per human-clarity invariant; MISSING = absent file, VIOLATE = block absent or mis-ordered.
-  Symbol-cleanliness rides the `symbols` row (CLAUDE.md in the human-facing scan set), not re-checked here.
-  Script-owned, never hand-verify CLAUDE.md per run.
-- `symbols|VIOLATE|<file:line> naked <sym> …` — a human-facing surface (README, CLAUDE.md, manifest) carries a naked `→ ≥ ≤ & ~` outside a backtick span or fenced block per symbol-set + human-clarity invariants; SPEC-adjacent telegraph keeps the set, so it is never scanned.
-  Script-owned, never hand-run the symbol grep per run.
-- `idiom|VIOLATE|<file:line> banned idiom <phrase> …` — a human-facing surface carries a banned idiom / jargon-idiom phrase per human-clarity invariant, matched against a curated low-false-positive BOUNDARIES subset (multi-word idiom + hyphenated jargon-idiom; ambiguous single words excluded).
-  Backtick-span + fenced-block exempt (a code-span or fenced example naming a banned phrase, e.g. CLAUDE.md's ban list, is fine).
-  Script-owned, never hand-run the idiom grep per run (a manual sweep forgets to re-run it) (closes §B.22).
-- `sembr|ADVISORY|<file:line> multi-sentence source line …` — a prose source line in the sembr file set (README, CLAUDE.md, `designs/*.md`, skill bodies) holds ≥ 2 sentences per sembr invariant; fence / `|`-table / frontmatter / blockquote / backtick-span exempt, pipe-row files never in the set.
-  Advisory only (source-format rule, never dirty).
-  Script-owned, never hand-run the multi-sentence line scan per run.
-- `token|ADVISORY|SPEC.md ~<n>k tokens > budget …` — estimate `bytes/3.4` per token-budget invariant.
-- `memo|ADVISORY|<trigger>` — invalidation (`schema_version` mismatch or `last_clean_sha` unreachable → drop memo, full sweep) or scope feed `v_row_shas drift: V<n>,…`.
-- `tasks|ADVISORY|flipped-since-clean: T<n>,…` — §T rows flipped `.`→`x` since clean sha.
-- `diff|ADVISORY|touched: <paths>` — paths changed since clean sha.
-- `scope|ADVISORY|v-path-dirty: V<n>,…` — §V rows whose body path tokens (quoted/backticked path-like strings) intersect the touched-set; script-computed, consumed by SCOPE step 1 in place of a hand-run grep over the §V section.
-- `batch|ADVISORY|recommended: <n> agents` — §V-classification sub-agent count from §V row count + PUBLISHED file census per batch invariant; consumed by Batch protocol step 1, never hand-computed.
-
-Merge into REPORT verbatim: `format` / `history` / `cite` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom` rows → their REPORT blocks (`mechanize` DRIFT/MISSING + `dispatch` VIOLATE + `grant` VIOLATE + `claude-md` MISSING/VIOLATE + `symbols` VIOLATE + `idiom` VIOLATE → invariant drift); `token` + `sembr` + `memo`-invalidation → `## advisory`.
-Scope-feed rows (`memo` drift, `tasks` flipped-set, `diff` touched-set, `scope` v-path-dirty) carry stable comma-joined fields consumed machine-side — chained into `emit-v-slices --dirty`, never surfaced in advisory, never hand-rolled via `git diff` or a hand-grep over §V bodies. `batch|ADVISORY` likewise consumed machine-side (Batch protocol step 1), never surfaced in advisory.
+Emits pipe-table `id|verdict|evidence` — full row catalog + REPORT merge rules: Read `references/audit-rows.md` @ first audit-output parse.
+Merge summary: dirty-class rows (`format` / `cite` / `history` / `pinned-header` / `mechanize` / `dispatch` / `grant` / `claude-md` / `symbols` / `idiom`) → their REPORT blocks; `token` + `sembr` + `memo`-invalidation → `## advisory`; scope-feed rows (`memo` drift, `tasks`, `diff`, `scope`) + `batch` consumed machine-side, never surfaced, never hand-rolled via `git diff` or a hand-grep over §V bodies.
 
 ## MEMO
 
-`.spec/check-state.json`, schema v3:
-
-```json
-{
-  "schema_version": 3,
-  "last_clean_sha": "<git HEAD @ last clean run>",
-  "v_row_shas": { "V<n>": "<sha256 of §V row body>" },
-  "last_run_at": "<ISO-8601 timestamp>",
-  "last_v_classifications": { "V<n>": "HOLD|HOLD-SINCE-CLEAN|SCOPE-EMPTY|VIOLATE-CAPTURED|LATENT" },
-  "oversized_cell_ack": "<sha256 over sorted oversized cell-id set>"
-}
-```
+`.spec/check-state.json`, schema v3 — field shapes: Read `references/memo-schema.md` when needed.
 
 Script owns both ends per memo invariant:
 
@@ -165,48 +124,10 @@ Repo-specific enforcement → extras hook + extras md per LOAD.
 
 ### Batch protocol (parallel invariant audit)
 
-Invariant audit MAY parallelize via Explore sub-agents:
-
-1. **Batch count** = the audit's `batch|ADVISORY|recommended: <n> agents` row — script-computed from §V row count + PUBLISHED file census; formula owned by the script per mechanical-realization invariant, never re-derived here. `n` = 1 → main-thread single-agent path.
-   Narrow-scope collapse (PUBLISHED census small vs §V count → fewer agents amortize cross-cutting greps better) folds into the row already, closing the eyeballed-file-count proxy class (§B.7).
-2. **Partition** = contiguous V<n> spans per batch (cite locality → shared file reads).
-3. **Prompt** = canonical block below, copied verbatim per batch, fill only `{...}` placeholders — no paraphrase, no per-call schema improvisation. `{V_SLICE}` + `{LINE_START}`/`{LINE_END}` filled from `emit-v-slices` output (batch = contiguous span; line bounds from the `## V<n> SPEC.md:<start>-<end>` headers), never re-Read SPEC.md.
-   Single-agent path sources same slice in-thread.
-4. **Aggregate** — main thread concatenates per-batch tables → REPORT invariant drift block.
-5. **Failure** — agent error or timeout → re-run that range serially (strict fallback, not retry); other batch results retained.
-
+Invariant audit MAY parallelize via Explore sub-agents.
+Batch count = the audit's `batch|ADVISORY|recommended: <n> agents` row — script-computed per batch invariant, never re-derived here; `n` = 1 → main-thread single-agent path.
+`n` > 1 → Read `references/batch-protocol.md` before spawning: 5-step protocol (partition, canonical prompt block copied verbatim fill-`{...}`-only, aggregate, serial fallback on agent failure).
 Cite-DAG, format, history, pinned-header, mechanize-block, dispatch-target, grant-use stay w/ the script — never delegated to §V batches.
-
-#### Canonical agent prompt block
-
-```
-You are an invariants audit sub-agent. Read-only tools (Explore-class palette). No edits, no commits.
-
-INPUT — SPEC.md invariants slice (lines {LINE_START}–{LINE_END}):
-
-{V_SLICE}
-
-INPUT — audit recipe (CHECK invariants step 5 behavioral-claim classification + judgment-class REPO-LOCAL extras from `.spec/check-extras.md`, verbatim):
-
-{RECIPE_EXCERPT}
-
-INPUT — scope sets (per scope-set invariant in SPEC.md):
-
-PUBLISHED = {PUBLISHED_PATHS}
-REPO-LOCAL = {REPO_LOCAL_PATHS}
-SPEC-ADJACENT = {SPEC_ADJACENT_PATHS}
-GITHUB-FACING = {GITHUB_FACING_PATHS}
-
-OUTPUT — pipe-table only. Columns: `id|verdict|evidence`.
-
-- `id` is invariant row identifier (`V<n>`).
-- `verdict` in {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE, SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT}.
-- `evidence` ≤ 1 line, one of `file:line` or `no test covers …` or `scope-touch overlap empty` or `HOLD-since-clean @ <sha>` or `<file:line>; see §B.<n>` (VIOLATE-CAPTURED form) or `<trigger-condition-absent reason>` (LATENT form).
-
-No prose preamble before the table. No trailing summary after the table. No commentary between rows. Pipe-table only — first line is header `id|verdict|evidence`, subsequent lines one row per assigned V<n>.
-```
-
-Block = single source of truth for sub-agent input + output shape; verbatim-copy contract closes the dispatcher-improvisation class.
 
 ## CHECK §-cite — ambiguous adjudication
 
@@ -239,46 +160,13 @@ For each T<n>:
 
 ## REPORT
 
-Telegraph register, grouped by severity.
+Telegraph register, grouped by severity — block templates + example rows: Read `references/report-template.md` @ REPORT assembly.
 Mechanical rows from script merge into their blocks; behavioral `V<n>` from §V batches; `I.<key>` / `T<n>` from interface + task audits.
-
-```
-## invariant drift
-V<n> VIOLATE: auth/mw.go:47 uses `<` not `≤`. see §B.<n>.
-V<n> VIOLATE-CAPTURED: <commit-sha> body contains heavy math operators; see §B.<n>.
-V<n> UNVERIFIABLE: no test covers every req path.
-§T.<n> VIOLATE: history: dated-retirement in task body — prune per freshness-contract invariant.
-mechanize DRIFT: skills/explain/SKILL.md MECHANIZE block diverges from canonical.
-dispatch VIOLATE: skills/build/SKILL.md:96 slash-dispatches auto-fire sub-skill /<plugin>:<sub-skill>.
-grant VIOLATE: skills/explain/SKILL.md:8 grants Grep zero body use.
-idiom VIOLATE: README.md:25 banned idiom load-bearing in human-facing prose.
-
-## cite drift
-T<n>.cites V<m> UNRESOLVED: V<m> absent from invariants section.
-§B.<n>.fix T<k> TYPE-MISMATCH: target is task row, expected invariant row.
-CLAUDE.md:<line> cite UNRESOLVED: row absent.
-
-## interface drift
-I.api DRIFT: POST /x returns `{result}` not `{id}`. route.go:112.
-I.cmd MISSING: `foo bar` absent from cli/*.go.
-
-## task drift
-T<n> STALE: status `x`, no middleware file exists.
-
-## summary
-2 violate. 1 violate-captured. 1 missing. 1 stale. 1 unverifiable. 1 unresolved. 1 type-mismatch. 5 suppressed (1 scope-empty, 2 hold-since-clean, 2 latent).
-```
-
+Block order: `## invariant drift`, `## cite drift`, `## interface drift`, `## task drift`, then checkpoint / advisory / summary per below.
 Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown.
 Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
 
 **Body-row aggregation** (mechanical core): `history`-class VIOLATE rows collapse per section (§V/§T/§B) when section count > threshold (script-owned) → single summary row `§<S>: <n> rows (<count> <pattern>, ...) → /sdd:condense body-trim` w/ breakdown across {amendment-counter, dated-retirement, supersession-narration}; below-threshold sections keep per-row form. `--full` restores per-row listing.
-
-```
-## invariant drift
-§V: 49 rows (29 amendment-counter, 12 dated-retirement, 8 supersession-narration) → /sdd:condense body-trim
-§B.<n> VIOLATE: history: amendment-counter @ SPEC.md:<line>
-```
 
 **Checkpoint** — clean-run REPORT ! contain `## checkpoint` H2 reflecting `write-memo` outcome, single line before `## summary` (state mutation needs salient signal, not buried prose):
 
@@ -289,18 +177,6 @@ Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT r
 **Advisory** — fired conditions ! emit `## advisory` H2 between `## checkpoint` and `## summary` (or leading output when no checkpoint).
 One line per fired `token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
 No line → omit heading.
-
-```
-## checkpoint
-clean — memo @ 060a9d2
-
-## advisory
-memo schema_version mismatch — memo dropped, full sweep
-SPEC.md ~30k tokens > 20k budget; consider /sdd:condense
-
-## summary
-0 violate. 1 violate-captured. 39 suppressed (18 hold-since-clean, 2 latent, 19 hold).
-```
 
 ## WRITE-MEMO
 
@@ -323,18 +199,7 @@ Exit `0` = clean (memo advanced); `1` = dirty (memo untouched, offenders on stde
 
 ## REMEDY HINTS
 
-Populate the Next block (not a separate section) — map drift classes → candidate items, surface most acute:
-
-- VIOLATE / DRIFT → `/sdd:spec <description citing §V.<n>>` (gate routes to BACKPROP).
-- VIOLATE-CAPTURED → no action; baseline `§B`-recorded, remediation forward-only.
-- `history:` VIOLATE → `/sdd:spec amend §<S>.<n>` to prune inlined history; task-row residue → `/sdd:condense` body-trim.
-- `format:` VIOLATE → `/sdd:spec amend §<S>.<n>` (or `/sdd:condense` when archive-marker / window split).
-- SUPPRESSED → no action; rolls forward until trigger fires / touch intersects / scope expands.
-- MISSING → `/sdd:build <task-cite>` if task exists; else `/sdd:spec amend task` to add row.
-- STALE → `/sdd:spec amend <task-cite>` to uncheck status.
-- EXTRA → invariant mandates the surface → `/sdd:spec amend interfaces` (cause known); invariant silent → `/sdd:spec <surface> missing from interfaces section` (cause TBD, `§B` row starts conversation).
-- UNRESOLVED / TYPE-MISMATCH → `/sdd:spec amend §<S>.<n>` to repair stale or wrong-section cite.
-
+Populate the Next block (not a separate section) — drift-class → candidate-item map: Read `references/report-template.md` (Remedy map §) @ Next-block assembly; surface most acute.
 Never invoke fixes.
 Report only.
 

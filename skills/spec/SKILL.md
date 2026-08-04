@@ -121,11 +121,11 @@ All audits run pre-show-user, mechanical pattern-match not LLM-judgment per mech
 
 **Step 0 — write-time prune** (delta-rewrite stage, ordered ahead of audit table so every audit sees final-form delta):
 
-- delta patches pre-existing §V row → §V-row residue prune per WRITE-TIME PRUNE §.
-- delta adds or rewrites §B `cause` cell → one-line trim per WRITE-TIME PRUNE §.
+- delta patches pre-existing §V row → §V-row residue prune per `references/write-time-prune.md` (Read on match — pattern set + pre-filters live there).
+- delta adds or rewrites §B `cause` cell → one-line trim per same file.
 - pruned content → commit-msg body (step 4); step 3 shows post-prune form.
 
-**Step 1 — audit table** (on-fail column names owning § — bail strings + sub-recipe detail live there only):
+**Step 1 — audit table** (on-fail column names owning sub-recipe — bail strings + grep sub-recipe detail live in `references/audit-recipes.md`, Read @ first fire):
 
 ```
 audit | fires when delta is | on fail
@@ -159,81 +159,12 @@ FOLD-IN  → fold-in §V.<n>(+) and §T.<n>(+): <slug>            (omit absent �
 
 APPLY ends @ commit. `## POST-APPLY` fires after, unchanged.
 
-## SWEEP-§T SCOPE AUDIT
+## AUDIT SUB-RECIPES + PRUNE PATTERNS — references/
 
-Every sweep-§T row (remediating §V-class violation) in delta ! task line declares scope as grep pattern or vocab table per sweep-§T-scope invariant; named-procedure or named-site list not accepted.
-No pattern → bail w/ `sweep §T row scope ! grep pattern per sweep-§T scope rule`; user supplies pattern, retry.
+Conditional detail one level deep per token-budget invariant (skill-body budget); Read each file only @ its load moment:
 
-## PINNED-CITE AUDIT
-
-**Sub-recipe (a) — PUBLISHED-scope ban**: grep `§[VTB]\.[0-9]+` in delta touching PUBLISHED scope (per scope-set invariant).
-Match → bail `pinned §-cite not allowed in PUBLISHED — use placeholder form (§V.<n>) or inline rule embedding` until rewrite.
-No PUBLISHED delta → no-op.
-
-**Sub-recipe (b) — SPEC.md-narrative §V resolution**: grep `§V\.[0-9]+` in delta touching SPEC.md narrative (§G/§C/§I/§V/§T/§B body).
-Pre-filter backtick-wrapped tokens `grep -v -E '`[^`]*§V\.[0-9]+[^`]*`'` (invert scan, grep -v -E per tooling-preference invariant) — historical-quote form per verbatim invariant exempt.
-Each surviving match resolves against current SPEC.md §V row set (parse `^V[0-9]+:` openers).
-Unresolved → bail `stale §V.<n> cite in delta — row absent (likely folded); backtick-wrap historical or substitute live row` until rewrite.
-No narrative delta → no-op.
-
-(a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (condense prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`.
-Pattern-match catches what LLM prose-review missed (see §B history).
-
-## NEXT-BLOCK-SECTION AUDIT
-
-Audits touched user-typeable `<plugin>/skills/<n>/SKILL.md` per skills-only architecture invariant.
-User-typeable = frontmatter lacks `disable-model-invocation: true` and `user-invocable: false` (skill dir surfaces as `/<plugin>:<n>` natively unless opted out).
-
-Each touched file in post-amend tree:
-1. Grep `^(disable-model-invocation|user-invocable):\s*` over frontmatter block.
-2. Opt-out match → no-op for this file (auto-fire or programmatic-only, no slash-cmd surface).
-3. Else grep `## OUTPUT — "Next" block` heading in post-amend file.
-   Match → no-op; else bail `<skill> SKILL.md lacks Next-block section per /<plugin>:<n> response-shape contract` until author adds §.
-
-Defends against new user-typeable skill bodies (or cross-plugin migrations) omitting Next-block contract sister skills carry — V20-class runtime rule governs response shape, not authoring-time presence (see §B history).
-Structurally no-op while APPLY step 4 writes SPEC.md only (mirrors pinned-cite (a) posture).
-
-## FOLD-FIRST AUDIT
-
-Per fold-first authoring invariant (§V.<n>).
-Mechanical decision-gate.
-
-Each proposed new §V row in delta:
-
-1. Closest existing §V row by topic — heuristic: shared scope tokens (e.g. `PUBLISHED`, `GITHUB-FACING`, `SPEC-ADJACENT`), shared procedure ref (e.g. `/sdd:spec`, `/sdd:check`), shared verb pattern (e.g. `audit`, `auto-fire`, `gate`).
-   None identifiable → step 3 w/ "no fold candidate" note.
-2. AskUserQuestion per decision-gate invariant (§V.<n>):
-   - **question**: `New §V row proposed: <delta one-line>. Closest existing row §V.<m>: <m-summary>. Fold into existing or split as new row?`
-   - **header**: `Fold-first`
-   - **options** (3, mutually exclusive, label = action):
-     - `Fold into §V.<m>` → reroute delta as §V.<m> amend (inline addition to existing row).
-     - `New row (cite §B recurrence-class)` → proceed; requires §B.<k> cite in delta justifying split (audit greps `§B\.[0-9]+` post-selection).
-     - `New row (orthogonal concept)` → proceed; user-typed orthogonal-concept declaration recorded in commit msg post-selection.
-3. Fold-into → re-render delta as §V.<m> amend, re-enter APPLY @ step 0 per Re-entry rule (re-prune + re-audit — not jump to show-user); new-row branches → record justification, proceed to show-user.
-
-Defends against premature-split class — small audit or enforcement-meta additions creating new §V row when inline amend sufficed. "mirrors §V.<n>" alone insufficient justification per fold-first authoring invariant.
-
-## WRITE-TIME PRUNE
-
-Per freshness-contract invariant (SPEC.md is clean current design; history in commit log + archive, not inlined).
-Auto-rewrites delta → clean current state; pruned history → auto-commit msg body (recoverable via code + `git log`).
-Show-user diff displays post-prune row — prune reviewed, not blind.
-
-**§V-row delta prune** (delta patches pre-existing §V row): strip inlined-history residue.
-Pattern set (single source per freshness-contract invariant — shared w/ /sdd:check history-residue audit + token-budget condense body-trim prong):
-
-- amendment-counter `(∆)` markers → drop (clean current state carries no edit tally).
-- dated-retirement `retired YYYY-MM-DD` clause in live row → drop (wholesale-retired row is reorganize archival job, not amend residue).
-- supersession-narration (`pre-amend …`, `prior … retired/dropped/superseded`) → drop.
-- `Closes §B.<x>` standalone narration → fold to `(closes §B.<x>)` suffix.
-
-Pre-filters (exempt, not pruned): backtick-wrapped tokens per verbatim-preservation invariant (code-context pattern-defs + quoted historical refs — §V row whose subject is a retirement rule not self-flag); cite-modifier `§V.<n>(∆)` (∆-on-citation marks amended cross-ref, differs ∆-on-retired-value).
-Stripped content → commit-msg body per APPLY step 4.
-
-**§B cause trim** (delta adds/rewrites §B `cause` cell): auto-trim → one-line bug-class description; multi-line forensics (repro transcript, root-cause walk, sha lineage) → commit-msg body per APPLY step 4.
-Preview shows trimmed form, not raw forensics.
-
-§T body not pruned here — /sdd:build flips status cell only per status-flip invariant so §T rows authored one-line @ creation (NEW + BACKPROP drafts); pre-existing §T residue owned by token-budget condense body-trim prong + /sdd:check oversized-cell advisory backstop.
+- `references/audit-recipes.md` — SWEEP-§T SCOPE (grep-pattern scope rule), PINNED-CITE (grep sub-recipes a/b + `grep -v -E` pre-filter), NEXT-BLOCK-SECTION (frontmatter Grep + heading probe), FOLD-FIRST (AskUserQuestion gate + re-entry) — full bodies + bail strings; Read @ first audit fire per APPLY step 1.
+- `references/write-time-prune.md` — §V-row residue prune pattern set + pre-filters, §B cause trim rule; Read @ APPLY step 0 on match.
 
 ## POST-APPLY
 
