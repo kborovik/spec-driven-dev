@@ -5,7 +5,7 @@ description: |
   Triggers when user invokes `/sdd:condense` or asks to condense spec or /sdd:check
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:condense",
   "condense SPEC.md", "SPEC too big", "shrink the spec", "token budget".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 */check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
 model: sonnet
 ---
 
@@ -39,7 +39,7 @@ Checklist = ephemeral harness UI: never repo state, never substitutes the `## Ne
 Six prongs, execution order 1 → 6.
 Per prong: scan SPEC.md for trigger match; emit firing-set + skip-set w/ 1-line rationale each.
 
-Script modes below run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>`; `${CLAUDE_PLUGIN_ROOT}` no-expand in frontmatter → python3 grant pinned mid-glob `Bash(python3 */check-mechanical.py *)` (script-sole use, leading `*` absorbs the plugin-root prefix) per tooling-preference invariant.
+Script modes below run `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py <mode>`; exact script-path grant pin via `${CLAUDE_SKILL_DIR}` frontmatter substitution (script-sole use, same variable in grant + body cmd) per tooling-preference invariant.
 
 ### Prong 1 — §V fold-first sweep
 

@@ -7,7 +7,7 @@ description: |
   spec, or verify invariants. Phrasings: "check drift", "audit the spec",
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
-allowed-tools: Read, Grep, Bash(python3 */check-mechanical.py *), Agent, TaskCreate, TaskUpdate
+allowed-tools: Read, Grep, Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, TaskCreate, TaskUpdate
 disallowed-tools: Edit, Write
 argument-hint: "[--full]"
 model: sonnet
@@ -42,7 +42,7 @@ Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disabl
 
 !`python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-overview`
 
-   Fallback: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-overview`.
+   Fallback: run the same cmd manually.
    Prints §G/§C/§I/§T/§B bodies + §V id list; §V bodies arrive via `emit-v-slices` only (step 4).
    Script error "no SPEC.md" → "no spec, nothing to check."
    Stop.
@@ -63,13 +63,13 @@ Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disabl
 
 ## MECHANICAL CORE — audit script
 
-Deterministic audit set — SPEC-FORMAT structural rules, cite + fix grammar, monotonic-ID, cite-DAG, history-residue + oversized-cell advisory, pinned-invariant-header, MECHANIZE-block byte-identity, auto-fire slash-dispatch ban, grant-use, CLAUDE.md marker block, human-facing symbol + idiom scan, sembr scan, memo bookkeeping, token estimate — owned by `${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py`.
+Deterministic audit set — SPEC-FORMAT structural rules, cite + fix grammar, monotonic-ID, cite-DAG, history-residue + oversized-cell advisory, pinned-invariant-header, MECHANIZE-block byte-identity, auto-fire slash-dispatch ban, grant-use, CLAUDE.md marker block, human-facing symbol + idiom scan, sembr scan, memo bookkeeping, token estimate — owned by `${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py`.
 Script regex is single source of truth; per-run paraphrase not permitted (mirrors canonical-agent-block verbatim contract) — each script row supersedes any hand-run sweep of the same rule (MECHANIZE `awk|md5|uniq` check, dispatch grep, grant sweep, symbol grep, idiom grep).
 
-Output injected @ LOAD step 3; fallback cmd (mid-glob grant pin per tooling-preference invariant; git ops all run inside the script):
+Output injected @ LOAD step 3; fallback cmd (exact script-path grant pin via `${CLAUDE_SKILL_DIR}` frontmatter substitution per tooling-preference invariant; git ops all run inside the script):
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py audit [--full]
+python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py audit [--full]
 ```
 
 Reads `SPEC.md` (+ `SPEC.archive.md` sibling if exists) from cwd; discovers PUBLISHED scope from `.claude-plugin/marketplace.json`; probes `.spec/scripts/check-extras.sh` (exists + executable → run, append its `id|verdict|evidence` rows — language-agnostic contract).
@@ -105,7 +105,7 @@ First-run, invalidated memo, or `--full` → classify all §V rows.
 §V bodies for the classified set:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-v-slices [--dirty V<n>,...]
+python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-v-slices [--dirty V<n>,...]
 ```
 
 Prints each §V row body w/ source range — header `## V<n> SPEC.md:<start>-<end>` + verbatim row text. `--dirty` = comma-list from step 1; omit on first-run / `--full` (all rows).
@@ -194,7 +194,7 @@ No line → omit heading.
 Source the live id-set skeleton from the script — never hand-enumerate (closes omitted-row silent-undercoverage class):
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-row-ids
+python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-row-ids
 ```
 
 Emits one blank-verdict row per live §V/§I/§T id (`id||`, header `id|verdict|evidence`).
@@ -202,7 +202,7 @@ Fill verdicts + evidence from REPORT classification — behavioral rows only (§
 Feed the filled skeleton to stdin; `--from-audit` re-runs the mechanical audit internally + merges it:
 
 ```
-python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py write-memo --from-audit < <filled-skeleton>
+python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py write-memo --from-audit < <filled-skeleton>
 ```
 
 Script merges its internal mechanical audit w/ the behavioral rows, validates vocab per row type, computes clean-set membership (clean iff no VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA), writes memo only when clean (schema v3, per-row hashes, `last_clean_sha` = HEAD, oversized-cell ack, `.gitignore` guard).

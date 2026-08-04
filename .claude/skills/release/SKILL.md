@@ -5,7 +5,7 @@ description: |
   version, commit, tag `v<version>`, publish GitHub release w/ generated notes.
   Triggers: "/release", "cut a release", "publish a release", "bump version and tag",
   "ship a new sdd version", "gh release".
-allowed-tools: Read, Edit, Bash(git *), Bash(gh *), Bash(python3 */check-mechanical.py *), AskUserQuestion
+allowed-tools: Read, Edit, Bash(git *), Bash(gh *), Bash(python3 ${CLAUDE_PROJECT_DIR}/scripts/check-mechanical.py *), AskUserQuestion
 argument-hint: "[<version> | major | minor | patch]"
 ---
 
@@ -34,11 +34,11 @@ Guard chain — outputs injected below (`!` preprocessing, pre-model; `disableSk
 
 3. self-test green — output ends `self-test OK (…)` → else bail:
 
-!`python3 scripts/check-mechanical.py --self-test`
+!`python3 ${CLAUDE_PROJECT_DIR}/scripts/check-mechanical.py --self-test`
 
 4. audit clean — no dirty verdict row (VIOLATE / UNVERIFIABLE / UNRESOLVED / TYPE-MISMATCH / DRIFT / MISSING / STALE / EXTRA) → else bail "resolve drift via /sdd:check first":
 
-!`python3 scripts/check-mechanical.py audit`
+!`python3 ${CLAUDE_PROJECT_DIR}/scripts/check-mechanical.py audit`
 
 5. read current version from `.claude-plugin/plugin.json`.
 
