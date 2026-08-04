@@ -10,6 +10,8 @@ description: |
 allowed-tools: Read, Grep, Bash(python3 */check-mechanical.py *), Agent, TaskCreate, TaskUpdate
 disallowed-tools: Edit, Write
 model: sonnet
+context: fork
+background: false
 ---
 
 # check — drift report
@@ -21,6 +23,7 @@ Mechanical audits owned by published script per mechanical-realization invariant
 Behavioral judgment stays LLM.
 Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.spec/scripts/check-extras.sh` hook (mechanical, run by script) + `.spec/check-extras.md` (judgment-class, consulted by LLM).
 Read-only → sub-agent delegation safe throughout.
+Runs `context: fork` + `background: false` — run isolates to the fork, REPORT returns as the result; no conversation history in fork (recipe self-contained). Agent tool absent → Batch single-agent path.
 Conditional detail lives in `references/` one level deep per token-budget invariant (skill-body budget) — each pointer names its load moment; Read on that moment only.
 
 ## PROGRESS
@@ -49,7 +52,6 @@ Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disabl
    - `--full` → delete `.spec/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation).
      Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
    - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full`.
-     Legacy section-name args and multi-flag forms retired.
 3. Audit output (MECHANICAL CORE):
 
 !`python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py audit $ARGUMENTS`
@@ -57,7 +59,6 @@ Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disabl
    Fallback: the MECHANICAL CORE fenced cmd.
    Its `memo|ADVISORY|…` rows report fired invalidation triggers + the `v_row_shas` dirty set that scopes §V re-classification.
 4. §V row bodies come from the script's `emit-v-slices` mode (SCOPE), never whole-file Read — large SPEC paginates past the Read token cap.
-   Script slice is canonical §V-body source for single-agent and sub-agent paths.
 
 ## MECHANICAL CORE — audit script
 
@@ -173,8 +174,7 @@ For each T<n>:
 Telegraph register, grouped by severity — block templates + example rows: Read `references/report-template.md` @ REPORT assembly.
 Mechanical rows from script merge into their blocks; behavioral `V<n>` from §V batches; `I.<key>` / `T<n>` from interface + task audits.
 Block order: `## invariant drift`, `## cite drift`, `## interface drift`, `## task drift`, then checkpoint / advisory / summary per below.
-Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown.
-Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
+Silence-class verdicts excluded from body — collapsed in summary `suppressed` count w/ per-reason breakdown; roll-forward semantics per `references/report-template.md`.
 
 **Body-row aggregation** (mechanical core): `history`-class VIOLATE rows collapse per section (§V/§T/§B) when section count > threshold (script-owned) → single summary row `§<S>: <n> rows (<count> <pattern>, ...) → /sdd:condense body-trim` w/ breakdown across {amendment-counter, dated-retirement, supersession-narration}; below-threshold sections keep per-row form. `--full` restores per-row listing.
 

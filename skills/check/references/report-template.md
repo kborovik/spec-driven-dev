@@ -43,6 +43,10 @@ Aggregated `history`-class form (section count > script-owned threshold):
 §B.<n> VIOLATE: history: amendment-counter @ SPEC.md:<line>
 ```
 
+## Roll-forward semantics
+
+Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT re-classifies when trigger fires; HOLD-SINCE-CLEAN re-verifies on touch-set intersect; SCOPE-EMPTY re-verifies on scope expansion.
+
 ## Remedy map — drift class → Next-block item
 
 - VIOLATE / DRIFT → `/sdd:spec <description citing §V.<n>>` (gate routes to BACKPROP).
