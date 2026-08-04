@@ -5,7 +5,7 @@ description: |
   Triggers when user invokes `/sdd:condense` or asks to condense spec or /sdd:check
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:condense",
   "condense SPEC.md", "SPEC too big", "shrink the spec", "token budget".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, Skill(sdd:*), TaskCreate, TaskUpdate
 model: sonnet
 ---
 

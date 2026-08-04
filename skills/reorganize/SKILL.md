@@ -5,7 +5,7 @@ description: |
   clarity-shape pass — distinct from /sdd:condense (token reduction).
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill(sdd:*), TaskCreate, TaskUpdate
 argument-hint: "[--taxonomy-only]"
 model: inherit
 ---

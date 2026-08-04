@@ -134,7 +134,7 @@ T53|x|dynamic-context injection for deterministic recipe steps — check LOAD `e
 T54|x|`context: fork` + `background: false` for /sdd:check — body + §V slices + batch outputs isolate to fork, REPORT returns as result; probe TaskCreate checklist + write-memo behavior in fork pre-adopt|V21,V64
 T55|x|frontmatter + description hygiene sweep over user-invocable skills — scope `grep -nE '^(model|description|argument-hint)' skills/*/SKILL.md .claude/skills/release/SKILL.md`: routing internals out of spec description → body; `argument-hint` added where body parses `$ARGUMENTS`; fable/opus model pins → `inherit` unless cost-downgrade justified|V62
 T56|x|probe `${CLAUDE_SKILL_DIR}` substitution in frontmatter Bash rules (supported v2.1.129+) — exact script-path pin expressible → sweep mid-glob `Bash(python3 */check-mechanical.py *)` grants to pinned form, amend V62 pin-inexpressible note same commit; not expressible → record result, keep mid-glob|V62
-T57|.|sweep bare `Skill` grants → `Skill(sdd:*)` prefix form per V62 narrowest-grant — scope `grep -nE '^allowed-tools:.*Skill' skills/*/SKILL.md`|V62
+T57|x|sweep bare `Skill` grants → `Skill(sdd:*)` prefix form per V62 narrowest-grant — scope `grep -nE '^allowed-tools:.*Skill' skills/*/SKILL.md`|V62
 
 ## §B BUGS
 

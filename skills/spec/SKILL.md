@@ -8,7 +8,7 @@ description: |
   "write the spec for...", "new spec", "distill spec from code",
   "spec this idea", "import existing repo", "pull invariants out of code",
   "this bug keeps biting", "post-mortem on Y".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill(sdd:*)
 argument-hint: "<intent | designs/slug.md>"
 model: inherit
 ---

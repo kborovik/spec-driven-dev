@@ -5,7 +5,7 @@ description: |
   implement, or execute spec or specific §T task. Phrasings: "build §T.<n>",
   "build --next", "implement next task", "run the build", "does the
   implementation run?", "is §T.<n> done?".
-allowed-tools: Read, Edit, Write, Bash, Skill, TaskCreate, TaskUpdate
+allowed-tools: Read, Edit, Write, Bash, Skill(sdd:*), TaskCreate, TaskUpdate
 argument-hint: "[§T.n | --next | --all]"
 model: inherit
 ---

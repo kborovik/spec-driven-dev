@@ -7,7 +7,7 @@ description: |
   skill's behavior. Redacts, dedups, then operator-gates a GitHub issue on the
   plugin repo; a dev-repo deviation routes to backprop instead. Not for consumer
   code bugs or env breakage unrelated to an sdd skill.
-allowed-tools: Bash(gh *), Bash(git *), Bash(jq *), Bash(python3 *), AskUserQuestion, Skill
+allowed-tools: Bash(gh *), Bash(git *), Bash(jq *), Bash(python3 *), AskUserQuestion, Skill(sdd:*)
 user-invocable: false
 ---
 
