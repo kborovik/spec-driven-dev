@@ -6,7 +6,8 @@ description: |
   Phrasings: "/sdd:reorganize", "reorganize the spec", "regroup §V by topic",
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill, TaskCreate, TaskUpdate
-model: fable
+argument-hint: "[--taxonomy-only]"
+model: inherit
 ---
 
 # reorganize — §V cluster + renumber + cite-DAG sweep

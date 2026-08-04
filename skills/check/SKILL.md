@@ -9,6 +9,7 @@ description: |
   "did the code drift?".
 allowed-tools: Read, Grep, Bash(python3 */check-mechanical.py *), Agent, TaskCreate, TaskUpdate
 disallowed-tools: Edit, Write
+argument-hint: "[--full]"
 model: sonnet
 context: fork
 background: false

@@ -6,7 +6,8 @@ description: |
   "build --next", "implement next task", "run the build", "does the
   implementation run?", "is §T.<n> done?".
 allowed-tools: Read, Edit, Write, Bash, Skill, TaskCreate, TaskUpdate
-model: opus
+argument-hint: "[§T.n | --next | --all]"
+model: inherit
 ---
 
 # build — implement spec

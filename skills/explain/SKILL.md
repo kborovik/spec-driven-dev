@@ -7,6 +7,7 @@ description: |
   read telegraph". Writes → /sdd:spec.
 allowed-tools: Read
 disallowed-tools: Edit, Write
+argument-hint: "[§-cite | --next]"
 model: sonnet
 ---
 

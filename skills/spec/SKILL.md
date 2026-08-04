@@ -2,20 +2,21 @@
 name: spec
 description: |
   Sole semantic author of SPEC.md @ repo root — create, amend, fold designs,
-  or backprop bugs (§T status-flip → build, archive → condense, §V renumber →
-  reorganize; those carve-outs not authoring paths).
+  or backprop bugs.
   Triggers when user asks to write spec, start new spec, distill spec from
   code, add invariants, amend a section, or record a bug. Common phrasings:
   "write the spec for...", "new spec", "distill spec from code",
   "spec this idea", "import existing repo", "pull invariants out of code",
   "this bug keeps biting", "post-mortem on Y".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill
-model: fable
+argument-hint: "<intent | designs/slug.md>"
+model: inherit
 ---
 
 # spec — spec mutator
 
 `telegraph` skill applies to all writes here.
+Carve-outs, not authoring paths: §T status-flip → /sdd:build; archive → /sdd:condense; §V renumber → /sdd:reorganize.
 
 ## DISPATCH
 

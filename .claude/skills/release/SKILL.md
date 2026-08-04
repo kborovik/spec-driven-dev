@@ -6,6 +6,7 @@ description: |
   Triggers: "/release", "cut a release", "publish a release", "bump version and tag",
   "ship a new sdd version", "gh release".
 allowed-tools: Read, Edit, Bash(git *), Bash(gh *), Bash(python3 */check-mechanical.py *), AskUserQuestion
+argument-hint: "[<version> | major | minor | patch]"
 ---
 
 # release — gh release flow (REPO-LOCAL)
