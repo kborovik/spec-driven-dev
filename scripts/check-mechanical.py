@@ -208,14 +208,49 @@ ARCHIVE_V_BLOCK = re.compile(r'^## §V\.retired\b')
 # §B date cell shape (ISO-8601)
 B_DATE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
 
-# history-residue (freshness-contract invariant)
-HR_AMEND = re.compile(r'\(∆+\)')
-HR_DATED = re.compile(r'\bretired \d{4}-\d{2}-\d{2}\b')
-HR_SUPERSEDE = re.compile(r'\bpre-amend\b|prior .{0,40}\b(?:retired|dropped|superseded)\b')
-# pre-filters
-PF_BACKTICK = re.compile(r'`[^`]*`')
-PF_CITE_MOD = re.compile(r'§V\.\d+\(∆+\)')
-PF_RETIRED_INPLACE = re.compile(r'^V\d+: retired \d{4}-\d{2}-\d{2}')
+# history-residue / write-time-prune pattern set (freshness-contract +
+# mechanical-realization invariants) — sole member source. Prose consumers
+# (spec write-time prune, condense prong 4, reorganize ARCHIVE-RETIRED) cite
+# the set name + `emit-prune-patterns`, never restate members. Roles:
+#   residue    — audit-detect here; drop @ spec write / condense trim
+#   fold       — write-time rewrite rule; folded form is the clean state,
+#                so never audit-flagged
+#   pre-filter — match exempts a row/span before the residue scan
+PRUNE_PATTERNS = [
+    {"id": "amendment-counter", "role": "residue",
+     "pattern": r'\(∆+\)',
+     "action": "drop — clean current state carries no edit tally"},
+    {"id": "dated-retirement", "role": "residue",
+     "pattern": r'\bretired \d{4}-\d{2}-\d{2}\b',
+     "action": "drop — wholesale-retired row is reorganize archival job"},
+    {"id": "supersession-narration", "role": "residue",
+     "pattern": r'\bpre-amend\b|prior .{0,40}\b(?:retired|dropped|superseded)\b',
+     "action": "drop — incl. recurrence-class lineage + surfaced-by prose "
+               "past regex reach"},
+    {"id": "closes-fold", "role": "fold",
+     "pattern": r'\bCloses §B\.\d+\b',
+     "action": "standalone sentence → `(closes §B.<n>)` suffix on prior clause"},
+    {"id": "backtick-span", "role": "pre-filter",
+     "pattern": r'`[^`]*`',
+     "action": "exempt — verbatim-preservation; pattern-def rows never "
+               "self-flag"},
+    {"id": "cite-modifier", "role": "pre-filter",
+     "pattern": r'§V\.\d+\(∆+\)',
+     "action": "exempt — ∆-on-citation marks amended cross-ref, not retired "
+               "value"},
+    {"id": "retired-in-place", "role": "pre-filter",
+     "pattern": r'^V\d+:\s+retired\s+\d{4}-\d{2}-\d{2}\b',
+     "action": "exempt — §V row pending reorganize ARCHIVE-RETIRED migration"},
+]
+_PRUNE_RE = {p["id"]: re.compile(p["pattern"]) for p in PRUNE_PATTERNS}
+# compiled aliases consumed by the audits — same objects as the emitted set
+# (single source; HR_ = residue detectors, PF_ = pre-filters)
+HR_AMEND = _PRUNE_RE["amendment-counter"]
+HR_DATED = _PRUNE_RE["dated-retirement"]
+HR_SUPERSEDE = _PRUNE_RE["supersession-narration"]
+PF_BACKTICK = _PRUNE_RE["backtick-span"]
+PF_CITE_MOD = _PRUNE_RE["cite-modifier"]
+PF_RETIRED_INPLACE = _PRUNE_RE["retired-in-place"]
 
 CANONICAL_ORDER = ["G", "C", "I", "V", "T", "B"]
 SECTION_NAME = {"G": "GOAL", "C": "CONSTRAINTS", "I": "INTERFACES",
@@ -2035,6 +2070,18 @@ def cmd_emit_token_estimate(args):
     return 0
 
 
+def cmd_emit_prune_patterns(args):
+    """History-residue / write-time-prune member set (freshness-contract +
+    mechanical-realization invariants). Consumers: spec write-time prune,
+    condense prong 4, reorganize ARCHIVE-RETIRED flagged-set grep — prose
+    surfaces cite this mode instead of restating members. Spec-independent:
+    emits the set without loading SPEC.md."""
+    print("id|role|pattern|action")
+    for p in PRUNE_PATTERNS:
+        print(f"{p['id']}|{p['role']}|{p['pattern']}|{p['action']}")
+    return 0
+
+
 def cmd_fix_sembr(args):
     """fix-sembr mode (sembr + mechanical-realization invariants): rewrite
     flagged multi-sentence prose lines one sentence per line, in place, over
@@ -2965,6 +3012,30 @@ def selftest():
         check(os.path.join(".spec", "check-state.json") not in rels,
               "discover_repo_local: md-only filter excludes memo json")
 
+    # prune-pattern set: sole member source (freshness-contract +
+    # mechanical-realization invariants) — emitted set == compiled detectors
+    check([p["id"] for p in PRUNE_PATTERNS] ==
+          ["amendment-counter", "dated-retirement", "supersession-narration",
+           "closes-fold", "backtick-span", "cite-modifier",
+           "retired-in-place"],
+          "prune-patterns: member ids + order stable")
+    roles = [p["role"] for p in PRUNE_PATTERNS]
+    check(roles.count("residue") == 3 and roles.count("fold") == 1
+          and roles.count("pre-filter") == 3,
+          "prune-patterns: role tags residue/fold/pre-filter")
+    check(HR_DATED.pattern == next(p["pattern"] for p in PRUNE_PATTERNS
+                                   if p["id"] == "dated-retirement")
+          and PF_RETIRED_INPLACE is _PRUNE_RE["retired-in-place"],
+          "prune-patterns: audit detectors compiled from the set")
+    fold_pat = next(p["pattern"] for p in PRUNE_PATTERNS
+                    if p["id"] == "closes-fold")
+    check(bool(re.search(fold_pat, f"row body. Closes §B.{7}.")),
+          "prune-patterns: closes-fold matches standalone sentence")
+    check(bool(PF_RETIRED_INPLACE.match(f"V{9}:  retired  2026-01-01 — x"))
+          and bool(PF_RETIRED_INPLACE.match(f"V{9}: retired 2026-01-01 — x")),
+          "prune-patterns: retired-in-place whitespace-tolerant "
+          "(reorganize grep parity)")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2974,7 +3045,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 211
+    return 216
 
 
 # --- entry -------------------------------------------------------------------
@@ -2989,7 +3060,8 @@ def main(argv=None):
                                          "emit-v-slices", "emit-superseded",
                                          "emit-fold-seeds", "emit-v-weights",
                                          "emit-row-ids", "emit-overview",
-                                         "emit-token-estimate"])
+                                         "emit-token-estimate",
+                                         "emit-prune-patterns"])
     parser.add_argument("--repo-root", default=os.environ.get("CHECK_REPO_ROOT", "."))
     parser.add_argument("--spec", default="SPEC.md")
     parser.add_argument("--no-hook", action="store_true",
@@ -3030,6 +3102,8 @@ def main(argv=None):
         return cmd_emit_overview(args)
     if args.mode == "emit-token-estimate":
         return cmd_emit_token_estimate(args)
+    if args.mode == "emit-prune-patterns":
+        return cmd_emit_prune_patterns(args)
     return cmd_write_memo(args)
 
 
