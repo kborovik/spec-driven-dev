@@ -9,14 +9,8 @@ Auto-rewrites delta → clean current state; pruned history → auto-commit msg 
 Show-user diff displays post-prune row — prune reviewed, not blind.
 
 **§V-row delta prune** (delta patches pre-existing §V row): strip inlined-history residue.
-Pattern set (single source per freshness-contract invariant — shared w/ /sdd:check history-residue audit + token-budget condense body-trim prong):
-
-- amendment-counter `(∆)` markers → drop (clean current state carries no edit tally).
-- dated-retirement `retired YYYY-MM-DD` clause in live row → drop (wholesale-retired row is reorganize archival job, not amend residue).
-- supersession-narration (`pre-amend …`, `prior … retired/dropped/superseded`) → drop.
-- `Closes §B.<x>` standalone narration → fold to `(closes §B.<x>)` suffix.
-
-Pre-filters (exempt, not pruned): backtick-wrapped tokens per verbatim-preservation invariant (code-context pattern-defs + quoted historical refs — §V row whose subject is a retirement rule not self-flag); cite-modifier `§V.<n>(∆)` (∆-on-citation marks amended cross-ref, differs ∆-on-retired-value).
+Member set = script-owned `PRUNE_PATTERNS` (sole source per freshness-contract + mechanical-realization invariants — shared w/ /sdd:check history-residue audit + token-budget condense body-trim prong); consume `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py emit-prune-patterns` → `id|role|pattern|action` table, never a restated member list.
+Role application @ write: `residue` rows → apply `action` (drop); `fold` rows → apply fold action; `pre-filter` rows → exempt match before the residue scan.
 Stripped content → commit-msg body per APPLY step 4.
 
 **§B cause trim** (delta adds/rewrites §B `cause` cell): auto-trim → one-line bug-class description; multi-line forensics (repro transcript, root-cause walk, sha lineage) → commit-msg body per APPLY step 4.

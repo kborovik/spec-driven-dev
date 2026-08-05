@@ -67,18 +67,12 @@ Archive carries verbatim row text. /sdd:check cite-DAG sweep eager-probes archiv
 ### Prong 4 — history-residue prune
 
 Prune history residue across live §V/§T/§B row bodies — SPEC.md is clean current design; history lives in commit log + archive.
-Pattern set single-sourced by freshness-contract invariant (shared w/ /sdd:check audit + /sdd:spec write-time prune):
-
-- amendment-counter `(∆)` markers → drop.
-- `retired YYYY-MM-DD` clause inlined in live row → drop (wholesale-retired row is reorganize archival job).
-- supersession-narration → drop: `pre-amend …`, `prior … retired/dropped/superseded`, recurrence-class lineage, surfaced-by prose.
-  Commit msg + `§B.cause`/`§T.cites` cite-DAG preserve narrative.
-- standalone `Closes §B.<x>` sentence → `(closes §B.<x>)` suffix on prior clause.
+Member set = script-owned `PRUNE_PATTERNS` (sole source per freshness-contract + mechanical-realization invariants — shared w/ /sdd:check audit + /sdd:spec write-time prune); consume `check-mechanical.py emit-prune-patterns` → `id|role|pattern|action` table, never a restated member list.
+Role application @ trim: `residue` rows → apply `action` (drop; commit msg + `§B.cause`/`§T.cites` cite-DAG preserve narrative); `fold` rows → apply fold action; `pre-filter` rows → exempt match.
 
 **§T body-trim** — owned here because /sdd:build flips status cell only, so §T body not reachable by /sdd:spec write-time prune: oversized `task` cell carrying step-by-step transcript → one-line goal; surplus → commit-msg body.
 Mirrors §B `cause` one-line trim.
 
-Pre-filters (match exempt): backtick-wrapped tokens (pattern-definition rows not self-flag); cite-modifier `§V.<n>(∆)`; wholesale-retired `V<n>: retired YYYY-MM-DD` rows pending reorganize.
 Verbatim-preservation holds: code, paths, URLs, identifiers, error strings, regex.
 
 ### Prong 5 — §V prose → telegraph rewrite

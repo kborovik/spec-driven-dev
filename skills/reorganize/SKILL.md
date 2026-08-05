@@ -53,10 +53,10 @@ Checklist = ephemeral harness UI: never repo state, never substitutes the PROPOS
 
 ## ARCHIVE-RETIRED
 
-Pre-CLUSTER. §V rows w/ body opening `retired YYYY-MM-DD` → migrate to `SPEC.archive.md ## §V.retired` block per archive-sibling schema.
+Pre-CLUSTER. §V rows matching the script-owned `retired-in-place` prune pattern → migrate to `SPEC.archive.md ## §V.retired` block per archive-sibling schema.
 Flagged rows skip cluster taxonomy, not consume new ids @ renumber.
 
-1. Grep `^V[0-9]+:\s+retired\s+[0-9]{4}-[0-9]{2}-[0-9]{2}\b` in §V → flagged-set.
+1. Flagged-set = §V rows matching the script-owned `retired-in-place` pattern — `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-prune-patterns` row (`PRUNE_PATTERNS` sole source per mechanical-realization invariant), never a hand-coded regex paraphrase.
 2. Citer-protection probe per flagged `V<n>` via cite-resolution cite-DAG: typed columns (§T.cites, §B.fix bare `V<n>`, incl. closed `x` rows) + free-text `§V.<n>` in §V/§C/§I bodies of active SPEC.md.
    Backtick pre-filter `` `[^`]*(§[VTB]\.[0-9]+|\b[VTB][0-9]+\b)[^`]*` `` (builtin Grep per tooling-preference invariant) excludes §B/§T narrative historical refs per verbatim-preservation invariant.
 3. Live citer on any flagged row → bail `cannot archive §V.<n> — live citers: <list>`.

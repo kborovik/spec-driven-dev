@@ -138,7 +138,7 @@ T57|x|sweep bare `Skill` grants → `Skill(sdd:*)` prefix form per V62 narrowest
 T58|x|extend `discover_repo_local` walk to `.spec/**` per scope-set invariant + self-test asserting `.spec/check-extras.md` in cite-DAG file set — scope `grep -n 'def discover_repo_local' scripts/check-mechanical.py`|V42,B24
 T59|x|sweep whole-file `Read SPEC.md` LOAD steps out of build + explain bodies → script `emit-overview` + `emit-v-slices` reads per single-load invariant — scope `grep -n 'Read .SPEC.md.' skills/build/SKILL.md skills/explain/SKILL.md`|V64,B25
 T60|x|script: reconcile history-residue pattern set as sole member source (role-tag write-time fold rules vs audit-detect) + `emit-prune-patterns` mode + self-test — scope `grep -n 'HR_' scripts/check-mechanical.py`|V40,V28,B26
-T61|.|sweep restated residue members + hand-coded retired-row regex → set name + script emit pointer per mechanical-realization invariant — scope vocab {skills/spec/references/write-time-prune.md, skills/condense/SKILL.md, skills/reorganize/SKILL.md}|V40,V28,B26
+T61|x|sweep restated residue members + hand-coded retired-row regex → set name + script emit pointer per mechanical-realization invariant — scope vocab {skills/spec/references/write-time-prune.md, skills/condense/SKILL.md, skills/reorganize/SKILL.md}|V40,V28,B26
 
 ## §B BUGS
 
