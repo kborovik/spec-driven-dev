@@ -137,6 +137,8 @@ T56|x|probe `${CLAUDE_SKILL_DIR}` substitution in frontmatter Bash rules (suppor
 T57|x|sweep bare `Skill` grants → `Skill(sdd:*)` prefix form per V62 narrowest-grant — scope `grep -nE '^allowed-tools:.*Skill' skills/*/SKILL.md`|V62
 T58|.|extend `discover_repo_local` walk to `.spec/**` per scope-set invariant + self-test asserting `.spec/check-extras.md` in cite-DAG file set — scope `grep -n 'def discover_repo_local' scripts/check-mechanical.py`|V42,B24
 T59|.|sweep whole-file `Read SPEC.md` LOAD steps out of build + explain bodies → script `emit-overview` + `emit-v-slices` reads per single-load invariant — scope `grep -n 'Read .SPEC.md.' skills/build/SKILL.md skills/explain/SKILL.md`|V64,B25
+T60|.|script: reconcile history-residue pattern set as sole member source (role-tag write-time fold rules vs audit-detect) + `emit-prune-patterns` mode + self-test — scope `grep -n 'HR_' scripts/check-mechanical.py`|V40,V28,B26
+T61|.|sweep restated residue members + hand-coded retired-row regex → set name + script emit pointer per mechanical-realization invariant — scope vocab {skills/spec/references/write-time-prune.md, skills/condense/SKILL.md, skills/reorganize/SKILL.md}|V40,V28,B26
 
 ## §B BUGS
 
@@ -166,3 +168,4 @@ B22|2026-06-19|README.md prose carries banned idiom/metaphor (`load-bearing`, `s
 B23|2026-06-22|spec AMEND + APPLY assume §V body in SPEC.md (write + `git commit -- SPEC.md`); /sdd:condense relocates §V bodies to `.claude/check-extras.md` + leaves stub row → amending condensed body (github enum add §V.61+§V.24) fell outside recipe write-scope, write + commit redirected to check-extras.md by hand|V49
 B24|2026-08-04|script REPO-LOCAL discovery hand-mirrored scope-set row w/o sync tie; T44 `.claude/`→`.spec/` move updated path strings, not the `discover_repo_local` walk → `.spec/check-extras.md` cites escaped cite-DAG sweep|V42
 B25|2026-08-04|single-load authoring sweep scoped to check LOAD only — build + explain LOAD step 1 kept whole-file `Read SPEC.md`; sibling recipes unswept @ amend, B19/B21 under-scope class|V64
+B26|2026-08-04|declared single-source residue set had no consumable script emission — three prose surfaces restated members + reorganize hand-coded retired-row regex; copies diverged (fold rule prose-only, lineage condense-only, `PF_RETIRED_INPLACE` script-only)|V40

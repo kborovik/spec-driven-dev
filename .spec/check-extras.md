@@ -32,7 +32,7 @@ V28: freshness-contract — live rows = clean current design; history → commit
 
 ## §V40 mechanical-realization
 
-V40: mechanical-realization — deterministic audit rules realized once in `scripts/check-mechanical.py`; skill bodies + SPEC-FORMAT state contracts, never duplicate parser pseudo-code; per-run regex paraphrase banned.
+V40: mechanical-realization — deterministic audit rules realized once in `scripts/check-mechanical.py`; skill bodies + SPEC-FORMAT state contracts, never duplicate parser pseudo-code; per-run regex paraphrase banned; script-owned pattern/member sets enter prose by set name + emit-mode pointer only, member enumeration never restated (closes §B.26).
 
 ## §V41 parametric-recipe
 
