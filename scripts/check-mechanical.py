@@ -153,6 +153,7 @@ import hashlib
 import subprocess
 import argparse
 import datetime
+import tempfile
 
 # --- verdict vocab (drift-verdict-vocab invariant) ---------------------------
 # Per-row-type admissibility: §V (invariant), §I (interface), §T (task) rows each
@@ -1803,11 +1804,15 @@ def discover_grant_skills(repo_root):
 
 
 def discover_repo_local(repo_root):
-    """REPO-LOCAL files holding pinned cites — conventional default set."""
+    """REPO-LOCAL files holding pinned cites — the cite-DAG repo-local file
+    set (scope-set invariant: `.spec/**` + `.claude/**` + README.md +
+    CLAUDE.md; membership synced with the invariant row same commit)."""
     files = []
-    cl = os.path.join(repo_root, ".claude")
-    if os.path.isdir(cl):
-        for root, _, fns in os.walk(cl):
+    for dirname in (".spec", ".claude"):
+        d = os.path.join(repo_root, dirname)
+        if not os.path.isdir(d):
+            continue
+        for root, _, fns in os.walk(d):
             for fn in fns:
                 if fn.endswith(".md"):
                     files.append(os.path.join(root, fn))
@@ -2938,6 +2943,28 @@ def selftest():
     check(refixed == fixed and rerewrites == {},
           "fix-sembr: rewrite is idempotent")
 
+    # discover_repo_local: cite-DAG repo-local file set walks `.spec/**` +
+    # `.claude/**` + repo-root README/CLAUDE (scope-set invariant)
+    with tempfile.TemporaryDirectory() as td:
+        os.makedirs(os.path.join(td, ".spec"))
+        os.makedirs(os.path.join(td, ".claude", "skills"))
+        for rel in (os.path.join(".spec", "check-extras.md"),
+                    os.path.join(".claude", "skills", "note.md"),
+                    "README.md"):
+            with open(os.path.join(td, rel), "w", encoding="utf-8") as f:
+                f.write("§V.1\n")
+        with open(os.path.join(td, ".spec", "check-state.json"),
+                  "w", encoding="utf-8") as f:
+            f.write("{}\n")
+        rels = {os.path.relpath(p, td) for p in discover_repo_local(td)}
+        check(os.path.join(".spec", "check-extras.md") in rels,
+              "discover_repo_local: .spec/check-extras.md in cite-DAG file set")
+        check(os.path.join(".claude", "skills", "note.md") in rels
+              and "README.md" in rels,
+              "discover_repo_local: .claude/** walk + repo-root set intact")
+        check(os.path.join(".spec", "check-state.json") not in rels,
+              "discover_repo_local: md-only filter excludes memo json")
+
     if fails:
         sys.stderr.write("SELF-TEST FAIL:\n  " + "\n  ".join(fails) + "\n")
         return 1
@@ -2947,7 +2974,7 @@ def selftest():
 
 def _selftest_count():
     # informational; kept in sync loosely with the check() calls above
-    return 208
+    return 211
 
 
 # --- entry -------------------------------------------------------------------
