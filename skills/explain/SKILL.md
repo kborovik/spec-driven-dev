@@ -5,7 +5,7 @@ description: |
   inverse of telegraph skill (telegraph encoder). Triggers: "/sdd:explain",
   "what does §V.<n> mean", "decompress this", "explain in prose", "I don't
   read telegraph". Writes → /sdd:spec.
-allowed-tools: Read
+allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *)
 disallowed-tools: Edit, Write
 argument-hint: "[§-cite | --next]"
 model: sonnet
@@ -20,8 +20,8 @@ Zero writes.
 
 ## LOAD
 
-1. Read `SPEC.md`.
-   Missing → "no spec, nothing to explain."
+1. Spec overview via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-overview` — §G/§C/§I/§T/§B bodies + §V id list; not whole-file Read per single-load invariant (exact script-path grant pin via `${CLAUDE_SKILL_DIR}` frontmatter substitution per tooling-preference invariant).
+   Script error "SPEC.md not found" → "no spec, nothing to explain."
    Bail.
 2. Parse `$ARGUMENTS`:
    - `§T.n` / `§V.n` / `§B.n` / `§I.<key>` → that row
@@ -32,6 +32,7 @@ Zero writes.
    Absent → arg resolves directly.
 4. Citation absent → list valid ids in target section.
    Bail.
+5. §V bodies (target row + cited siblings) via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-v-slices --dirty V<n>,...`; stub row `→ .spec/check-extras.md §V<n>` → Read that § there.
 
 ## EXPAND
 

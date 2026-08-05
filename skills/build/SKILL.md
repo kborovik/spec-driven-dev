@@ -18,9 +18,10 @@ No swarm.
 
 ## LOAD
 
-1. Read `SPEC.md`.
-   Missing → tell user run spec skill first; bail.
+1. Spec overview via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-overview` — §G/§C/§I/§T/§B bodies + §V id list; not whole-file Read per single-load invariant.
+   Script error "SPEC.md not found" → tell user run spec skill first; bail.
 2. Parse `$ARGUMENTS`: `§T.n` → that task only; `--next` or empty → lowest-numbered `.` row; `--all` → every `.` row in §T order — plan once, then chain {edit → verify → commit} per row autonomously.
+3. §V bodies for the chosen rows' cites via `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-v-slices --dirty V<a>,V<b>` (comma-list from §T `cites`); stub row `→ .spec/check-extras.md §V<n>` → Read that § there.
 
 ## PLAN
 
