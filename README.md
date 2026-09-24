@@ -2,12 +2,13 @@
   Spec-Driven Development (SDD)
 </h1>
 
-## What this is
+## Introduction
 
-SDD is a Claude Code plugin that stores a project's rules in one file, `SPEC.md`.
+**SDD** is a **Claude Code plugin** that stores a project's rules in one file, `SPEC.md`.
 Use it so each later task follows the same rules as the first, including after you clear the chat or hand the repo to someone else.
 An LLM can write code faster than it can stay consistent with its own earlier decisions.
-`SPEC.md` is the text the agent re-reads on every command, so those rules stay in context.
+
+**`SPEC.md` always stays in context.**
 
 What that gives you:
 
