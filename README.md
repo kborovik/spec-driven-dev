@@ -5,27 +5,17 @@
 ## Introduction
 
 **SDD** is a **Claude Code plugin** that stores a project's rules in one file, `SPEC.md`.
-Use it so each later task follows the same rules as the first, including after you clear the chat or hand the repo to someone else.
-An LLM can write code faster than it can stay consistent with its own earlier decisions.
+Compression keeps that file small enough to stay in context.
 
-**`SPEC.md` always stays in context.**
-
-What that gives you:
-
-- **A stable address for every row.**
-  Code comments, tests, and commits can point at `§V.<n>`, `§T.<n>`, or `§B.<n>`.
-- **A short spec.**
-  Telegraph, the grammar in `SPEC.md`, uses about 40% fewer tokens than the same content in Claude prose.
+- **Compression.**
+  Telegraph, the grammar in `SPEC.md`, uses about 40% fewer tokens than the same content in prose.
   The measurement is under [Telegraph encoding](#telegraph-encoding).
-- **A stricter spec after a real failure.**
-  A missing rule becomes a `§B` row and usually a new `§V` invariant.
-- **One writer.**
-  The main Claude session edits code, edits `SPEC.md`, flips task status, and commits.
-  Sub-agents may read.
-  They do not edit files.
-  The same spec and the same task produce the same plan.
-- **A drift report after time away.**
-  `/sdd:check` lists broken `§V` invariants and open `§T` tasks.
+- **Always in context.**
+  `SPEC.md` stays in context on every command.
+  A later task follows the same rules as the first.
+- **No extra lookups.**
+  A citation such as `§V.<n>` is an address in `SPEC.md`.
+  The command reads that row from the file already in context.
 
 > The spec is the one file whose token cost is always justified.
 > Any other text must save tokens later, save context, or be removed.
