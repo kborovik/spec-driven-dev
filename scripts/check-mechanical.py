@@ -62,15 +62,15 @@ Modes:
                 requires `chain runs once`. `skills/github/SKILL.md`
                 MERGE requires `--subject` and squash subject
                 `#<issue>` (the linked issue, not merely PR);
-                GitHub default `(#PR)` insufficient (closes §B.36);
+                GitHub default `(#PR)` insufficient (closes §B.39);
                 MERGE probes `gh pr checks` +
-                `reviewDecision,mergeable` (closes §B.69);
-                CLOSE `gh pr close --delete-branch` (closes §B.70);
+                `reviewDecision,mergeable` (closes §B.72);
+                CLOSE `gh pr close --delete-branch` (closes §B.73);
                 PR body `Related: #<issue>` (no Acceptance copy).
                 READY remainder no wait, fold-produced Acceptance
                 notes, re-run task verify, child-fail
-                `gh pr comment` (closes §B.66, §B.67, §B.68,
-                §B.71).
+                `gh pr comment` (closes §B.69, §B.70, §B.71,
+                §B.74).
                 `skills/build/SKILL.md`
                 issue-linked pass
                 requires github PUSH then load-and-run review-apply +
@@ -79,27 +79,27 @@ Modes:
                 `skills/_fragments/CHAIN.md`, `skills/_fragments/NEXT.md`,
                 and `skills/build/SKILL.md` require no check hop,
                 Next item #1 merge phrasing, and `/sdd:check` listed
-                not hopped (closes §B.63). README
+                not hopped (closes §B.66). README
                 Issue-linked PR requires `gh pr create --draft`,
                 `gh pr ready`, Closes only at merge, no-issue
                 converse (`No corresponding GitHub issue`,
                 `no git branch, no GitHub PR`), squash commit
-                message `#<issue>` (closes §B.36),
+                message `#<issue>` (closes §B.39),
                 fold-produced §T ids (not post-spec
-                `/sdd:build --all`; closes §B.64), and the
+                `/sdd:build --all`; closes §B.67), and the
                 doc-or-comment review skip. Acceptance-gate
                 detector = issue linkage not planned close trailer;
                 ALLOW @ build = evidence sufficient; close trailer
-                MERGE-only (closes §B.37). Realized once
+                MERGE-only (closes §B.40). Realized once
                 here so the drift-detector retires a hand-run github-skill
                 grep. Emits `write-serialize|VIOLATE|…` /
                 `write-serialize|MISSING|…` — the write-serialize
                 invariant's post-spec review spawn: `skills/github/SKILL.md`
                 requires `scratch writes` and
-                `uses general-purpose Agent, not read-only Explore` (closes §B.34).
+                `uses general-purpose Agent, not read-only Explore` (closes §B.37).
                 Emits `github-workflow|VIOLATE|…` for missing
                 `POST-SPEC-CHILD=1` in `skills/build/SKILL.md` LOAD or
-                `skills/github/SKILL.md` spawn prompt (closes §B.35).
+                `skills/github/SKILL.md` spawn prompt (closes §B.38).
                 Emits `linear-no-pr|VIOLATE|…` — leftover LINEAR-no-PR
                 wording (`LINEAR|solo linear|no PR required`) on skill
                 bodies, fragments, README, CLAUDE.md (not SPEC.md — the
@@ -137,7 +137,7 @@ Modes:
                 telegraph keeps the set, so it is never scanned. Sound (fenced
                 prose treated exempt too) — realized once here so the
                 drift-detector retires its hand-run symbol grep. Skip when
-                `plugin_dirs(repo_root)` is empty (closes §B.73); a plugin
+                `plugin_dirs(repo_root)` is empty (closes §B.76); a plugin
                 repo still emits.
                 Emits `idiom|VIOLATE|…` — the human-clarity invariant's
                 idiom-ban rule: no human-facing surface (README, CLAUDE.md, the
@@ -147,7 +147,7 @@ Modes:
                 single words excluded). Backtick-span + fenced-block exempt —
                 realized once here so the drift-detector retires its hand-run
                 idiom grep, a fixed-pattern sweep a manual pass forgets to re-run.
-                Skip when `plugin_dirs(repo_root)` is empty (closes §B.73);
+                Skip when `plugin_dirs(repo_root)` is empty (closes §B.76);
                 a plugin repo still emits.
                 Emits `skill-effort|VIOLATE|…` — the skill-effort
                 invariant: published `skills/*/SKILL.md` leave frontmatter
@@ -230,8 +230,9 @@ Modes:
                 live §V + §I + §T id as a verdict-table row. Default is blank
                 verdict and evidence (`id||`). With --from-audit, pre-fill from
                 the same memo + scope-feed sources audit emits: HOLD-SINCE-CLEAN
-                for clean §V/§T, MATCH for §I, blank verdict for dirty §V and
-                flipped §T. The drift-detector fills only the remaining blanks
+                for clean §V/§T, blank verdict for §I (full sweep), dirty §V
+                and flipped §T. The drift-detector fills only the remaining
+                blanks; write-memo rejects any blank typed row (exit 2)
                 instead of joining advisory ids by hand. A live row can't be
                 silently dropped from the verdict table (omitted-row
                 undercoverage class). §I ids derive from kind-prefixed
@@ -501,7 +502,8 @@ def dirty_v_ids(v_rows, memo, touched, full=False):
 def prefill_verdicts(ids, dirty_v, flipped_t):
     """Pre-fill emit-row-ids --from-audit table (memo + mechanical-realization).
 
-    Clean §V/§T → HOLD-SINCE-CLEAN; dirty §V + flipped §T → blank; §I → MATCH.
+    Clean §V/§T → HOLD-SINCE-CLEAN; dirty §V + flipped §T → blank; §I → blank
+    (§I full-sweeps every run, so its verdict always comes from classification).
     Evidence cells stay blank — the drift-detector fills remaining blanks.
     """
     dirty = set(dirty_v)
@@ -511,7 +513,7 @@ def prefill_verdicts(ids, dirty_v, flipped_t):
         if ID_NUM.match(rid) and rid[0] == "V":
             v = "" if rid in dirty else "HOLD-SINCE-CLEAN"
         elif rid.startswith("I."):
-            v = "MATCH"
+            v = ""
         elif ID_NUM.match(rid) and rid[0] == "T":
             v = "" if rid in flipped else "HOLD-SINCE-CLEAN"
         else:
@@ -587,6 +589,16 @@ def collect_v_slices(sections, repo_root=None):
     (`→ .spec/check-extras.md §Vn`) resolve to the live body in check-extras.md
     (source field notes the body file). Unresolved stubs keep the stub text."""
     extras = load_check_extras_bodies(repo_root) if repo_root else {}
+    extras_lines = {}
+    if extras:
+        try:
+            for n, line in enumerate(read_text(os.path.join(
+                    repo_root, ".spec", "check-extras.md")).splitlines(), 1):
+                m = V_ROW.match(line)
+                if m and m.group(1) not in extras_lines:
+                    extras_lines[m.group(1)] = n
+        except OSError:
+            pass
     v_lines = sections.get("V", [])
     openers = [idx for idx, (_, line) in enumerate(v_lines) if V_ROW.match(line)]
     slices = []
@@ -599,6 +611,7 @@ def collect_v_slices(sections, repo_root=None):
         vid = m.group(1)
         text = "\n".join(b[1] for b in block)
         source = "SPEC.md"
+        line_start, line_end = block[0][0], block[-1][0]
         stub = V_STUB_RE.search(text)
         if stub and extras:
             # Prefer the id named in the stub; fall back to the row id.
@@ -607,10 +620,13 @@ def collect_v_slices(sections, repo_root=None):
             if resolved:
                 # Keep opener line for identity; replace redirected body.
                 text = f"{vid}: {resolved}" if not resolved.lstrip().startswith(vid) else resolved
-                source = f".spec/check-extras.md#{body_id}"
+                source = ".spec/check-extras.md"
+                body_line = extras_lines.get(body_id) or extras_lines.get(vid)
+                if body_line:
+                    line_start = line_end = body_line
         slices.append({"id": vid,
-                       "line_start": block[0][0],
-                       "line_end": block[-1][0],
+                       "line_start": line_start,
+                       "line_end": line_end,
                        "text": text,
                        "source": source})
     return slices
@@ -1001,8 +1017,12 @@ def audit_bug_dates(b_rows):
     return out
 
 
-def audit_archive_markers(sections, archive_present, archive_has_vretired):
-    """Archive marker shape under §T/§B (and §V when a retired block exists)."""
+def audit_archive_markers(sections, archive_present, archive_has_vretired,
+                          arch_ids=None):
+    """Archive marker shape under §T/§B (and §V when a retired block exists).
+    With `arch_ids` (per-letter archived id sets), a §T/§B marker is required
+    only when that section has archived rows, and its range + count must match
+    those rows; a marker over zero archived rows is VIOLATE."""
     out = []
     found = {"T": False, "B": False, "V": False}
     for letter in ("T", "B", "V"):
@@ -1010,10 +1030,14 @@ def audit_archive_markers(sections, archive_present, archive_has_vretired):
             if ARCHIVE_MARK_ANY.match(line):
                 found[letter] = True
                 if letter in ("T", "B"):
-                    if not ARCHIVE_MARK_TB.match(line):
+                    m = ARCHIVE_MARK_TB.match(line)
+                    if not m:
                         out.append(("format", "VIOLATE",
                                     f"format: §{letter} archive marker malformed "
                                     f"@ SPEC.md:{lineno}"))
+                    elif arch_ids is not None:
+                        out += _archive_marker_range(letter, line, lineno,
+                                                     arch_ids.get(letter, set()))
                 else:
                     if not ARCHIVE_MARK_V.match(line):
                         out.append(("format", "VIOLATE",
@@ -1021,15 +1045,36 @@ def audit_archive_markers(sections, archive_present, archive_has_vretired):
                                     f"@ SPEC.md:{lineno}"))
     if archive_present:
         for letter in ("T", "B"):
-            if not found[letter]:
+            needed = (arch_ids is None) or bool(arch_ids.get(letter))
+            if needed and not found[letter]:
                 out.append(("format", "VIOLATE",
                             f"format: §{letter} missing archive marker "
-                            f"(SPEC.archive.md exists)"))
+                            f"(SPEC.archive.md has archived §{letter} rows)"))
         if archive_has_vretired and not found["V"]:
             out.append(("format", "VIOLATE",
                         "format: §V missing §V.retired archive marker "
                         "(archive contains §V.retired)"))
     return out
+
+
+ARCHIVE_MARK_NUMS = re.compile(r'§[TB]\.(\d+)\.\.§[TB]\.(\d+) .*\((\d+) rows\)')
+
+
+def _archive_marker_range(letter, line, lineno, ids):
+    """Marker `lo..hi (n rows)` must match the archived §<letter> id set."""
+    m = ARCHIVE_MARK_NUMS.search(line)
+    nums = sorted(int(i[1:]) for i in ids)
+    if not nums:
+        return [("format", "VIOLATE",
+                 f"format: §{letter} archive marker @ SPEC.md:{lineno} claims "
+                 f"archived rows but SPEC.archive.md has none")]
+    if m and (int(m.group(1)), int(m.group(2)), int(m.group(3))) != \
+            (nums[0], nums[-1], len(nums)):
+        return [("format", "VIOLATE",
+                 f"format: §{letter} archive marker @ SPEC.md:{lineno} range/count "
+                 f"≠ archived rows ({letter}{nums[0]}..{letter}{nums[-1]}, "
+                 f"{len(nums)} rows)")]
+    return []
 
 
 def audit_archive_sibling(archive_text):
@@ -1500,6 +1545,51 @@ def audit_sembr(sembr_files):
     return out
 
 
+# --- CLAUDE.md presence + direct-instruction marker block --------------------
+# human-clarity invariant: repo-root CLAUDE.md carries the plain-imperative
+# restatement of the clarity standard governing chat + human-facing output,
+# wrapped in a stable marker block. Symbol-cleanliness rides the human-facing
+# scan (CLAUDE.md is in discover_human_facing), realized once per
+# mechanical-realization invariant — never re-checked here.
+
+CLAUDE_MD = "CLAUDE.md"
+CLAUDE_MARKER_BEGIN = "<!-- sdd:direct-instruction:begin -->"
+CLAUDE_MARKER_END = "<!-- sdd:direct-instruction:end -->"
+
+
+def classify_claude_md(text):
+    """CLAUDE.md presence + marker-block audit core (human-clarity invariant) —
+    pure, unit-testable without the filesystem. `text` is the file content, or
+    None when the file is absent @ repo root. Emits one row: MISSING when the
+    carrier is absent, VIOLATE when present but the begin/end marker block is
+    absent or mis-ordered (the block the audit anchors on). Present + well-formed
+    block → no row (silent, sibling convention). Symbol-cleanliness is NOT
+    re-checked — CLAUDE.md rides the human-facing symbol scan
+    (mechanical-realization invariant), so a naked symbol surfaces as a `symbols`
+    row, not here."""
+    if text is None:
+        return [("claude-md", "MISSING",
+                 f"claude-md MISSING: {CLAUDE_MD} absent @ repo root — "
+                 f"human-clarity invariant requires the plain-imperative "
+                 f"restatement carrier")]
+    b = text.find(CLAUDE_MARKER_BEGIN)
+    e = text.find(CLAUDE_MARKER_END)
+    if b < 0 or e < 0 or e <= b:
+        return [("claude-md", "VIOLATE",
+                 f"claude-md VIOLATE: {CLAUDE_MD} missing direct-instruction "
+                 f"marker block ({CLAUDE_MARKER_BEGIN} ... {CLAUDE_MARKER_END})")]
+    return []
+
+
+def audit_claude_md(repo_root):
+    """File-reading wrapper for the CLAUDE.md presence + marker-block audit
+    (human-clarity invariant). Reads repo-root CLAUDE.md (None when absent) and
+    delegates to the pure classifier."""
+    path = os.path.join(repo_root, CLAUDE_MD)
+    text = read_text(path) if os.path.isfile(path) else None
+    return classify_claude_md(text)
+
+
 # --- mechanize pointer -------------------------------------------------------
 
 MECHANIZE_HDR = re.compile(r'^## MECHANIZE\b')
@@ -1728,7 +1818,7 @@ def classify_github_pr_per_issue(github_text, frag_text=""):
             out.append(("github-workflow", "VIOLATE",
                         "github-workflow VIOLATE: skills/github/SKILL.md "
                         f"leftover {marker}"))
-    # CLOSE: git switch must precede git branch -D (closes §B.40)
+    # CLOSE: git switch must precede git branch -D (closes §B.43)
     close_m = re.search(r'(?m)^## CLOSE\b', github_text)
     if close_m:
         close_hay = _md_block_until_h2(github_text, close_m.start())
@@ -1840,9 +1930,9 @@ def audit_github_review_skip(repo_root):
 # with `Related: #<issue>` (missing SPEC.md still opens the PR; no close
 # trailer; no review-at-create). Spec stops before the chain. Spec-side
 # cites the three-step chain (`/sdd:build` + READY remainder) not a
-# two-step subset (closes §B.33). The before-spec-delta block must not
+# two-step subset (closes §B.36). The before-spec-delta block must not
 # run `/sdd:build` or load POST-SPEC-CHAIN (numbered or not);
-# POST-APPLY must not `auto-chain run` (closes §B.32, §B.74).
+# POST-APPLY must not `auto-chain run` (closes §B.35, §B.77).
 SPEC_FOLD_GITHUB_NEEDLES = (
     ("push default", "push default branch"),
     ("gh issue develop", "issue branch via gh issue develop"),
@@ -1904,7 +1994,7 @@ def classify_spec_fold_github(spec_text):
     needle absent → VIOLATE (one row per miss). Before spec delta
     `/sdd:build` or `POST-SPEC-CHAIN.md` (numbered or not) or
     POST-APPLY `auto-chain run` → VIOLATE so the chain cannot run
-    twice (closes §B.32, §B.74)."""
+    twice (closes §B.35, §B.77)."""
     if not spec_text:
         return [("github-workflow", "MISSING",
                  "github-workflow MISSING: skills/spec/SKILL.md unreadable")]
@@ -2203,7 +2293,7 @@ def audit_condense_stub_skip(repo_root):
     return classify_condense_stub_skip(condense_text)
 
 
-# --- write-serialize review scratch-write audit (closes §B.34) ---------------
+# --- write-serialize review scratch-write audit (closes §B.37) ---------------
 
 # Needles the github post-spec review spawn must carry (write-serialize
 # invariant): scratch writes only, no repo edits; spawn uses a
@@ -2223,7 +2313,7 @@ def classify_review_scratch_write(github_text, frag_text=""):
     `skills/_fragments/POST-SPEC-CHAIN.md` (spawn recipe may live
     there). Empty/unreadable github → MISSING. Each required
     needle absent from github+fragment hay → VIOLATE (one row per
-    miss). Closes §B.34."""
+    miss). Closes §B.37."""
     if not github_text:
         return [("write-serialize", "MISSING",
                  "write-serialize MISSING: skills/github/SKILL.md unreadable")]
@@ -2255,7 +2345,7 @@ def audit_review_scratch_write(repo_root):
                                          _read_post_spec_chain(repo_root))
 
 
-# --- github-workflow POST-SPEC-CHILD discriminator (closes §B.35) ------------
+# --- github-workflow POST-SPEC-CHILD discriminator (closes §B.38) ------------
 
 # Needles the post-spec build child must carry (github-workflow +
 # write-serialize): spawn prompt sets `POST-SPEC-CHILD=1`; build LOAD
@@ -2266,7 +2356,7 @@ POST_SPEC_CHILD_TOKEN = "POST-SPEC-CHILD=1"
 def classify_post_spec_child(build_text, github_text, frag_text=""):
     """POST-SPEC-CHILD=1 discriminator contract — pure, unit-testable
     without the filesystem (github-workflow + write-serialize; closes
-    §B.35). `build_text` is `skills/build/SKILL.md`; `github_text` is
+    §B.38). `build_text` is `skills/build/SKILL.md`; `github_text` is
     `skills/github/SKILL.md`; `frag_text` is
     `skills/_fragments/POST-SPEC-CHAIN.md` (spawn token may live
     there). Empty/unreadable file → MISSING. Token absent from
@@ -2319,7 +2409,7 @@ def audit_post_spec_child(repo_root):
 # Needles the README Issue-linked PR section must carry (github-workflow +
 # github-facing-register invariants): branch then spec commit then draft PR;
 # build then review-apply then `gh pr ready`; Closes only at merge after
-# acceptance-gate; squash commit message holds `#<issue>` (closes §B.36);
+# acceptance-gate; squash commit message holds `#<issue>` (closes §B.39);
 # doc-or-comment review skip.
 README_ISSUE_LINKED_NEEDLES = (
     ("gh pr create --draft", "branch then spec commit then draft PR"),
@@ -2370,20 +2460,20 @@ def audit_readme_issue_linked(repo_root):
     return classify_readme_issue_linked(text)
 
 
-# --- github-workflow MERGE squash subject (closes §B.36) ---------------------
+# --- github-workflow MERGE squash subject (closes §B.39) ---------------------
 
 # Needles the github MERGE recipe must carry (github-workflow invariant):
 # `gh pr merge --squash --subject` and the subject holds `#<issue>` (the
 # linked issue, not merely PR). GitHub default subject PR title `(#PR)`
 # is insufficient — `Closes #<issue>` on the PR body does not put the
-# issue number in the squash commit subject (closes §B.36).
+# issue number in the squash commit subject (closes §B.39).
 GITHUB_MERGE_SUBJECT_NEEDLE = "--subject"
 GITHUB_MERGE_ISSUE_NEEDLE = "#<issue>"
 
 
 def classify_github_merge_subject(github_text):
     """github-workflow MERGE squash subject contract — pure, unit-testable
-    without the filesystem (closes §B.36). `github_text` is
+    without the filesystem (closes §B.39). `github_text` is
     `skills/github/SKILL.md`; empty/unreadable → MISSING. MERGE block
     (else whole body) must carry `--subject`. The `--subject` line must
     also carry `#<issue>` so a `(#PR)`-only subject is VIOLATE even when
@@ -2408,7 +2498,7 @@ def classify_github_merge_subject(github_text):
     return out
 
 
-# MERGE check-probe needles (github-workflow invariant; closes §B.69):
+# MERGE check-probe needles (github-workflow invariant; closes §B.72):
 # `gh pr checks` + `reviewDecision,mergeable` in the MERGE block.
 GITHUB_MERGE_PROBE_NEEDLES = (
     ("gh pr checks", "MERGE gh pr checks probe"),
@@ -2418,7 +2508,7 @@ GITHUB_MERGE_PROBE_NEEDLES = (
 
 def classify_github_merge_probe(github_text):
     """github-workflow MERGE check-probe contract — pure, unit-testable
-    without the filesystem (closes §B.69). `github_text` is
+    without the filesystem (closes §B.72). `github_text` is
     `skills/github/SKILL.md`; empty/unreadable → MISSING. MERGE block
     (else whole body) must carry `gh pr checks` and
     `reviewDecision,mergeable`."""
@@ -2469,7 +2559,7 @@ def audit_github_merge_subject(repo_root):
     return classify_github_merge_subject(github_text)
 
 
-# --- github-workflow READY remainder + fold ids (closes §B.66–§B.68, §B.71)
+# --- github-workflow READY remainder + fold ids (closes §B.69–§B.71, §B.74)
 
 # Needles the github skill must carry (github-workflow invariant):
 # post-spec READY remainder no wait; fold-produced ids include existing
@@ -2486,7 +2576,7 @@ GITHUB_READY_REMAINDER_NEEDLES = (
 def classify_github_ready_remainder(github_text, frag_text=""):
     """github-workflow READY remainder + fold-produced Acceptance-notes
     contract — pure, unit-testable without the filesystem (closes
-    §B.66, §B.67, §B.68, §B.71). `github_text` is
+    §B.69, §B.70, §B.71, §B.74). `github_text` is
     `skills/github/SKILL.md`; `frag_text` is
     `skills/_fragments/POST-SPEC-CHAIN.md` (fold-produced Acceptance
     notes + `gh pr comment` may live there). Empty/unreadable github →
@@ -3154,6 +3244,9 @@ def _manifest_paths(repo_root):
             pj if os.path.exists(pj) else None)
 
 
+SDD_PLUGIN_NAME = "sdd"     # sdd-only needle audits gate on this manifest name
+
+
 def plugin_dirs(repo_root):
     """PUBLISHED plugin source dirs from `.claude-plugin/marketplace.json`
     (`plugins[].source`, root `./` → repo root), else single
@@ -3268,7 +3361,7 @@ def discover_human_facing(repo_root):
 
 def discover_sembr_fragments(repo_root):
     """Shared recipe fragments under each plugin's `skills/_fragments/**`
-    (sembr invariant scope — closes §B.26). Separate helper so self-tests
+    (sembr invariant scope — closes §B.29). Separate helper so self-tests
     assert fragment inclusion without requiring a full skill tree."""
     out = []
     for d in plugin_dirs(repo_root):
@@ -3285,7 +3378,7 @@ def discover_sembr_fragments(repo_root):
 def discover_sembr_files(repo_root):
     """Sembr-invariant prose file set: repo-root README.md + CLAUDE.md,
     `designs/*.md` drafts, PUBLISHED skill bodies, and
-    `skills/_fragments/**` (shared recipe text — closes §B.26)."""
+    `skills/_fragments/**` (shared recipe text — closes §B.29)."""
     out = []
     for name in ("README.md", "CLAUDE.md"):
         p = os.path.join(repo_root, name)
@@ -3469,7 +3562,8 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
 
     findings = []
     findings += audit_section_catalog(order)
-    findings += audit_archive_markers(sections, arch_present, arch_vret)
+    findings += audit_archive_markers(sections, arch_present, arch_vret,
+                                      arch_ids)
     if arch_text:
         findings += audit_archive_sibling(arch_text)
     findings += audit_cites_grammar(t_rows)
@@ -3488,8 +3582,9 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
     findings += audit_pinned_header(published_md)
     skill_md = discover_skill_md(repo_root)
     findings += audit_mechanize_block(skill_md)
-    # empty plugin_dirs → no row, not MISSING/VIOLATE
-    if plugin_dirs(repo_root):
+    # empty plugin_dirs → no row, not MISSING/VIOLATE; sdd-only needle audits
+    # fire only in the sdd plugin repo itself (consumer-core-profile invariant)
+    if plugin_dirs(repo_root) and SDD_PLUGIN_NAME in plugin_names(repo_root):
         findings += audit_design_post_approve(repo_root)
         findings += audit_github_pr_per_issue(repo_root)
         findings += audit_github_review_skip(repo_root)
@@ -3506,6 +3601,8 @@ def run_audit(repo_root, spec_path, run_hook=True, full=False):
         findings += audit_readme_issue_linked(repo_root)
         findings += audit_linear_no_pr(repo_root)
         findings += audit_skill_effort(repo_root)
+        findings += audit_claude_md(repo_root)
+    if plugin_dirs(repo_root):
         findings += audit_human_symbols(discover_human_facing(repo_root))
         findings += audit_human_idiom(discover_human_facing(repo_root))
     findings += audit_dispatch_targets(skill_md, plugin_names(repo_root))
@@ -3546,47 +3643,20 @@ def cmd_emit_v_slices(args):
     return 0
 
 
-CANONICAL_CHECK_AGENT_PROMPT = """You are an invariants audit sub-agent. Read-only tools (Explore-class palette). No edits, no commits.
-
-INPUT — SPEC.md invariants slice (lines {LINE_START}–{LINE_END}):
-
-{V_SLICE}
-
-INPUT — audit recipe (CHECK invariants step 5 behavioral-claim classification + judgment-class REPO-LOCAL extras from `.spec/check-extras.md`, verbatim):
-
-{RECIPE_EXCERPT}
-
-INPUT — scope sets (per scope-set invariant in SPEC.md):
-
-PUBLISHED = {PUBLISHED_PATHS}
-REPO-LOCAL = {REPO_LOCAL_PATHS}
-SPEC-ADJACENT = {SPEC_ADJACENT_PATHS}
-GITHUB-FACING = {GITHUB_FACING_PATHS}
-
-OUTPUT — pipe-table only. Columns: `id|verdict|evidence`.
-
-- `id` is invariant row identifier (`V<n>`).
-- `verdict` in {HOLD, VIOLATE, VIOLATE-CAPTURED, UNVERIFIABLE, SCOPE-EMPTY, HOLD-SINCE-CLEAN, LATENT}.
-- `evidence` ≤ 1 line, one of `file:line` or `no test covers …` or `scope-touch overlap empty` or `HOLD-since-clean @ <sha>` or `<file:line>; see §B.<n>` (VIOLATE-CAPTURED form) or `<trigger-condition-absent reason>` (LATENT form).
-
-No prose preamble before the table. No trailing summary after the table. No commentary between rows. Pipe-table only — first line is header `id|verdict|evidence`, subsequent lines one row per assigned V<n>.
-"""
-
-
 def cmd_emit_check_agent_prompt(args):
-    """Emit the canonical §V-classification sub-agent prompt (single source with
-    skills/_fragments/CHECK-AGENT-PROMPT.md when present)."""
+    """Emit the canonical §V-classification sub-agent prompt. Sole source =
+    skills/_fragments/CHECK-AGENT-PROMPT.md (shared-fragments invariant); no
+    second copy lives in this script, so the two can never drift."""
     here = os.path.dirname(os.path.abspath(__file__))
     frag = os.path.normpath(
         os.path.join(here, "..", "skills", "_fragments", "CHECK-AGENT-PROMPT.md")
     )
-    if os.path.isfile(frag):
+    try:
         body = read_text(frag)
-        sys.stdout.write(body if body.endswith("\n") else body + "\n")
-        return 0
-    sys.stdout.write(CANONICAL_CHECK_AGENT_PROMPT)
-    if not CANONICAL_CHECK_AGENT_PROMPT.endswith("\n"):
-        sys.stdout.write("\n")
+    except OSError:
+        sys.stderr.write(f"emit-check-agent-prompt: {frag} unreadable\n")
+        return 2
+    sys.stdout.write(body if body.endswith("\n") else body + "\n")
     return 0
 
 
@@ -3791,12 +3861,16 @@ def validate_vocab(rows):
     classified row carries only a verdict valid for its type — MATCH is §I-only,
     V-vocab §V-only, STALE §T-only — so the LLM can't silently remap an
     out-of-type verdict (closes §B.8). Pseudo-id rows are unrestricted; a blank
-    verdict (unfilled skeleton row) is skipped. Returns list of complaints."""
+    verdict on a typed §V/§I/§T row (unfilled skeleton row) is a complaint, so
+    an unclassified dirty row can never advance the memo. Returns list of
+    complaints."""
     bad = []
     for rid, v, _ in rows:
-        if not v:
-            continue
         vocab = row_type_vocab(rid)
+        if not v:
+            if vocab is not None:
+                bad.append(f"{rid} verdict blank — unfilled skeleton row")
+            continue
         if vocab is not None and v not in vocab:
             bad.append(f"{rid} verdict {v} not in row-type vocab")
     return bad
@@ -3896,7 +3970,7 @@ def cmd_write_memo(args):
     return 0
 
 
-# --- acceptance-gate (github-workflow; closes §B.31) --------------------------
+# --- acceptance-gate (github-workflow; closes §B.34) --------------------------
 # Pure parse + verdict helpers for the ACCEPTANCE-GATE fragment.
 # LLM still maps open bullets to evidence; script owns section/bullet parse and
 # the BLOCK/ALLOW/ADVISORY decision so unproven close cannot silent-pass.
@@ -4326,18 +4400,23 @@ def selftest():
     check(filled == [
         (f"V{1}", "HOLD-SINCE-CLEAN", ""),
         (f"V{2}", "", ""),
-        ("I.cmd", "MATCH", ""),
+        ("I.cmd", "", ""),
         (f"T{9}", "HOLD-SINCE-CLEAN", ""),
         (f"T{10}", "", ""),
-    ], "emit-row-ids --from-audit: pre-fill HOLD-SINCE-CLEAN/MATCH/blank")
+    ], "emit-row-ids --from-audit: pre-fill HOLD-SINCE-CLEAN/blank")
     filled_table = "id|verdict|evidence\n" + "\n".join(
         f"{rid}|{v}|{e}" for rid, v, e in filled)
     check(parse_table(filled_table) == filled,
           "emit-row-ids --from-audit: pre-fill table parses for write-memo")
-    check(validate_vocab(filled) == [],
+    check(validate_vocab([r for r in filled if r[1]]) == [],
           "emit-row-ids --from-audit: pre-fill verdicts in row-type vocab")
-    check(memo_exit_code(filled)[0] == 0,
-          "write-memo: pre-filled clean table still exit 0")
+    check(memo_exit_code(filled)[0] == 2,
+          "write-memo: unfilled blank dirty rows → exit 2, memo untouched")
+    done = [(r, v or ("HOLD" if r.startswith("V") else
+                      "MATCH" if r.startswith("I.") else "HOLD-SINCE-CLEAN"), e)
+            for r, v, e in filled]
+    check(memo_exit_code(done)[0] == 0,
+          "write-memo: pre-filled table with blanks classified → exit 0")
     vfix = [{"id": f"V{1}", "body": "alpha"}, {"id": f"V{2}", "body": "beta"}]
     memo_ok = {"schema_version": MEMO_SCHEMA,
                "v_row_shas": {f"V{1}": row_body_sha("alpha"),
@@ -4716,7 +4795,7 @@ def selftest():
 
     # github-workflow MERGE squash subject holds #<issue> (not merely PR).
     # GitHub default (#PR) on --subject is VIOLATE even when Closes #<issue>
-    # sits on another line (closes §B.36).
+    # sits on another line (closes §B.39).
     # test_name_hint: github MERGE squash subject holds #<issue> (not merely PR)
     gm_good = (
         "## MERGE — squash\n"
@@ -4744,7 +4823,7 @@ def selftest():
     check(classify_github_merge_subject("")[0][1] == "MISSING",
           "github MERGE: empty github body → MISSING")
 
-    # github-workflow MERGE check-probe (closes §B.69).
+    # github-workflow MERGE check-probe (closes §B.72).
     # test_name_hint: github MERGE check-probe
     gp_good = (
         "## MERGE — ACCEPTANCE-GATE then squash\n"
@@ -4769,8 +4848,8 @@ def selftest():
           "github MERGE check-probe: empty github body → MISSING")
 
     # github-workflow READY remainder no wait + fold-produced Acceptance
-    # notes + re-run task verify + gh pr comment (closes §B.66, §B.67,
-    # §B.68, §B.71).
+    # notes + re-run task verify + gh pr comment (closes §B.69, §B.70,
+    # §B.71, §B.74).
     # test_name_hint: github READY remainder no-wait + fold-produced Acceptance-notes
     grr_good = (
         "Post-spec: apply open bug + suggestion; list nits; no wait.\n"
@@ -4811,7 +4890,7 @@ def selftest():
     # (READY remainder). The before-spec-delta block must not run
     # /sdd:build or load POST-SPEC-CHAIN, numbered or not.
     # POST-APPLY must not auto-chain run
-    # (github-workflow invariant; closes §B.32, §B.33, §B.74).
+    # (github-workflow invariant; closes §B.35, §B.36, §B.77).
     sf_good = (
         "**Before spec delta**\n"
         "1. push default branch\n"
@@ -5006,7 +5085,7 @@ def selftest():
           "github-workflow: missing no review-at-create → VIOLATE")
 
     # write-serialize post-spec review spawn: scratch writes only; spawn
-    # uses general-purpose Agent, not read-only Explore (closes §B.34).
+    # uses general-purpose Agent, not read-only Explore (closes §B.37).
     # test_name_hint: review scratch write
     rs_good = (
         "load-and-run bundled review as sub-agent\n"
@@ -5037,7 +5116,7 @@ def selftest():
           "write-serialize: pseudo-id unrestricted vocab")
 
     # POST-SPEC-CHILD=1 discriminator in build LOAD + github spawn prompt
-    # (github-workflow + write-serialize; closes §B.35).
+    # (github-workflow + write-serialize; closes §B.38).
     # test_name_hint: POST-SPEC-CHILD=1
     psc_build = (
         "## LOAD\n"
@@ -5460,7 +5539,8 @@ def selftest():
           "vocab rejects §V silent verdict on §I row")
     check(validate_vocab([(f"T{9}", "STALE", "")]) == [], "vocab admits STALE on §T row")
     check(validate_vocab([(f"T{9}", "MATCH", "")]), "vocab rejects MATCH on §T row")
-    check(validate_vocab([("I.api", "", "")]) == [], "vocab skips blank skeleton verdict")
+    check(validate_vocab([("I.api", "", "")]) != [], "vocab rejects blank typed skeleton verdict")
+    check(validate_vocab([("batch", "", "")]) == [], "vocab skips blank pseudo-id verdict")
     check(compute_clean([("I.api", "MATCH", "")])[0] is True, "clean-set: MATCH is clean")
     check(compute_clean([("I.api", "DRIFT", "")])[0] is False, "clean-set: DRIFT is dirty")
     # write-memo --from-audit merge (memo invariant): the mechanical audit unions
@@ -5505,6 +5585,43 @@ def selftest():
     after_fence = "```\na → b\n```\nthen x → y in plain prose"
     check(any(v == "VIOLATE" for _, v, _ in scan_human_symbols("p", after_fence)),
           "human-symbols: scanning resumes after fence close")
+
+    # archive markers: required only for sections w/ archived rows; range +
+    # count must match the archived id set (closes empty §B.0 marker class)
+    _ams = {"T": [(5, f"## archived: §T.{1}..§T.{2} → SPEC.archive.md (2 rows)")],
+            "B": []}
+    _aid = {"T": {f"T{1}", f"T{2}"}, "B": set(), "V": set()}
+    check(audit_archive_markers(_ams, True, False, _aid) == [],
+          "archive marker: §T marked, §B w/o archived rows needs no marker")
+    _ams0 = dict(_ams, B=[(9, f"## archived: §B.{0}..§B.{0} → SPEC.archive.md (0 rows)")])
+    check(any("claims archived rows" in e
+              for _, _, e in audit_archive_markers(_ams0, True, False, _aid)),
+          "archive marker: marker over zero archived rows → VIOLATE")
+    _amsx = {"T": [(5, f"## archived: §T.{1}..§T.{3} → SPEC.archive.md (3 rows)")],
+             "B": []}
+    check(any("range/count" in e
+              for _, _, e in audit_archive_markers(_amsx, True, False, _aid)),
+          "archive marker: range/count mismatch → VIOLATE")
+    check(any("§T missing archive marker" in e
+              for _, _, e in audit_archive_markers({"T": [], "B": []}, True,
+                                                   False, _aid)),
+          "archive marker: archived §T rows w/o marker → VIOLATE")
+
+    # CLAUDE.md presence + direct-instruction marker block (human-clarity
+    # invariant): absent → MISSING, present-without-block → VIOLATE, present
+    # with well-formed begin/end block → clean (silent); end-before-begin →
+    # VIOLATE. Symbol-cleanliness rides the human-symbol scan, not re-checked.
+    check(classify_claude_md(None)[0][1] == "MISSING",
+          "claude-md: absent file → MISSING")
+    check(classify_claude_md("# CLAUDE.md\nno marker here")[0][1] == "VIOLATE",
+          "claude-md: present without marker block → VIOLATE")
+    well_formed = f"intro\n{CLAUDE_MARKER_BEGIN}\nrules\n{CLAUDE_MARKER_END}\nrest"
+    check(classify_claude_md(well_formed) == [],
+          "claude-md: well-formed marker block → clean")
+    end_first = f"{CLAUDE_MARKER_END}\nrules\n{CLAUDE_MARKER_BEGIN}"
+    check(classify_claude_md(end_first)[0][1] == "VIOLATE",
+          "claude-md: end-before-begin marker → VIOLATE")
+
 
     # human-facing banned-idiom audit (human-clarity invariant): a banned idiom /
     # jargon-idiom phrase in prose flagged; backtick span + fenced block exempt;
@@ -5653,7 +5770,7 @@ def selftest():
           "prune-patterns: retired-in-place whitespace-tolerant "
           "(reorganize grep parity)")
     # discover_sembr_files includes skills/_fragments/** (sembr invariant +
-    # §B.26): fragment .md paths join the prose set so multi-sentence fragment
+    # §B.29): fragment .md paths join the prose set so multi-sentence fragment
     # lines are audited + fix-sembr-reachable.
     with tempfile.TemporaryDirectory() as td:
         os.makedirs(os.path.join(td, ".claude-plugin"))
@@ -5679,7 +5796,7 @@ def selftest():
               "sembr-discover: missing _fragments dir → empty")
 
     # ARCHIVE_CLOSED_T mirrors the token-budget closed-§T archive threshold
-    # (token-budget invariant + §B.29) — single source for condense prong 3.
+    # (token-budget invariant + §B.32) — single source for condense prong 3.
     check(ARCHIVE_CLOSED_T == 50,
           "token-budget: ARCHIVE_CLOSED_T == 50 (condense prong 3 source)")
     check(isinstance(ARCHIVE_CLOSED_T, int) and ARCHIVE_CLOSED_T > 0,
@@ -5808,7 +5925,7 @@ def selftest():
     check(classify_condense_stub_skip("")[0][1] == "MISSING",
           "condense prong-6: empty body → MISSING")
 
-    # acceptance-gate parse + verdict (github-workflow invariant; closes §B.31)
+    # acceptance-gate parse + verdict (github-workflow invariant; closes §B.34)
     # test_name_hint: acceptance_gate_blocks_unproven_close
     ag_body = (
         "## Problem\n\nSomething broke.\n\n"
@@ -6045,6 +6162,17 @@ def selftest():
             f.write('{"name":"t","note":"x ≥ y"}\n')
         check(plugin_dirs(td) == [td],
               "consumer-core-profile: plugin.json → plugin_dirs non-empty")
+        other_rows = run_audit(td, "SPEC.md", run_hook=False)
+        check(not any(rid in ("design-lifecycle", "github-workflow",
+                              "write-serialize", "skill-effort")
+                      for rid, _, _ in other_rows),
+              "consumer-core-profile: non-sdd plugin → no sdd-only needle rows")
+        check(any(rid == "symbols" and v == "VIOLATE"
+                  for rid, v, _ in other_rows),
+              "consumer-core-profile: non-sdd plugin still audits symbols")
+        with open(os.path.join(td, ".claude-plugin", "plugin.json"), "w",
+                  encoding="utf-8") as f:
+            f.write('{"name":"sdd","note":"x ≥ y"}\n')
         plugin_rows = run_audit(td, "SPEC.md", run_hook=False)
         check(any(rid == "design-lifecycle" and v in DIRTY_VERDICTS
                   for rid, v, _ in plugin_rows),

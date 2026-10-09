@@ -262,7 +262,7 @@ Default: surface `/sdd:check` as Next item #1 (cascade over just-applied delta).
 Exceptions:
 - **BACKPROP** → item #1 = concrete `/sdd:build §T.<n>` (resume card); item #2 = `/sdd:check`.
 - **DISTILL** → item #1 = `/sdd:check`; item #2 = `/sdd:spec` confirm `?`-flagged rows.
-- **FOLD-IN github issue** and **fold-design with issue N** → spec stops before the chain; load `${CLAUDE_SKILL_DIR}/../_fragments/POST-SPEC-CHAIN.md` (`/sdd:build`; READY remainder); Next merge when approved — say "merge the PR".
+- **FOLD-IN github issue** and **fold-design with issue N** → spec stops before the chain; github PR recipe owns the chain (`/sdd:build`; READY remainder) and runs it once after the spec commit — spec never loads POST-SPEC-CHAIN itself; Next merge when approved — say "merge the PR".
 - Green-path: not default-chained from spec (operator or explicit Next).
 
 Not silent commit-then-done.

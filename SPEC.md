@@ -137,9 +137,9 @@ T67|x|port spec: micro-AMEND, DISTILL second pass, Step 0b body-file porcelain, 
 T68|x|port script: merge grok-fork audits + emit modes (emit-residue, emit-archive-window, emit-condense-propose, emit-check-agent-prompt) w/ Claude modes (emit-prune-patterns, skill-token); design-lifecycle audit on `skills/design`; `--no-chain` accepted; self-test|V40,V31,V47,V69,V71,V77
 T69|x|port auto-fire engage log (github, monitor, steno, telegraph) + caller-engagement descriptions|V75,V61
 T70|x|frontmatter: drop `model:` lines from published skills; `effort: medium` on check + explain only|V77,V62
+T71|x|apply PR #9 review findings (sdd-only audit gate, CLAUDE.md audit, §B cite shift, single chain owner, memo blanks, archive markers, slice lines, prompt source, CI)|V71,V67,V13,V69,V44,V16,V64,V72
 
 ## §B BUGS
-## archived: §B.0..§B.0 → SPEC.archive.md (0 rows)
 
 id|date|cause|fix
 B1|2026-06-11|sub-skill flags inverted: `disable-model-invocation` hid auto-fire skills from Skill tool, kept slash surface|V61

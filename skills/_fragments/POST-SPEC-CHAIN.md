@@ -1,6 +1,6 @@
 # POST-SPEC-CHAIN — post-spec-commit chain (canonical)
 
-Loaded by spec POST-APPLY, github PR after the spec commit, build LOAD / POST-LOOP / CHAIN / OUTPUT.
+Loaded by github PR after the spec commit (fired by the spec PUSH) and build LOAD / POST-LOOP / CHAIN / OUTPUT; never by spec POST-APPLY.
 Not loaded from **Before spec delta**.
 Owner = github PR recipe (github-workflow + write-serialize invariants).
 The pull request opens before the spec delta.

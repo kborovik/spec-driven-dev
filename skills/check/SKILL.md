@@ -111,7 +111,7 @@ First-run, invalidated memo, or `--full` → classify all §V rows.
 python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-v-slices [--dirty V<n>,...]
 ```
 
-Prints each §V row body w/ source range — header `## V<n> SPEC.md:<start>-<end>` + verbatim row text. `--dirty` = comma-list from step 1; omit on first-run / `--full` (all rows).
+Prints each §V row body w/ source range — header `## V<n> SPEC.md:<start>-<end>` (stub row → `.spec/check-extras.md:<line>` of the resolved body) + verbatim row text. `--dirty` = comma-list from step 1; omit on first-run / `--full` (all rows).
 Sidesteps Read pagination, not bulk-load cost: single-agent path loads full slice set in-thread (may spill to persisted file past inline output cap); sub-agent batches distribute per spawn.
 
 ## CHECK invariants
