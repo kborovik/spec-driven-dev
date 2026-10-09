@@ -20,6 +20,11 @@ skill returns `(converged-mode, facts)` — data only; not file, not commit, not
 
 ## LOOP
 
+**First-turn concrete escape (hard rule):** if `$ARGUMENTS` / intent string already supplies every fact in some mode's convergence triple, return `(mode, facts)` with **zero questions** — never re-confirm what the user already stated.
+Examples: full BACKPROP triple in one sentence; AMEND with explicit `§V.n` + delta; DISTILL "build the spec from this codebase".
+
+Otherwise:
+
 1. ask 1 question
 2. wait for answer
 3. pick next question from pool or converge

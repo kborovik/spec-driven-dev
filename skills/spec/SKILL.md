@@ -2,15 +2,16 @@
 name: spec
 description: |
   Sole semantic author of SPEC.md @ repo root — create, amend, fold designs,
-  or backprop bugs.
+  fold GitHub issues, or backprop bugs (§T status-flip → build, archive →
+  condense, §V renumber → reorganize; those carve-outs not authoring paths).
   Triggers when user asks to write spec, start new spec, distill spec from
-  code, add invariants, amend a section, or record a bug. Common phrasings:
-  "write the spec for...", "new spec", "distill spec from code",
-  "spec this idea", "import existing repo", "pull invariants out of code",
-  "this bug keeps biting", "post-mortem on Y".
-allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Agent, Skill(sdd:*)
-argument-hint: "<intent | designs/slug.md>"
-model: inherit
+  code, add invariants, amend a section, record a bug, fold a design plan, or
+  fold a GitHub issue. Common phrasings: "write the spec for...", "new spec",
+  "distill spec from code", "spec this idea", "import existing repo",
+  "pull invariants out of code", "this bug keeps biting", "post-mortem on Y",
+  "fold-design", "github issue N".
+allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(grep *), Bash(gh *), Agent, Skill(sdd:*)
+argument-hint: "<intent | fold-design [N] | github issue N>"
 ---
 
 # spec — spec mutator
@@ -20,14 +21,22 @@ Carve-outs, not authoring paths: §T status-flip → /sdd:build; archive → /sd
 
 ## DISPATCH
 
-**Step 0 (precondition):** porcelain state injected below (`!` preprocessing; `disableSkillShellExecution` consumers see a disabled-by-policy marker → run `git status --porcelain SPEC.md` manually):
+**Step 0a (precondition):** porcelain state injected below (`!` preprocessing; `disableSkillShellExecution` consumers see a disabled-by-policy marker → run `git status --porcelain SPEC.md` manually):
 
 !`git status --porcelain SPEC.md`
 
 Empty output → continue; else bail w/ "SPEC.md has uncommitted changes; commit or stash first" (auto-commit assumes clean baseline; porcelain catches staged + untracked, which `git diff --quiet` misses).
+**Step 0b (post-resolution, AMEND only):** after AMEND resolves body file, if body file is not SPEC.md → `git status --porcelain <body-file>` empty → continue; else bail w/ "<body-file> has uncommitted changes; commit or stash first" (stub-redirected §V write must not leak into path-scoped commit).
 
-**Step 1 (fold-in shortcut):** `$ARGUMENTS` matches `designs/*.md`, file exists, SPEC.md exists @ repo root → FOLD-IN (skip socratic gate — design skill Open-Questions-empty rule already enforced convergence pre-persist).
-Design path w/o SPEC.md → bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first" (design skill degrades gracefully sans SPEC.md so converged drafts can predate it).
+**Step 1 (fold-in shortcut):** any of:
+- `$ARGUMENTS` matches `mechanization-candidate <pattern>` / free-form candidate report → engage `sdd:monitor` dispatched mechanization-candidate path; stop.
+- `$ARGUMENTS` is `fold-design [N]` / `fold the design plan` / free-form fold of current approved design plan → FOLD-IN from approved session plan (design skill; retains issue N linkage when issue present; issue N → **Before spec delta** once, then the fold).
+- `$ARGUMENTS` matches `designs/*.md`, file exists → FOLD-IN from legacy design draft.
+- `$ARGUMENTS` matches `github issue <N>` / free-form "fold issue N" → **Before spec delta** once, then FOLD-IN from GitHub issue (see FOLD-IN — github issue).
+`github issue N` or fold-design with issue N: missing SPEC.md does not skip the pull request.
+**Before spec delta** runs once, before any draft.
+Do not run it again from FOLD-IN.
+Other fold-in: SPEC.md must exist @ repo root else bail w/ "fold-in needs SPEC.md; init via NEW or DISTILL first".
 Else → gate.
 
 Engage `sdd:socratic` gate w/ `$ARGUMENTS` as intent.
@@ -70,6 +79,9 @@ Flag uncertain items w/ `?` so user can confirm.
 
 → APPLY.
 
+**Second pass (required Next):** post-APPLY Next always includes `/sdd:check` then `/sdd:spec` confirm `?`-flagged rows (named AMEND batch).
+DISTILL is not one-shot truth — brownfield needs check noise + confirmation.
+
 ## BACKPROP — bug → §B + §V
 
 Input: gate triple (symptom + surface + recurrence-class).
@@ -86,38 +98,105 @@ Input: gate triple (symptom + surface + recurrence-class).
 Rule: every bug → §B entry.
 Invariant optional but preferred.
 
+**Resume card (post-commit):** APPLY already listed `backprop-handoff.json` in `.spec/.gitignore`.
+Write `.spec/backprop-handoff.json` with `{B, V, T, test_name_hint}` for the new rows (REPO-LOCAL cache, not design truth).
+Next item #1 = concrete `/sdd:build §T.<n>` (never bare `--next` only).
+Build LOAD consumes + deletes the card on close.
+
 ## AMEND — targeted edit
 
 Input: gate §-target + delta.
 
-**Resolve body file** (§V target — condense relocates heavy §V bodies, SPEC.md row left a stub): read the target's SPEC.md §V row.
-Row body redirects to `.spec/check-extras.md §V<n>` (condense prong-6 stub) → live body lives there under `## §V<n>` header; body file = `.spec/check-extras.md` (multi-target AMEND → one resolved body file per §V target, stub-redirected rows collapse to the same file).
-Else inline-body row → body file = SPEC.md. §B/§G/§C/§I/§T targets always SPEC.md.
-Resolved body file feeds APPLY step 4 write + commit path-scope per extras-hook invariant.
+**Resolve body file** via script when possible: `emit-v-slices --dirty V<n>` resolves check-extras stubs (extras-hook + single-load).
+Fallback hand-resolve: SPEC.md stub `→ .spec/check-extras.md §V<n>` → body file `.spec/check-extras.md`; else SPEC.md. §B/§G/§C/§I/§T always SPEC.md.
 
-Read target § from its resolved body file.
-Show current in steno per steno skill if target in {§V, §B} (audience: user reviewing proposal); telegraph otherwise.
-Ask user what changes.
+### Micro-AMEND (trivial path)
+
+Fires when all hold: single § target; delta ≤ one cell / one line; no new §V row; no sweep-§T.
+Still show preview.
+AskUserQuestion options lead with `Apply` (recommended); skip fold-first (no new row).
+Structural multi-row / new §V / FOLD-IN / BACKPROP / NEW / DISTILL keep full APPLY gate.
+
+### Full AMEND
+
+Read target § from resolved body file.
+Show current in steno if target in {§V, §B}; telegraph otherwise.
+Ask user what changes when delta incomplete.
 
 → APPLY.
 
 Never silently rewrite §s user did not name.
 
-## FOLD-IN — design draft → §V or §T amend
+## FOLD-IN — design plan, legacy design draft, or github issue → §V / §T amend
 
-Input: `designs/<slug>.md` (converged per design skill Open-Questions-empty rule).
+Input (any of):
+- approved Claude Code plan mode body from `/sdd:design` (`fold-design`)
+- legacy `designs/<slug>.md`
+- GitHub issue `N` via `/sdd:spec github issue N` (or free-form fold of issue N)
 
-No socratic gate — design skill enforced convergence pre-persist so /sdd:spec trusts content.
-Multi-target: one design may propose new §V row(s), §T row(s), §I edit(s), §B row(s) in one apply.
+No socratic gate — design already enforced Open-Questions-empty (or park) pre-approve; issue fold is operator-named target.
+Multi-target: one design or issue may propose new §V / §T / §I / §B rows in one apply.
 
-1. Read draft; parse proposed amendments.
+**Before spec delta** (github-workflow invariant; `github issue N` or fold-design with issue N only; sole call site is DISPATCH; runs once before any draft, including when SPEC.md is missing):
+
+Open pull request for this issue → stop early.
+`gh issue develop <issue> --list` names linked branches.
+`gh pr list --head <branch> --state open --json number` non-empty → `git switch <branch>` and stop.
+Do not run `gh issue develop` again.
+Do not make another empty commit.
+Do not call `gh pr create` again.
+
+Else the tree is clean (`git status --porcelain` empty) or the block bails before any push or commit.
+`git commit --allow-empty` records a non-empty index, so porcelain must still be empty at that commit.
+
+1. Fetch `origin`.
+   Resolve `<default-base>` from `origin/HEAD`.
+2. Local `<default-base>` behind `origin/<default-base>` → fast-forward (`git switch <default-base>` then `git merge --ff-only`).
+   Diverged → stop and report.
+   Do not force-push.
+3. Local `<default-base>` ahead → `git push origin <default-base>` (named refspec; this is the push default branch step; never bare `git push`).
+   Rejected → stop and report.
+   Already up to date → success, not a failure.
+4. Issue branch — `gh issue develop <issue> --checkout` (in-place, one branch per session).
+5. One commit ahead of that base, not the spec delta: `git commit --allow-empty -m "issue <issue>: ahead of base"` only when porcelain is still empty.
+   `gh pr create` rejects zero-ahead.
+   The message has no close trailer.
+6. `gh pr create --draft` with `Related: #<issue>` before the spec delta (generic structure; steno body per github-facing-register invariant; no close trailer; no review-at-create).
+
+Missing SPEC.md does not skip the pull request; the pull request is open before the spec delta.
+SPEC.md present → return to the fold on that branch: draft, then on OK write, path-scoped commit, PUSH.
+SPEC.md missing → stay on the issue branch; no delta, no invented SPEC.md; next NEW or DISTILL on this branch creates SPEC.md and PUSHes.
+Never rerun this block; never a second pull request; spec stops before the chain.
+No GitHub issue → skip this block.
+
+1. Read plan, draft, or issue; parse proposed amendments.
 2. Draft each in telegraph (target §s + delta text).
 
 → APPLY.
 
-Rule: fold-in mutates SPEC.md only; design file persists in working tree post-apply (no `git rm`, `git add`, or `rm`) per design-file lifecycle invariant — APPLY write step SPEC.md-only so structurally enforced.
-User removes or preserves manually.
-Provenance: slug in SPEC.md commit msg + git history.
+Rule: fold-in mutates SPEC.md only.
+Plan file stays in session; legacy design file stays in working tree (no auto `rm`).
+Provenance: slug, "fold-design", or `github-issue-<N>` in commit msg.
+When `fold-design` runs with an issue N created during design (or `$ARGUMENTS` supplies issue N), treat as issue-linked fold: record `github-issue-<N>` in commit body.
+Dispatch already ran **Before spec delta** once.
+Do not run it again.
+
+### FOLD-IN — github issue
+
+Draft PR already open (DISPATCH ran **Before spec delta** once).
+SPEC.md missing → stop per that block (no LOAD, no delta).
+SPEC.md present → ordered steps below.
+
+Ordered:
+
+1. **LOAD** — `gh issue view <N> --json number,title,body,labels` against the cwd repo (no `--repo` slug).
+2. **MAP** — problem / body prose → candidate §V / §T rows (telegraph); title → short task goal when one §T fits.
+3. **Acceptance** — if body has `## Acceptance` checklist, fold open bullets into §T goals or task notes so `/sdd:build` can prove them; if no `## Acceptance` → surface **ADVISORY** in the preview (not silent-verified; github-workflow invariant) and continue fold without inventing bullets.
+4. **Link** — record issue number in commit body (`github-issue-<N>`); do not auto-close the issue from this fold.
+
+→ APPLY show-user (step 3) on the issue branch, after **Before spec delta**.
+On OK → write delta, path-scoped commit, then PUSH.
+Spec stops before the chain.
 
 ## APPLY (all modes, post-delta)
 
@@ -140,16 +219,22 @@ next-block  | touches user-typeable SKILL.md | bail → NEXT-BLOCK-SECTION AUDIT
 fold-first  | adds §V row to pre-existing §V section, mode not FOLD-IN | AskUserQuestion gate → FOLD-FIRST AUDIT
 ```
 
-pinned-cite (a) + next-block rows structurally no-op while step 4 writes SPEC.md only — retained defensive (fire only if future mode widens write set).
-
 Table uses named-invariant + placeholder cite form only (`per <named> invariant`, `§V.<n>`) — `skills/**` in PUBLISHED where pinned §-digit cites banned per sub-recipe (a); body pinned-cite count is 0, stays 0.
 
 **Step 2 — render-split**: §V + §B content rows → steno per steno skill (audience: user reviewing proposal); all else → telegraph (§T/§I pipe forms already legible, §G/§C targets, header-only §B row).
 
 **Step 3 — show-user**: render diff preview; await user OK.
 
-**Step 4 — write + commit**: on OK → write delta to its resolved body file(s) (telegraph) + auto-commit path-scoped `git commit -m <subject> [-m <body>] -- <body-file(s)>` (write-ownership invariant — scopes to the owned file set, pre-staged files never leak).
-Body file(s) = SPEC.md every mode + target, except a stub-redirected §V AMEND → `.spec/check-extras.md` per AMEND § resolution + extras-hook invariant (the SPEC.md stub row stays untouched, so check-extras.md is the sole path-scope; mixed delta touching both an inline §V/other § and a stub-redirected §V → path list = the union). `-m` flags ! precede `--` — message tokens after `--` parse as pathspecs, commit fails; no commit prompt (uniform every mode).
+**Step 4 — write + commit**: on OK → write delta to its resolved body file(s) (telegraph) + auto-commit path-scoped per `${CLAUDE_SKILL_DIR}/../_fragments/PATH-SCOPED-COMMIT.md`: `git commit -m <subject> [-m <body>] -- <body-file(s)>`.
+github-issue fold (and fold-design with issue N): draft PR already open per **Before spec delta**; write delta on that branch + path-scoped commit, then PUSH; spec stops before the chain.
+Non-github-issue APPLY: no github BRANCH, no github PR (do not open one).
+Current branch already has an open pull request (`gh pr view --json state` is OPEN) → after the path-scoped commit, PUSH.
+That covers NEW, DISTILL, AMEND, and BACKPROP on the issue branch; never a second pull request.
+No open pull request → the commit stays on the current branch; no push.
+Body file(s) = SPEC.md every mode + target, except a stub-redirected §V AMEND → `.spec/check-extras.md` per AMEND § resolution + extras-hook invariant (the SPEC.md stub row stays untouched, so check-extras.md is the sole path-scope; mixed delta touching both an inline §V/other § and a stub-redirected §V → path list = the union).
+No commit prompt (uniform every mode).
+NEW / DISTILL / BACKPROP: first `.spec/` write (NEW/DISTILL init or first BACKPROP, whichever first) → grep `^backprop-handoff.json$` in `.spec/.gitignore`; missing → init or append that line (backprop-resume-card invariant); path-scope `.spec/.gitignore` when created or patched.
+Resume-card JSON stays untracked (post-commit BACKPROP write).
 Msg per mode:
 
 ```
@@ -157,78 +242,48 @@ NEW      → init SPEC.md (V<1>..V<n>, T<1>..T<m>)
 DISTILL  → init SPEC.md from code
 BACKPROP → backprop §B.<n>(+) + §V.<N>(+): <one-line cause>   (trimmed forensics → msg body, from step 0)
 AMEND    → amend §<S>.<n>(+): <one-line>                       (pruned history → msg body, from step 0)
-FOLD-IN  → fold-in §V.<n>(+) and §T.<n>(+): <slug>            (omit absent §s)
+FOLD-IN  → fold-in §V.<n>(+) and §T.<n>(+): <slug|fold-design>  (omit absent §s)
 ```
 
 **Re-entry**: any stage rewriting delta after step 0 — concretely fold-first's fold-into reroute (new §V row → existing-row amend) — re-enters APPLY @ step 0; rewritten delta newly satisfies §V-row prune and prior audits saw a delta that no longer exists.
 
-APPLY ends @ commit. `## POST-APPLY` fires after, unchanged.
+APPLY ends @ commit (github-issue fold: PUSH the open pull request, then POST-APPLY). `## POST-APPLY` fires after.
 
 ## AUDIT SUB-RECIPES + PRUNE PATTERNS — references/
 
 Conditional detail one level deep per token-budget invariant (skill-body budget); Read each file only @ its load moment:
 
-- `references/audit-recipes.md` — SWEEP-§T SCOPE (grep-pattern scope rule), PINNED-CITE (grep sub-recipes a/b + `grep -v -E` pre-filter), NEXT-BLOCK-SECTION (frontmatter Grep + heading probe), FOLD-FIRST (AskUserQuestion gate + re-entry) — full bodies + bail strings; Read @ first audit fire per APPLY step 1.
-- `references/write-time-prune.md` — §V-row residue prune pattern set + pre-filters, §B cause trim rule; Read @ APPLY step 0 on match.
+- `references/audit-recipes.md` — SWEEP-§T SCOPE, PINNED-CITE, NEXT-BLOCK-SECTION, FOLD-FIRST bodies + bail strings; Read @ first audit fire per APPLY step 1.
+- `references/write-time-prune.md` — §V-row residue prune + §B cause trim; Read @ APPLY step 0 on match.
 
 ## POST-APPLY
 
-Every mode post-commit ! surface `/sdd:check` as Next-block item #1 per §V.<n>; operator dispatches next turn → cascade scan over just-applied delta.
-Not silent commit-then-done.
-Recipe ends @ commit — slash-cmd dispatch is operator turn only.
+Default: surface `/sdd:check` as Next item #1 (cascade over just-applied delta).
+Exceptions:
+- **BACKPROP** → item #1 = concrete `/sdd:build §T.<n>` (resume card); item #2 = `/sdd:check`.
+- **DISTILL** → item #1 = `/sdd:check`; item #2 = `/sdd:spec` confirm `?`-flagged rows.
+- **FOLD-IN github issue** and **fold-design with issue N** → spec stops before the chain; github PR recipe owns the chain (`/sdd:build`; READY remainder) and runs it once after the spec commit — spec never loads POST-SPEC-CHAIN itself; Next merge when approved — say "merge the PR".
+- Green-path: not default-chained from spec (operator or explicit Next).
 
-Catches class where SPEC.md amend invalidates derivative content in `<plugin>/**` (skills, commands, READMEs) w/o manual audit.
-Next-block surfacing is baseline — operator dispatch is only path to `/sdd:check`.
+Not silent commit-then-done.
 
 ## OUTPUT RULES
 
 Defer to `${CLAUDE_PLUGIN_ROOT}/SPEC-FORMAT.md` — row shape, section catalog, citation forms, header conventions.
 
-## MECHANIZE — script-candidate scan
+## MECHANIZE
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
-Candidate = any of:
-
-- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
-- LLM-side join / sort / count / dedup over script-emittable data
-- multi-step parse collapsible to one script emit mode
-- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
-
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
-Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
-Route by cwd:
-
-- dev repo (this plugin) → /sdd:spec → new §T row
-- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
+Load `${CLAUDE_SKILL_DIR}/../_fragments/MECHANIZE.md`.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
-Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state.
-Two output moments, distinct item leads: show-user turn (diff pending) → apply + revise lead; post-commit turn → `/sdd:check` item #1 every mode per POST-APPLY, then `/sdd:build §T.n` when pending §T row exists.
-
-Example @ show-user, diff pending (Hint skipped — items self-explanatory):
-
-```
-## Next
-
-1. apply the diff to `SPEC.md`
-2. /sdd:spec rework the V<N> invariant before building
-```
-
-Example post-commit, any mode (`/sdd:check` leads per POST-APPLY):
-
-```
-## Next
-
-1. /sdd:check — cascade scan over the just-applied delta
-2. /sdd:build T<n> — start the next pending task
-```
+Per `${CLAUDE_SKILL_DIR}/../_fragments/NEXT.md`.
+Show-user → apply + revise lead.
+Post-commit → POST-APPLY leads (BACKPROP concrete build; DISTILL check + confirm-?; FOLD-IN github issue or fold-design+issue N merge when approved — say "merge the PR"; else check then build).
 
 ## NON-GOALS
 
-- Writes serialize on main thread; reads delegable to sub-agents — SPEC.md draft + apply + commit stays main-thread; BACKPROP root-cause + NEW/DISTILL code-walk reads delegable.
-- No dashboards, no logs, no state files beyond SPEC.md itself.
-- No auto-build after spec.
-  User invokes build explicitly.
+- Writes serialize on main thread; reads delegable to Agent sub-agents (BACKPROP root-cause + NEW/DISTILL code-walk).
+- No dashboards.
+  Cache files (`.spec/backprop-handoff.json`, check memo) are not design truth.
+- No auto-build after non-BACKPROP spec except github PR recipe post-spec-commit chain per `${CLAUDE_SKILL_DIR}/../_fragments/POST-SPEC-CHAIN.md`.

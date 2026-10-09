@@ -108,13 +108,13 @@ Optional `SPEC.archive.md` @ repo root is sibling file carrying verbatim archive
 
 ### Archive marker
 
-When `SPEC.archive.md` exists, SPEC.md §T and §B sections ! contain per-section archive marker H2 line directly under section heading:
+When `SPEC.archive.md` holds archived rows for §T or §B, that SPEC.md section ! contain per-section archive marker H2 line directly under section heading (section w/ zero archived rows carries no marker):
 
 ```
 ## archived: §<S>.<a>..§<S>.<b> → SPEC.archive.md (<n> rows)
 ```
 
-Where `<S>` in {`T`, `B`}, `<a>` is lowest archived id, `<b>` is highest archived id, `<n>` is row count.
+Where `<S>` in {`T`, `B`}, `<a>` is lowest archived id, `<b>` is highest archived id, `<n>` is row count. Range + count ! match archived rows.
 
 When `SPEC.archive.md` contains `## §V.retired` block, SPEC.md §V section ! contain archive marker H2 line directly under section heading:
 

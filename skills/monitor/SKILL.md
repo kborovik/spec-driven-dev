@@ -13,12 +13,17 @@ user-invocable: false
 
 # monitor — skill-deviation capture → plugin-repo issue
 
-Auto-fire sub-skill, 5th member of the sub-skill-flags family (telegraph, backprop, socratic, steno, monitor).
+Auto-fire sub-skill per the sub-skill-flags invariant (`user-invocable: false`, never `disable-model-invocation`).
 No hook — the skills-only invariant bans runtime interception; monitor = LLM self-report, not a wrapper.
 Ships PUBLISHED to every consumer → every plugin user is a data source.
 
 Trigger lives in this frontmatter description only — zero edits to existing skill bodies (byte-identical).
 Body LLM-facing → telegraph.
+
+## ENGAGE LOG
+
+When this skill fires, emit one telegraph line before PROTOCOL: `engaged sdd:monitor — <auto-fire|mechanization-candidate>`.
+Operator must see the governor (auto-fire visibility).
 
 ## WHEN — fires mid-skill-run when an sdd skill deviates:
 
@@ -47,15 +52,12 @@ No deviation → no fire.
 6. **GATE** — AskUserQuestion before any gh write (decision-gate invariant).
    Header `Skill deviation`, question body surfaces the resolved `--repo <target>` verbatim (operator confirms exact write destination before any publish); mutually-exclusive labels: `File issue` (miss), `Comment` (hit), `Skip`.
    No auto-file path exists.
-7. **WRITE** — immediately pre-write assert resolved `--repo` == `<target>` (= manifest `.repository`, step 4); mismatch → abort, no gh write (monitor-protocol invariant). `<target>` ! derive from `.repository` only — a repo named in the deviation excerpt is never sourced as `--repo` (redaction strips it; this assertion backstops a leak).
-   Then per gate selection:
-   - miss + File issue → `gh issue create --repo <target> --title "<skill>: <deviation summary>" --body <steno>` (github-facing-register → steno per steno skill).
-   - hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per deviation class).
-   - Skip → nothing written.
+7. **WRITE** — per `## WRITE`.
+   Title `<skill>: <deviation summary>`.
 
 ## DISPATCHED — `mechanization-candidate` entry path
 
-Second entry path, not auto-fire (mechanize-scan invariant).
+Second entry path, engaged via `/sdd:spec mechanization-candidate` (mechanize-scan invariant).
 Engaged from a user-invocable recipe's MECHANIZE `## Next` item — consumer plugin-target only.
 Carries the observed pattern + proposed script mode, not a deviation → no CAPTURE, no WHEN trigger.
 Skips the dev-repo backprop hand-off: mechanize-scan routes a dev-repo candidate to /sdd:spec → §T row and a consumer repo-local one to the consumer's /sdd:spec → extras row; only the consumer-plugin-target case reaches here, so no ROUTE step.
@@ -73,11 +75,19 @@ Ordered, stop on bail:
 4. **GATE** — AskUserQuestion before any gh write (decision-gate invariant).
    Header `Mech candidate`, question body surfaces the resolved `--repo <target>` verbatim (operator confirms exact write destination before any publish); mutually-exclusive labels: `File issue` (miss), `Comment` (hit), `Skip`.
    No auto-file path exists.
-5. **WRITE** — immediately pre-write assert resolved `--repo` == `<target>` (= manifest `.repository`, TARGET step); mismatch → abort, no gh write (monitor-protocol invariant). `<target>` ! derive from `.repository` only — a repo named in the candidate excerpt is never sourced as `--repo` (redaction strips it; this assertion backstops a leak).
-   Then per gate selection:
-   - miss + File issue → `gh issue create --repo <target> --title "<skill>: mech candidate — <pattern>" --body <steno>` (github-facing-register → steno per steno skill; body = observed pattern + proposed script mode).
-   - hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per candidate class).
-   - Skip → nothing written.
+5. **WRITE** — per `## WRITE`.
+   Title `<skill>: mech candidate — <pattern>`.
+   Body = observed pattern + proposed script mode.
+
+## WRITE
+
+Immediately pre-write assert resolved `--repo` == `<target>` (= manifest `.repository`); mismatch → abort, no gh write (monitor-protocol invariant).
+`<target>` ! derive from `.repository` only — a repo named in the excerpt is never sourced as `--repo` (redaction strips it; this assertion backstops a leak).
+Then per gate selection:
+- miss + File issue → `gh issue create --repo <target> --title <title> --body <steno>` (github-facing-register → steno per steno skill).
+- hit + Comment → `gh issue comment <n> --repo <target> --body <steno occurrence>` (occurrence count = signal; one issue per class).
+- Skip → nothing written.
+Title and body supplied by the entry path (PROTOCOL vs DISPATCHED).
 
 ## REDACTION — mandatory
 
@@ -93,7 +103,6 @@ Hand off to backprop, file no issue.
 
 ## NON-GOALS
 
-- no hook / runtime interception (skills-only invariant — no hooks).
 - no auto-file — every gh write operator-gated; silent publish impossible (decision-gate invariant).
 - no CI / scheduled filing, no telemetry, metrics, or dashboards.
-- never edits SPEC.md or any skill body — existing skills stay byte-identical.
+- never writes or edits SPEC.md or any skill body — existing skills stay byte-identical.

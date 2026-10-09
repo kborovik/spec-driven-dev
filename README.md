@@ -134,15 +134,26 @@ Backticks are allowed.
 ### `/sdd:design`
 
 `/sdd:design` is for a structural choice: tradeoffs, named alternatives, or how a subsystem should be shaped.
-The model proposes a shape.
+The skill enters Claude Code plan mode and writes the proposal to the session plan file.
 You critique it.
 The loop stops when `## Open Questions` is empty.
-The result is saved to `designs/<slug>.md`.
-`/sdd:spec` later copies the decisions into `§V` and `§T` rows.
-The draft file stays in the working tree until you remove it or keep it.
+You approve the plan in the plan-mode prompt.
+
+After you approve, the skill opens a GitHub issue with the plan as its body.
+The issue gets a class label: `enhancement`, `bug`, or `documentation`.
+The default label is `enhancement`.
+The issue body ends with an `## Acceptance` checklist built from the plan's success criterion.
+Then the skill stops.
+It does not write `designs/<slug>.md` unless you ask for a copy.
+
+Fold the issue into the spec later with `/sdd:spec github issue N`.
+In the same session, `/sdd:spec fold-design` also works and keeps the link to issue N.
+An older `designs/<slug>.md` draft still folds with `/sdd:spec designs/<slug>.md`.
 
 ```bash
 /sdd:design how should the release pipeline split monorepo plugins?
+# after you approve: a labeled GitHub issue is opened
+/sdd:spec github issue N
 ```
 
 `/sdd:design` stops when every structural question has a decision.
@@ -168,7 +179,52 @@ With an existing `SPEC.md`, the mode is **BACKPROP**, **AMEND**, or rarely **NEW
 /sdd:spec build the spec from this codebase
 /sdd:spec V<n>'s `≤` should be `<` for unsigned tokens
 /sdd:spec rate-limiter dropped requests under 100rps
+/sdd:spec github issue 12   # fold an issue into §V and §T; see Issue-linked pull request
 ```
+
+A small amend (one target, one cell or line, no new `§V` row) still shows a preview.
+Its confirm option `Apply` comes first.
+After a **BACKPROP**, the next item names the exact `/sdd:build §T.<n>` to run.
+After a **DISTILL**, the next items are `/sdd:check` and a confirm pass over rows marked `?`.
+
+### Issue-linked pull request
+
+Every GitHub issue you work on gets one pull request linked to it.
+No corresponding GitHub issue means no git branch, no GitHub PR.
+In that case the work commits on the current branch.
+
+`/sdd:spec github issue N` runs these steps once, before it writes any spec change:
+
+1. Push the default branch when it is ahead of `origin`.
+2. Check out the issue branch with `gh issue develop N --checkout`.
+3. Make one empty commit, so the branch is one commit ahead of its base.
+4. Open a draft with `gh pr create --draft`.
+   The body has a `Related: #<issue>` line.
+   It has no close trailer, and review does not run at this point.
+
+A missing `SPEC.md` does not skip the pull request.
+When an open pull request for the issue already exists, the command switches to its branch and opens no second one.
+
+With `SPEC.md` present, the fold drafts the spec change on the issue branch.
+After you confirm, it commits and pushes.
+Then a chain runs once with no wait for you:
+
+1. A sub-agent runs `/sdd:build` on the fold-produced `§T` ids only.
+   Those ids are the new `§T` rows and the existing open rows that got acceptance notes in this fold.
+2. The bundled `code-review` skill reviews the branch.
+   A doc-or-comment diff skips review.
+   That diff changes only `SPEC.md`, `SPEC.archive.md`, `.spec/check-extras.md`, `SPEC-FORMAT.md`, `README.md`, `CLAUDE.md`, or files under `designs/`, or it changes only comment and whitespace lines.
+3. The parent applies the review findings, runs the checks again, pushes, and runs `gh pr ready`.
+
+**Acceptance gate.**
+Before any step closes issue N, build and the github skill read the issue's `## Acceptance` checklist.
+Each open item needs evidence: a test name, a code path, or a command result.
+An item without evidence blocks the close.
+An issue with no `## Acceptance` section produces an advisory, not a silent pass.
+
+The close trailer (`Closes #<issue>`) is added only at merge, after the acceptance gate passes.
+Merge is a squash with branch delete.
+The squash commit subject holds `#<issue>`, the linked issue number, so `git log` shows which issue closed.
 
 ### `/sdd:build`
 
@@ -179,7 +235,15 @@ Planning reads may use sub-agents.
 - `§T.<n>` implements that task.
 - `--next` implements the lowest-numbered row with status `.`.
 - `--all` implements every `.` row in `§T` order.
+- `§T.<a>,§T.<b>` implements those rows in `§T` order.
+- `--no-chain` turns off the follow-up check described below.
 - An empty argument does the same thing as `--next`.
+
+After a task passes, build runs `/sdd:check` on the closed task in the same turn.
+This follow-up is called the green-path chain.
+It makes one hop per turn: a command reached by a hop does not hop again.
+On an issue-linked branch, build instead pushes after each task and marks the pull request ready once at the end.
+It then asks you to say "merge the PR" when review approves.
 
 Each task runs four steps:
 
@@ -214,10 +278,13 @@ It always audits `§V`, `§I`, and `§T` together.
 - An empty argument re-checks `§V` rows touched since the last clean run.
   Untouched rows stay marked `HOLD-SINCE-CLEAN`.
 - `--full` deletes `.spec/check-state.json` first and classifies every row again.
+- `--no-chain` turns off the follow-up build described below.
 
 Violations are grouped as `VIOLATE`, `RISK`, or `STALE`.
-The report names a next command, usually `/sdd:spec <intent>` or `/sdd:build`.
-It never runs that command.
+The report names a next command, usually `/sdd:explain`, `/sdd:spec <intent>`, or `/sdd:build`.
+A report with violations never runs a fix.
+A clean report with open tasks runs `/sdd:build --next` once in the same turn.
+Check itself runs in a read-only forked context, so that build runs in the main session.
 
 ### `/sdd:explain`
 
@@ -259,7 +326,8 @@ The map is `.spec/spec-renumber-map.json`.
 ### New project
 
 ```bash
-/sdd:design how should we shape the parser / renderer split?   # optional; structural questions only
+/sdd:design how should we shape the parser / renderer split?   # optional; opens a GitHub issue
+/sdd:spec github issue N    # fold that issue; or describe the project directly:
 /sdd:spec build a static-site generator that converts a Markdown directory into a single-page HTML bundle
 # review §G §C §I §V in SPEC.md, then amend if needed
 /sdd:build --next   # plan, implement, and verify the scaffold task
@@ -354,14 +422,18 @@ That is the measured cut of about 40%, inverted.
 
 ## Files
 
-`telegraph`, `backprop`, `socratic`, and `steno` run from the commands above.
-Each directory under `skills/` is one slash command.
+`telegraph`, `backprop`, `socratic`, `steno`, `github`, and `monitor` run from the commands above.
+You do not call them by slash command.
+Each other directory under `skills/` is one slash command.
 `skills/spec/` is `/sdd:spec`.
+Skill frontmatter is honored on dispatch: `description`, `argument-hint`, `allowed-tools`, `disallowed-tools`, `user-invocable`, `context`, and `effort`.
+`check` and `explain` set `effort: medium`.
+No skill sets `model`, so each skill uses the session model.
 
 ```
 .claude-plugin/plugin.json       plugin manifest (name: sdd)
 .claude-plugin/marketplace.json  marketplace manifest for direct install
-skills/design/                   /sdd:design — propose, then critique, then designs/<slug>.md
+skills/design/                   /sdd:design — plan mode, then a labeled GitHub issue
 skills/spec/                     /sdd:spec — the only SPEC.md writer
 skills/build/                    /sdd:build — plan, then execute
 skills/check/                    /sdd:check — read-only drift report
@@ -372,6 +444,9 @@ skills/telegraph/                short-grammar encoder; runs on spec writes
 skills/backprop/                 bug-to-spec protocol; runs from /sdd:build on a spec failure
 skills/socratic/                 one question to sharpen intent; called by /sdd:spec
 skills/steno/                    short prose for text a human reviews
+skills/github/                   gh issue and pull-request workflow; runs on gh operations
+skills/monitor/                  files a plugin issue when an sdd skill misbehaves
+skills/_fragments/               shared recipe text loaded by the skills (not commands)
 scripts/check-mechanical.py      deterministic checks used by /sdd:check
 benchmarks/telegraph/            token-reduction benchmark, results, and write-up
 SPEC-FORMAT.md                   format contract for every SPEC.md

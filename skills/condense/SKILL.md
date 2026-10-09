@@ -6,7 +6,6 @@ description: |
   emits `## advisory` token-budget overflow line. Phrasings: "/sdd:condense",
   "condense SPEC.md", "SPEC too big", "shrink the spec", "token budget".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Bash(git *), Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, Skill(sdd:*), TaskCreate, TaskUpdate
-model: sonnet
 ---
 
 # condense — SPEC.md condenser
@@ -19,11 +18,9 @@ Writes serialize main-thread; per-prong scan reads delegable to sub-agents.
 
 ## PROGRESS
 
-Multi-phase run per response-shape invariant → emit live harness checklist.
 Phases: LOAD, PROPOSE (six-prong scan), CONFIRM, EXECUTE.
-TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/PROGRESS.md` (TaskCreate, TaskUpdate).
 CONFIRM cancel / subset-skip → unreached phases `deleted`, not `completed`.
-Checklist = ephemeral harness UI: never repo state, never substitutes the `## Next` block.
 
 ## LOAD
 
@@ -39,19 +36,21 @@ Checklist = ephemeral harness UI: never repo state, never substitutes the `## Ne
 Six prongs, execution order 1 → 6.
 Per prong: scan SPEC.md for trigger match; emit firing-set + skip-set w/ 1-line rationale each.
 
-Script modes below run `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py <mode>`; exact script-path grant pin via `${CLAUDE_SKILL_DIR}` frontmatter substitution (script-sole use, same variable in grant + body cmd) per tooling-preference invariant.
+One script call: `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-condense-propose`; exact script-path grant pin via `${CLAUDE_SKILL_DIR}` frontmatter substitution (script-sole use, same variable in grant + body cmd) per tooling-preference invariant.
+Emit labeled tables (`## fold-seeds`, `## superseded`, `## archive-window`, `## residue`, `## v-weights`) with columns unchanged vs standalone modes.
+Consume this emit — never five separate emit-* calls.
 
 ### Prong 1 — §V fold-first sweep
 
 Fold pattern-mirrored sibling §V rows into target row inline.
-Seed script-computed: `check-mechanical.py emit-fold-seeds` emits `cluster_members|co_citers` table — connected components of live §V rows sharing a citer (§T `cites` or §B `fix` naming ≥ 2 live §V rows).
+Seed = `## fold-seeds` table (`cluster_members|co_citers`) — connected components of live §V rows sharing a citer (§T `cites` or §B `fix` naming ≥ 2 live §V rows).
 Seed advisory not auto-apply: co-citation is candidacy signal not proof; operator confirms each fold @ CONFIRM (LLM judges topic coherence).
 Augment seed w/ topic-keyword overlap (shared scope tokens / procedure refs / verb pattern) where co-citation thin.
-Fires first — fold reshapes later prongs (prong 6 inherits folded shape).
+Fires first — fold reshapes later prongs (prong 6 re-runs weights after fold when this prong fires).
 
 ### Prong 2 — SUPERSEDED §T inline marker
 
-Candidates script-computed: `check-mechanical.py emit-superseded` emits `tid|superseded_v|original_cites` table — closed §T (status `x`) whose §V cite resolves into no live §V row (only archived §V.retired block or nowhere) → SUPERSEDED candidate.
+Candidates = `## superseded` table (`tid|superseded_v|original_cites`) — closed §T (status `x`) whose §V cite resolves into no live §V row (only archived §V.retired block or nowhere) → SUPERSEDED candidate.
 Live-only resolution — distinct from cite-DAG audit live+archive scope.
 Consume table; not by-hand per-cite resolution.
 Operator confirms each (content-amend-away not cite-detectable).
@@ -60,15 +59,21 @@ Preserves row id; closes cite-DAG-miss audit noise.
 
 ### Prong 3 — §T/§B window-vs-archive split
 
-Trigger: closed §T rows > 50.
-Older closed rows → `SPEC.archive.md` (repo-root sibling, committed, id ascending). §T/§B gain per-section marker `## archived: §<S>.<a>..§<S>.<b> → SPEC.archive.md (<n> rows)`.
+Candidates = `## archive-window` table (`action|tid_lo|tid_hi|count|marker`) — closed §T (status `x`) vs `ARCHIVE_CLOSED_T` (single source; not hardcode).
+`skip` action → prong 3 skip (no archive).
+`archive` + `keep` rows → keep newest N closed live, archive older closed id-asc; `marker` cell is the SPEC-FORMAT §T archive-marker H2.
+Consume table only; not hand-count closed §T.
+On archive: older closed rows → `SPEC.archive.md` (repo-root sibling, committed, id ascending). §T/§B gain per-section marker from table (form `## archived: §<S>.<a>..§<S>.<b> → SPEC.archive.md (<n> rows)`).
 Archive carries verbatim row text. /sdd:check cite-DAG sweep eager-probes archive; archived rows stable so memo HOLD-SINCE-CLEAN across runs.
 
 ### Prong 4 — history-residue prune
 
 Prune history residue across live §V/§T/§B row bodies — SPEC.md is clean current design; history lives in commit log + archive.
-Member set = script-owned `PRUNE_PATTERNS` (sole source per freshness-contract + mechanical-realization invariants — shared w/ /sdd:check audit + /sdd:spec write-time prune); consume `check-mechanical.py emit-prune-patterns` → `id|role|pattern|action` table, never a restated member list.
-Role application @ trim: `residue` rows → apply `action` (drop; commit msg + `§B.cause`/`§T.cites` cite-DAG preserve narrative); `fold` rows → apply fold action; `pre-filter` rows → exempt match.
+Candidates = `## residue` table (`section|id|pattern|line`) — every live row hit by the script-owned `PRUNE_PATTERNS` set or oversized §T `task` / §B `cause` cells (`oversized-cell`), after the same pre-filters as the audit path.
+Empty body (header only) → prong 4 skip.
+Consume table; not hand regex / per-run pattern paraphrase (freshness-contract + mechanical-realization invariants — single source with `audit_history_residue`).
+Per-hit action = `action` cell of the matching `emit-prune-patterns` row (`id|role|pattern|action`): `residue` → drop (commit msg + `§B.cause`/`§T.cites` cite-DAG preserve narrative); `fold` → apply fold action; `pre-filter` → exempt.
+`oversized-cell` → §T body-trim / §B cause one-line trim (surplus → commit-msg body).
 
 **§T body-trim** — owned here because /sdd:build flips status cell only, so §T body not reachable by /sdd:spec write-time prune: oversized `task` cell carrying step-by-step transcript → one-line goal; surplus → commit-msg body.
 Mirrors §B `cause` one-line trim.
@@ -83,8 +88,11 @@ Verbatim-preservation holds: code, paths, URLs, identifiers, numbers, versions, 
 
 ### Prong 6 — §V audit-recipe extraction
 
-Heavy set script-computed: `check-mechanical.py emit-v-weights` emits `v_row|bytes|tokens|cum_pct|heavy` table, heaviest first; heavy = top rows whose cumulative weight first reaches ≥ 50% of §V-section total (tie-break descending weight then ascending id — run-stable).
+Heavy set = `## v-weights` table (`v_row|bytes|tokens|cum_pct|heavy`), heaviest first.
+Prong 1 fired → re-run `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py emit-v-weights` post-fold and consume that table; else consume the `## v-weights` table from PROPOSE.
+Consume stub-skip from table: extract `heavy=yes` only; `heavy=no` (already-stubbed `→ .spec/check-extras.md §V<n>` rows) → no re-extract.
 Not by inspection.
+Not a second stub-detect pass — the table owns stub-skip.
 Heavy rows: extract audit-recipe content → `.spec/check-extras.md` (REPO-LOCAL extension); SPEC.md row keeps 1-line ref.
 Check skill loader already path-probes `.spec/check-extras.md` — no check-skill amend.
 
@@ -109,51 +117,25 @@ Single atomic commit:
 2. Prong 3 fired → `git add SPEC.archive.md`.
 3. Prong 6 fired → `git add .spec/check-extras.md`.
 4. Prong 1 fired → cite-DAG sweep same commit; touch REPO-LOCAL citers renumbered by fold.
-5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit `git commit -m <subject> -- <staged artifacts> SPEC.md` (write-ownership invariant — commit scopes to staged owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `condense SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
+5. Stage remaining artifacts + `SPEC.md` (`git add`), then path-scoped commit per `${CLAUDE_SKILL_DIR}/../_fragments/PATH-SCOPED-COMMIT.md`: `git commit -m <subject> -- <staged artifacts> SPEC.md`; auto-commit msg `condense SPEC.md: prongs {<firing-set>} (~<n>k → ~<m>k tokens)`; no user prompt.
 
 EXECUTE ends @ commit.
 Rollback `git revert <condense-sha>`.
 Drift cascade → Next-block item #1; operator dispatches next turn.
 
-## MECHANIZE — script-candidate scan
+## MECHANIZE
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
-Candidate = any of:
-
-- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
-- LLM-side join / sort / count / dedup over script-emittable data
-- multi-step parse collapsible to one script emit mode
-- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
-
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
-Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
-Route by cwd:
-
-- dev repo (this plugin) → /sdd:spec → new §T row
-- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
+Load `${CLAUDE_SKILL_DIR}/../_fragments/MECHANIZE.md`.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
-Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/NEXT.md`.
 State-mutator → post-EXECUTE prefer `/sdd:check` (confirm cite-DAG + format-layer + token-budget clean).
-
-Example after EXECUTE (firing-set {1,2,3,4,5}; commit auto-fired):
-
-```
-## Next
-
-1. /sdd:check — cascade scan over condensed SPEC.md
-2. /sdd:build --next — start the next pending §T row
-3. git revert <condense-sha> — rollback if condensation breaks downstream
-```
-
-Variants: CONFIRM cancel (no commit) → swap item 1 for `/sdd:condense` (re-run to apply after spec review), drop item 3.
+CONFIRM cancel (no commit) → `/sdd:condense` re-run; drop revert item.
 CONFIRM subset → Next-block unchanged.
 
 ## NON-GOALS
 
 - not auto-fire — /sdd:check emits advisory; operator invokes /sdd:condense next turn.
-- not partial commit — every firing prong applies or none.
-- not retune thresholds (20k-token advisory, > 50 closed-§T archive trigger) in this skill body — canonical values live in the token-budget-condense invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.
+- not partial commit — the confirmed prong set applies in one commit or not at all; CONFIRM may narrow that set (force-skip, subset), never split the commit.
+- not retune thresholds (`TOKEN_BUDGET` 20k-token advisory, `ARCHIVE_CLOSED_T` closed-§T archive trigger) in this skill body — canonical values live in the token-budget invariant row (SPEC.md) w/ mechanical mirrors in `check-mechanical.py` constants; retune via /sdd:spec AMEND + sync the script constant same commit.
