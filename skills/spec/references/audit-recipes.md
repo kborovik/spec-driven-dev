@@ -21,8 +21,6 @@ Each surviving match resolves against current SPEC.md §V row set (parse `^V[0-9
 Unresolved → bail `stale §V.<n> cite in delta — row absent (likely folded); backtick-wrap historical or substitute live row` until rewrite.
 No narrative delta → no-op.
 
-(a) defends against PUBLISHED-touching deltas via spec-cmd flow — `/sdd:spec` normally writes SPEC.md only so typically no-op. (b) closes post-fold authoring gap — fold-time sweep (condense prong-1) substitutes existing cites @ fold-commit; new bare cites to folded id authored post-fold bypass until next `/sdd:check`.
-Pattern-match catches what LLM prose-review missed (see §B history).
 
 ## NEXT-BLOCK-SECTION AUDIT
 
@@ -35,8 +33,6 @@ Each touched file in post-amend tree:
 3. Else grep `## OUTPUT — "Next" block` heading in post-amend file.
    Match → no-op; else bail `<skill> SKILL.md lacks Next-block section per /<plugin>:<n> response-shape contract` until author adds §.
 
-Defends against new user-typeable skill bodies (or cross-plugin migrations) omitting Next-block contract sister skills carry — V20-class runtime rule governs response shape, not authoring-time presence (see §B history).
-Structurally no-op while APPLY step 4 writes SPEC.md only (mirrors pinned-cite (a) posture).
 
 ## FOLD-FIRST AUDIT
 
@@ -55,5 +51,3 @@ Each proposed new §V row in delta:
      - `New row (cite §B recurrence-class)` → proceed; requires §B.<k> cite in delta justifying split (audit greps `§B\.[0-9]+` post-selection).
      - `New row (orthogonal concept)` → proceed; user-typed orthogonal-concept declaration recorded in commit msg post-selection.
 3. Fold-into → re-render delta as §V.<m> amend, re-enter APPLY @ step 0 per Re-entry rule (re-prune + re-audit — not jump to show-user); new-row branches → record justification, proceed to show-user.
-
-Defends against premature-split class — small audit or enforcement-meta additions creating new §V row when inline amend sufficed. "mirrors §V.<n>" alone insufficient justification per fold-first authoring invariant.

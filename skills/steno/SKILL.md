@@ -3,12 +3,17 @@ name: steno
 description: |
   Simple technical language for human readers — terse-prose register for
   non-author reviewers.
-  Triggers: write/edit human-facing terse prose for review; user says
-  "steno", "shorthand", "tighten this", "make this shorter".
+  Not user-invoked — engaged from caller recipes when writing human-facing
+  terse prose (GitHub issue/PR bodies, commit-message bodies, README scan
+  prose).
 user-invocable: false
 ---
 
 # steno — simple technical language
+
+## ENGAGE LOG
+
+When engaged for human-facing prose, emit one telegraph line once per run: `engaged sdd:steno`.
 
 Audience: human reviewer scanning prose for facts — not a token-optimised model.
 Anchor: simple technical language — clarity primary, compression subordinate; a word that aids the skim stays.

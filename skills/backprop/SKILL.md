@@ -47,10 +47,11 @@ Writes split per write-ownership (spec = sole SPEC.md mutator; build = code writ
 1. **Spec commit** — spec skill BACKPROP mode applies §B (+ §V, §T) → auto-commit `backprop §B.<n>(+) + §V.<N>(+): <one-line cause>`.
    SPEC.md only.
    Record lands even when fix deferred.
-2. **Code commit** — /sdd:build (resume or operator-dispatched): invariant w/o test = lie → add failing test first, name cites invariant (`TestV<N>_RefundIdempotent`), watch fail.
+   Spec also writes `.spec/backprop-handoff.json` resume card `{B, V, T, test_name_hint}` and Next leads with concrete `/sdd:build §T.<n>`.
+2. **Code commit** — /sdd:build (resume or operator-dispatched): LOAD reads resume card when present; invariant w/o test = lie → add failing test first, name cites invariant (`TestV<N>_RefundIdempotent`), watch fail.
    Fix code.
    New test ! pass; full suite ! no regression.
-   Commit `T<n>: <goal>` citing new §B/§V.
+   Commit `T<n>: <goal>` citing new §B/§V; delete resume card on close.
 
 ## WORKED EXAMPLE
 

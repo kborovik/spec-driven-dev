@@ -50,6 +50,7 @@ Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT r
 ## Remedy map — drift class → Next-block item
 
 - VIOLATE / DRIFT → `/sdd:spec <description citing §V.<n>>` (gate routes to BACKPROP).
+- UNVERIFIABLE or multi-cite VIOLATE → lead with `/sdd:explain §V.<n>` before `/sdd:spec` / `/sdd:build`.
 - VIOLATE-CAPTURED → no action; baseline `§B`-recorded, remediation forward-only.
 - `history:` VIOLATE → `/sdd:spec amend §<S>.<n>` to prune inlined history; task-row residue → `/sdd:condense` body-trim.
 - `format:` VIOLATE → `/sdd:spec amend §<S>.<n>` (or `/sdd:condense` when archive-marker / window split).
@@ -58,6 +59,10 @@ Rows roll forward run-to-run; HOLD re-verifies on next dirty-scope hit; LATENT r
 - STALE → `/sdd:spec amend <task-cite>` to uncheck status.
 - EXTRA → invariant mandates the surface → `/sdd:spec amend interfaces` (cause known); invariant silent → `/sdd:spec <surface> missing from interfaces section` (cause TBD, `§B` row starts conversation).
 - UNRESOLVED / TYPE-MISMATCH → `/sdd:spec amend §<S>.<n>` to repair stale or wrong-section cite.
+- reorganize advisory (sparse §V numbering / cluster gap) → `/sdd:reorganize`.
+- token advisory → `/sdd:condense`.
+
+Never auto-remedy on dirty report.
 
 ## Checkpoint + advisory example
 

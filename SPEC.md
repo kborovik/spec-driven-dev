@@ -9,50 +9,51 @@ LLM writes code faster than humans read → standards + logic drift unchecked; c
 - installable Claude Code plugin marketplace; root-source plugin `sdd` (`.claude-plugin/marketplace.json`, source `./`)
 - skills-only: every surface = `skills/<name>/SKILL.md`; no commands/ tree, no hooks
 - `scripts/check-mechanical.py` single-file, stdlib-only python3
-- no orchestrator, no swarm: main Claude executes; sub-agents read-only
+- no orchestrator, no swarm: main Claude executes; sub-agents read-only; exclusion: github post-spec-commit `/sdd:build` child on fold-produced §T ids write-capable; bundled `code-review` sub-agent scratch writes only (github-workflow invariant)
 - no state beyond SPEC.md + git + REPO-LOCAL `.spec/` cache
 
 ## §I INTERFACES
 
 external surface — what operator + consuming repo see.
 
-- design: `/sdd:design <topic>` → propose-critique loop → `designs/<slug>.md` (SPEC.md untouched)
-- spec: `/sdd:spec <intent>` → socratic gate → SPEC.md delta preview → apply + auto-commit
-- build: `/sdd:build [§T.n|--next|--all]` → plan → edit → verify → flip §T `.`→`x` + commit per task
-- check: `/sdd:check [--full]` → read-only drift REPORT (severity blocks, checkpoint, advisory, summary) + Next block
+- design: `/sdd:design <topic>` → Claude Code plan mode propose-critique → approved plan → hand title/body (Problem + Proposal + Design decisions + Effect + Out of scope + Unresolved when present)/Acceptance/class to github ISSUE + stop; later fold via `/sdd:spec github issue N` or same-session `/sdd:spec fold-design` (preserves issue N linkage; no default `designs/` write)
+- spec: `/sdd:spec <intent>` → socratic gate → SPEC.md delta preview → apply + auto-commit; fold-design + micro-AMEND paths; `github issue N` / fold-design+issue N → push default branch then issue branch then one commit ahead of base (not spec delta) then draft PR (`Related: #<issue>`; no Closes; no review-at-create) before spec delta, including when SPEC.md missing; block runs once (open PR → switch and stop); SPEC.md present → draft + commit + PUSH; SPEC.md missing → no delta write; later NEW/DISTILL/AMEND/build on that branch PUSH; post-spec chain builds fold-produced §T ids (new + Acceptance-touched existing `.`) then review then READY; non-issue path: no BRANCH, no PR
+- build: `/sdd:build [§T.n|§T.a,§T.b,…|--next|--all|--no-chain]` → plan → edit → verify → flip §T `.`→`x` + commit; green-path one hop per operator turn → check; issue-linked → PUSH per task, READY once post-loop (no check hop; Next merge phrasing); post-spec child (`POST-SPEC-CHILD=1`): fold-produced §T ids, implies `--no-chain`, PUSH only; task-scoped acceptance @ build; full acceptance @ MERGE only; MERGE probes checks + reviewDecision + mergeable
+- check: `/sdd:check [--full|--no-chain]` → forked read-only recipe + script; REPORT + Next; clean chain → `## chain` hop line → main thread build --next
 - explain: `/sdd:explain [§-cite|--next]` → prose expansion w/ cited siblings, zero writes
 - condense: `/sdd:condense` → six-prong token sweep, single atomic commit
-- reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep, single atomic commit
-- script: `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, fix-sembr, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, --self-test
+- reorganize: `/sdd:reorganize [--taxonomy-only]` → §V cluster + renumber + cite sweep (updates SPEC.md stubs and `.spec/check-extras.md` row prefixes), single atomic commit
+- script: `python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py <mode>` → pipe-table `id|verdict|evidence`; modes: audit, write-memo, fix-sembr, emit-v-slices, emit-superseded, emit-fold-seeds, emit-v-weights, emit-row-ids, emit-overview, emit-token-estimate, emit-prune-patterns, emit-residue, emit-archive-window, emit-condense-propose, emit-check-agent-prompt, --self-test
+- fragments: `skills/_fragments/*` shared recipe text (MECHANIZE, NEXT, CHAIN, ACCEPTANCE-GATE, POST-SPEC-CHAIN, …) — not slash surfaces
 - format: `SPEC-FORMAT.md` → row shape + section catalog contract; loaded by spec, check, condense, reorganize
 
 ## §V INVARIANTS
 
 numbered, testable, named; each ! hold. ids clustered by topic; gaps = cluster spans + closure history.
 
-V1: spec-adjacent-register — SPEC.md, `skills/**/SKILL.md`, SPEC-FORMAT.md, spec-referencing prose ! telegraph per telegraph skill; /sdd:explain decodes on demand.
-V2: github-facing-register — README, issues, PRs, commit-msg bodies ! steno per steno skill; commit subjects = per-skill fixed templates, verbatim.
+V1: spec-adjacent-register — → `.spec/check-extras.md §V1`
+V2: github-facing-register — → `.spec/check-extras.md §V2`
 V3: verbatim-preservation — → `.spec/check-extras.md §V3`
 V4: symbol-set — → `.spec/check-extras.md §V4`
-V10: sole-source-of-truth — SPEC.md @ repo root is sole live spec; no docs/ tree, no sidecars; SPEC.archive.md sibling carries immutable archived rows only.
-V11: shape-semantics-split — SPEC-FORMAT.md binds row shape + section catalog + citation grammar; §V rows bind semantics + enforcement; neither restates the other.
-V12: monotonic-numbering — V/T/B ids strictly increasing in section order; gaps OK, reuse banned; sole renumber path = /sdd:reorganize (map append + cite sweep, same commit).
-V13: cite-resolution — every cite ! resolve: `cites` tokens → live/archived V/T/B row or live §I kind, `fix` tokens → §V row, free-text `§<S>.<n>` → §<S> row; renumber sweeps citers same commit.
-V14: pinned-cite-ban — PUBLISHED bodies ! placeholder (`§V.<n>`) or named-invariant form, never pinned §-digit cites; SPEC.md-narrative + REPO-LOCAL pinned cites ! resolve live.
-V15: renumber-chain-walk — `.spec/spec-renumber-map.json` append-only; historical id resolves newest-first to live id or `archive` sentinel (→ SPEC.archive.md §V.retired block, never live row).
-V16: archive-semantics — archived §T/§B + retired §V rows migrate verbatim to SPEC.archive.md w/ per-section markers per SPEC-FORMAT; archived rows stay cite-resolvable, never edited.
+V10: sole-source-of-truth — → `.spec/check-extras.md §V10`
+V11: shape-semantics-split — → `.spec/check-extras.md §V11`
+V12: monotonic-numbering — → `.spec/check-extras.md §V12`
+V13: cite-resolution — → `.spec/check-extras.md §V13`
+V14: pinned-cite-ban — → `.spec/check-extras.md §V14`
+V15: renumber-chain-walk — → `.spec/check-extras.md §V15`
+V16: archive-semantics — → `.spec/check-extras.md §V16`
 V20: write-ownership — → `.spec/check-extras.md §V20`
-V21: write-serialize — SPEC.md + code writes serialize main-thread; reads delegable to read-only sub-agents.
-V22: recipe-step-no-dispatch — slash-cmd dispatch = operator turn only; recipes end @ commit + Next block; sole exclusion: /sdd:build verify-fail routes cause to spec skill mid-loop.
+V21: write-serialize — → `.spec/check-extras.md §V21`
+V22: recipe-step-no-dispatch — → `.spec/check-extras.md §V22`
 V23: decision-gate — → `.spec/check-extras.md §V23`
 V24: response-shape — → `.spec/check-extras.md §V24`
-V25: socratic-gate — /sdd:spec mode {NEW, DISTILL, BACKPROP, AMEND, FOLD-IN} = gate byproduct of free-form `$ARGUMENTS`; no mode prefixes, no skip flags; concrete intent converges ≤ 1 turn.
-V26: first-principle-probe — NEW mode fires foundational-claim question exactly once, declinable; `first-principle-asked` recorded regardless of answer.
+V25: socratic-gate — → `.spec/check-extras.md §V25`
+V26: first-principle-probe — → `.spec/check-extras.md §V26`
 V27: backprop-protocol — → `.spec/check-extras.md §V27`
 V28: freshness-contract — → `.spec/check-extras.md §V28`
-V29: fold-first — new §V row vs amend of closest existing row ! operator gate; split justification = §B recurrence cite or declared orthogonal concept; "mirrors existing row" alone insufficient.
-V30: sweep-scope — sweep-class §T row ! declare scope as grep pattern or vocab table; named-procedure + named-site lists rejected.
-V31: design-lifecycle — /sdd:design writes `designs/<slug>.md` only (write-new); fold-in mutates SPEC.md only; draft persists in working tree, operator disposes.
+V29: fold-first — → `.spec/check-extras.md §V29`
+V30: sweep-scope — → `.spec/check-extras.md §V30`
+V31: design-lifecycle — → `.spec/check-extras.md §V31`
 V40: mechanical-realization — → `.spec/check-extras.md §V40`
 V41: parametric-recipe — → `.spec/check-extras.md §V41`
 V42: scope-set — → `.spec/check-extras.md §V42`
@@ -60,10 +61,10 @@ V43: drift-verdict-vocab — → `.spec/check-extras.md §V43`
 V44: memo — → `.spec/check-extras.md §V44`
 V45: scope-feed — → `.spec/check-extras.md §V45`
 V46: batch — → `.spec/check-extras.md §V46`
-V47: check-dispatch — /sdd:check accepts bare (memo-driven) or `--full` (drop memo, re-classify all) only; other args bail.
+V47: check-dispatch — → `.spec/check-extras.md §V47`
 V48: token-budget — → `.spec/check-extras.md §V48`
 V49: extras-hook — → `.spec/check-extras.md §V49`
-V60: skills-only — every surface = `skills/<name>/SKILL.md` dispatched natively as `/<plugin>:<name>`; no commands/ tree, no hooks, no orchestrator.
+V60: skills-only — → `.spec/check-extras.md §V60`
 V61: sub-skill-flags — → `.spec/check-extras.md §V61`
 V62: tooling-preference — → `.spec/check-extras.md §V62`
 V63: plugin-shape — → `.spec/check-extras.md §V63`
@@ -73,7 +74,14 @@ V66: mechanize-scan — → `.spec/check-extras.md §V66`
 V67: human-clarity — → `.spec/check-extras.md §V67`
 V68: table-use — → `.spec/check-extras.md §V68`
 V69: github-workflow — → `.spec/check-extras.md §V69`
-V70: sembr — repo `.md` prose source lines ! semantic line breaks (sembr.org): one sentence per line, clause-boundary break OK; source-format only — rendered output unchanged; scope: README.md, CLAUDE.md, `designs/*.md`, `skills/**/SKILL.md`; exempt: pipe-row files (SPEC.md, SPEC.archive.md, `.spec/check-extras.md`), fenced blocks, `|`-tables, frontmatter; GitHub issue/PR/comment bodies out of scope (GFM renders single newline as hard break); register-orthogonal — sibling to table-use.
+V70: sembr — → `.spec/check-extras.md §V70`
+V71: consumer-core-profile — → `.spec/check-extras.md §V71`
+V72: shared-fragments — → `.spec/check-extras.md §V72`
+V73: backprop-resume-card — → `.spec/check-extras.md §V73`
+V74: micro-amend — → `.spec/check-extras.md §V74`
+V75: auto-fire-engage-log — → `.spec/check-extras.md §V75`
+V76: thin-check — → `.spec/check-extras.md §V76`
+V77: skill-effort — → `.spec/check-extras.md §V77`
 
 ## §T TASKS
 
@@ -139,6 +147,15 @@ T58|x|extend `discover_repo_local` walk to `.spec/**` per scope-set invariant + 
 T59|x|sweep whole-file `Read SPEC.md` LOAD steps out of build + explain bodies → script `emit-overview` + `emit-v-slices` reads per single-load invariant — scope `grep -n 'Read .SPEC.md.' skills/build/SKILL.md skills/explain/SKILL.md`|V64,B25
 T60|x|script: reconcile history-residue pattern set as sole member source (role-tag write-time fold rules vs audit-detect) + `emit-prune-patterns` mode + self-test — scope `grep -n 'HR_' scripts/check-mechanical.py`|V40,V28,B26
 T61|x|sweep restated residue members + hand-coded retired-row regex → set name + script emit pointer per mechanical-realization invariant — scope vocab {skills/spec/references/write-time-prune.md, skills/condense/SKILL.md, skills/reorganize/SKILL.md}|V40,V28,B26
+T62|x|port grok-fork workflow: init `skills/_fragments/` (MECHANIZE, NEXT, PROGRESS, PATH-SCOPED-COMMIT, CHAIN, CHECK-AGENT-PROMPT, UPSTREAM-FR, ACCEPTANCE-GATE, POST-SPEC-CHAIN); user-invocable skills point, never copy|V72,V66
+T63|x|port issue-linked PR flow: github ISSUE/BRANCH/PR/PUSH/READY/MERGE/CLOSE + spec `github issue N` before-delta draft PR + post-spec chain + acceptance gate|V69,V21,V22,I.spec
+T64|x|port build: multi-id args, `--no-chain`, resume card, POST-SPEC-CHILD, task-scoped acceptance, POST-LOOP READY|V22,V69,V73,I.build
+T65|x|port check: `--no-chain`, `effort: medium`, green-path hop via REPORT `## chain` line from fork, explain-first remedies, reorganize advisory|V22,V47,V76,V77,I.check
+T66|x|port design: plan mode (`EnterPlanMode`/`ExitPlanMode`) → github ISSUE + class label → stop; fold via `/sdd:spec github issue N` or `fold-design`; evals updated|V31,V69,I.design
+T67|x|port spec: micro-AMEND, DISTILL second pass, Step 0b body-file porcelain, BACKPROP resume card, monitor mechanization-candidate route|V74,V73,V20,V65
+T68|x|port script: merge grok-fork audits + emit modes (emit-residue, emit-archive-window, emit-condense-propose, emit-check-agent-prompt) w/ Claude modes (emit-prune-patterns, skill-token); design-lifecycle audit on `skills/design`; `--no-chain` accepted; self-test|V40,V31,V47,V69,V71,V77
+T69|x|port auto-fire engage log (github, monitor, steno, telegraph) + caller-engagement descriptions|V75,V61
+T70|x|frontmatter: drop `model:` lines from published skills; `effort: medium` on check + explain only|V77,V62
 
 ## §B BUGS
 
@@ -169,3 +186,54 @@ B23|2026-06-22|spec AMEND + APPLY assume §V body in SPEC.md (write + `git commi
 B24|2026-08-04|script REPO-LOCAL discovery hand-mirrored scope-set row w/o sync tie; T44 `.claude/`→`.spec/` move updated path strings, not the `discover_repo_local` walk → `.spec/check-extras.md` cites escaped cite-DAG sweep|V42
 B25|2026-08-04|single-load authoring sweep scoped to check LOAD only — build + explain LOAD step 1 kept whole-file `Read SPEC.md`; sibling recipes unswept @ amend, B19/B21 under-scope class|V64
 B26|2026-08-04|declared single-source residue set had no consumable script emission — three prose surfaces restated members + reorganize hand-coded retired-row regex; copies diverged (fold rule prose-only, lineage condense-only, `PF_RETIRED_INPLACE` script-only)|V40
+B27|2026-07-21|MECHANIZE byte-identity forced multi-skill copy-paste; DRIFT class on any edit drift|V66,V72
+B28|2026-07-21|/sdd:design slash-only + designs/ file fought plan mode; no GitHub issue hand-off|V31
+B29|2026-07-21|discover_sembr_files omits skills/_fragments/**; multi-sentence fragment lines unaudited|V70
+B30|2026-07-21|condense+reorganize copy PROGRESS/NEXT body instead of _fragments pointer|V72
+B31|2026-07-21|telegraph+steno frontmatter advertise user-says triggers; collide w/ caller dispatch|V61
+B32|2026-07-21|closed-§T archive threshold 50 hardcode in condense; not script constant per V48|V48
+B33|2026-07-21|PROGRESS pointer sweep left task-checklist grant without body literal on condense+reorganize|V62
+B34|2026-07-21|Closes #N / issue close w/o Acceptance audit → silent-pass|V69
+B35|2026-08-22|post-spec-commit chain copied into APPLY + POST-APPLY → double build+review|V69
+B36|2026-08-22|spec-side post-spec chain omitted READY remainder|V69
+B37|2026-08-22|V21 read-only default blocked review sub-agent scratch writes|V21
+B38|2026-08-22|post-spec build child had no discriminator; took operator-run READY path|V69
+B39|2026-08-23|squash-merge default subject PR title `(#PR)`; `Closes #<issue>` on PR body not squash commit → git log cannot recover closed issue|V69
+B40|2026-08-23|acceptance-gate trigger keyed on close trailer after close trailer banned on build commits|V69
+B41|2026-08-23|emit-v-weights ranks already-stubbed §V rows as heavy|V48
+B42|2026-08-23|grant-use audit extras-only; recipes omit required grants|V62
+B43|2026-08-23|github CLOSE `git branch -D` while still on issue-linked branch; git refuses delete current branch|V69
+B44|2026-08-23|Next "merge when approved" has no user-invocable dispatch; github auto-fire only|V24,V69
+B45|2026-08-23|build issue-linked READY inside per-task loop; `--all` re-runs review+pr-ready each row|V69,V22
+B46|2026-08-23|V47 check-dispatch bare/`--full` only; §I+skill+README accept `--no-chain`|V47
+B47|2026-08-23|CHAIN "at most one hop" vs two default edges; hop depth per turn vs per recipe unclear|V22,V24
+B48|2026-08-23|condense NON-GOALS all-or-none firing set; CONFIRM offers force-skip + subset|-
+B49|2026-08-23|condense prong 6 consumes pre-fold v-weights while prong 1 claims fold-first reshape|V48
+B50|2026-08-23|monitor "5th member" roster omits github; V61 lists six auto-fire skills|V61
+B51|2026-08-23|post-spec child `/sdd:build --all` closes whole backlog into one issue PR|V69
+B52|2026-08-23|POST-SPEC-CHILD inherits green-path chain; child may hop check then build --next|V21,V22,V69
+B53|2026-08-23|spec Step 0 porcelain checks SPEC.md only; stub AMEND body file uncommitted work leaks|V20,V49
+B54|2026-08-23|spec github fold: branch vs delta-write order underspecified; dirty checkout risk|V69,V20
+B55|2026-08-23|ACCEPTANCE-GATE COMMENT posts every ALLOW; build per-task gate → N comments per `--all`|V69
+B56|2026-08-23|design POST-APPROVE duplicates github ISSUE create steps; dual ownership drift class|V31,V72,V69
+B57|2026-08-23|design prescribes plan-file write/patch; allowed-tools omits write; grant audit pattern misses|V62
+B58|2026-08-23|github body `<n>` means issue id and PR id in different sections|V69
+B59|2026-08-23|build+explain whole-file SPEC.md Read; single-load prefers script emit where covered|V64
+B60|2026-08-23|reorganize CONFIRM subset re-emits CONFIRM inside no-mid-flow-reprompt gate|V23
+B61|2026-08-23|V69+§I+ACCEPTANCE-GATE claim full accept @ PR ready; task-scoped recipes = MERGE-only full gate|V69
+B62|2026-08-23|V25 lists FOLD-IN as socratic mode; FOLD-IN is dispatch shortcut bypassing gate|V25
+B63|2026-08-23|check description "never invokes" remedies; body+V22 green-path chain invokes build|V22,V76
+B64|2026-08-23|spec POST-APPLY names FOLD-IN github issue only; fold-design+issue N same issue-linked path under-specified|V31,V69
+B65|2026-08-23|post-spec child fail → parent Next build-only; no BACKPROP offer for class b/c|V21,V27,V69
+B66|2026-08-23|issue-linked READY hops `/sdd:check`; check Next drops merge phrasing|V22,V24,V69
+B67|2026-08-23|README Issue-linked PR still says post-spec `/sdd:build --all`|V69
+B68|2026-08-23|design ISSUE body drops Effect + Out of scope + Unresolved; fold from issue sees reduced plan|V31
+B69|2026-08-23|READY remainder unless-operator-declines vs post-spec no-wait|V69
+B70|2026-08-23|fold-produced ids omit existing `.` §T rows that received Acceptance notes; MERGE blocks after ready|V69
+B71|2026-08-23|READY review-apply then `gh pr ready` with no re-verify|V69
+B72|2026-08-23|MERGE runs `gh pr merge` with no probe of checks or `reviewDecision` or mergeable|V69
+B73|2026-08-23|CLOSE deletes local branch only; remote branch remains|V69
+B74|2026-08-23|post-spec child fail reports to parent session; draft PR has no GitHub comment|V21,V69
+B75|2026-09-04|run_audit plugin-skill + README audits fire when plugin_dirs empty → consumer check always dirty|V71
+B76|2026-09-12|consumer README symbols/idiom still fire when plugin_dirs empty after V71 skip → memo blocked|V71
+B77|2026-10-08|github-issue spec fold defers draft PR until after spec commit; missing SPEC.md skips PR so later modes commit off the issue branch|V69

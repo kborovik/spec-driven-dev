@@ -8,7 +8,7 @@ description: |
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *)
 disallowed-tools: Edit, Write
 argument-hint: "[§-cite | --next]"
-model: sonnet
+effort: medium
 ---
 
 # explain — decompress spec into prose
@@ -77,49 +77,15 @@ Bottom line: implement a middleware that enforces §V.<n> without altering §I.a
 2. /sdd:explain §V.<n> — read the cited invariant in prose
 ```
 
-## MECHANIZE — script-candidate scan
+## MECHANIZE
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
-Candidate = any of:
-
-- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
-- LLM-side join / sort / count / dedup over script-emittable data
-- multi-step parse collapsible to one script emit mode
-- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
-
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
-Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
-Route by cwd:
-
-- dev repo (this plugin) → /sdd:spec → new §T row
-- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
+Load `${CLAUDE_SKILL_DIR}/../_fragments/MECHANIZE.md`.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
-Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (closed-vs-pending row implications, citation-form edge cases).
-Read-only → items are slash-cmd follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` rows → `/sdd:explain --next` or `/sdd:check`.
-
-Closed §T row (terminal state) — tail of output:
-
-```
-Status: complete (`x`).
-
-Bottom line: §V.<n> is enforced by the middleware shipped under §T.<n>.
-
-## Hint
-
-Closed rows are historical. `run 1` skips to live work; `run 2` audits whether the closed task drifted out of code.
-
-## Next
-
-1. /sdd:explain --next — read the next pending §T row
-2. /sdd:check — audit whether the closed task still holds
-```
-
-"Bottom line" stays — summarizes citation, never directs action.
-Action only in Next; pre-action context in optional Hint.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/NEXT.md`.
+Read-only follow-ups: `/sdd:build §T.n` only for `.` rows; closed `x` → `/sdd:explain --next` or `/sdd:check`.
+"Bottom line" summarizes citation, never directs action.
 
 ## NON-GOALS
 

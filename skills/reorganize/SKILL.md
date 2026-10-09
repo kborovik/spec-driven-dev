@@ -7,18 +7,18 @@ description: |
   "renumber invariants", "cluster §V rows", "tidy §V order", "taxonomy pass".
 allowed-tools: AskUserQuestion, Read, Edit, Write, Grep, Bash(git *), Bash(jq *), Bash(python3 *), Agent, Skill(sdd:*), TaskCreate, TaskUpdate
 argument-hint: "[--taxonomy-only]"
-model: inherit
 ---
 
 # reorganize — §V cluster + renumber + cite-DAG sweep
 
 Operator-triggered clarity-shape pass over SPEC.md §V.
-Cadence ≤ once per major epoch (months) — skill body documents intent, not /sdd:check - enforced.
+Cadence ≤ once per major epoch (months).
+`/sdd:check` may emit a reorganize advisory when §V numbering looks sparse or cluster debt is high — that is the discoverability signal (token advisory alone is not enough).
 Single atomic commit, rollback via `git revert`.
 
 ## PREAMBLE
 
-State-mutator scoped to SPEC.md + `.spec/spec-clusters.json` + `.spec/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists).
+State-mutator scoped to SPEC.md + `.spec/check-extras.md` (when present) + `.spec/spec-clusters.json` + `.spec/spec-renumber-map.json` + cite-DAG sweep targets (PUBLISHED + REPO-LOCAL + SPEC.md internal + `SPEC.archive.md` when exists).
 Operator invokes only per recipe-step-no-dispatch rule.
 Owns §V renumber permission carved out of monotonic-id invariant.
 
@@ -28,10 +28,9 @@ Single commit per atomic-operation discipline, not partial application; cite-DAG
 
 ## PROGRESS
 
-Multi-phase run per response-shape invariant → emit live harness checklist.
 Phases: LOAD, ARCHIVE-RETIRED, CLUSTER, PROPOSE, CONFIRM, EXECUTE.
-TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit. `--taxonomy-only` exit / CONFIRM cancel / subset re-loop → unreached phases `deleted`, not `completed`.
-Checklist = ephemeral harness UI: never repo state, never substitutes the PROPOSE render or the `## Next` block.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/PROGRESS.md` (TaskCreate, TaskUpdate).
+`--taxonomy-only` exit / CONFIRM cancel / subset re-loop → unreached phases `deleted`, not `completed`.
 
 ## LOAD
 
@@ -91,13 +90,13 @@ Not CONFIRM, not EXECUTE.
 
 ## CONFIRM
 
-AskUserQuestion per decision-gate invariant — single bulk-confirm covers renumber + sweep (mid-flow re-prompt not allowed per atomic-operation discipline):
+AskUserQuestion per decision-gate invariant — single bulk-confirm per gate pass (no prompt inside an in-flight pass):
 
 - **question**: `Reorganize SPEC.md: <m> clusters, <k> id renumbers, <a> archive-retired rows, cite-DAG sweep over <s> sites. Apply?`
 - **header**: `Reorganize gate`
 - **options** (3, mutually exclusive):
   - `apply renumber + cite-DAG sweep + archive-retired` → EXECUTE w/ full map + flagged set.
-  - `subset` → operator-typed cluster list or `skip archive-retired` keyword (retains flagged rows in active §V this run); re-render PROPOSE w/ filter, re-emit CONFIRM.
+  - `subset` → ends this gate pass; operator-typed cluster list or `skip archive-retired` keyword (retains flagged rows in active §V this run); restart PROPOSE with filter then CONFIRM (new pass).
   - `cancel` → stop, no mutation.
 
 ## EXECUTE
@@ -115,12 +114,13 @@ Single atomic commit:
    Append-only — never rewrite prior runs.
 3. Rewrite §V in cluster order: body verbatim per verbatim-preservation invariant, only `V<n>:` prefix renumbered.
    Archived ids skipped.
+   If `.spec/check-extras.md` exists, rewrite each `## §V<old>` heading and `V<old>:` row prefix to `## §V<new>` and `V<new>:` per renumber map.
 4. Overwrite `.spec/spec-clusters.json` w/ post-run state; keyed by fingerprint, `current_id` = `V<new>`.
    Archived rows not persisted (terminus in archive sibling).
 5. Cite-DAG sweep w/ renumber map: target set per PREAMBLE scope; backtick pre-filter as ARCHIVE-RETIRED step 2.
    Every surviving `§V.<old>` free-text or bare `V<old>` typed-column cite (§T.cites, §B.fix) → `§V.<new>` / `V<new>` per context. `new:'archive'` entries not substituted — citer-protection gate already excluded live citers.
 6. Probe `.spec/.gitignore`: both json files not gitignored (git-tracked per scope-set invariant); not guard add.
-7. Stage owned paths `git add SPEC.md SPEC.archive.md .spec/spec-clusters.json .spec/spec-renumber-map.json` + touched sweep sites (add tracks new-file artifacts), then path-scoped commit `git commit -m <subject> -- <those same paths>` (write-ownership invariant — commit scopes to the owned set, pre-staged files never leak; `-m` flags ! precede `--`); auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
+7. Stage owned paths `git add SPEC.md SPEC.archive.md .spec/check-extras.md .spec/spec-clusters.json .spec/spec-renumber-map.json` + touched sweep sites (add tracks new-file artifacts), then path-scoped commit per `${CLAUDE_SKILL_DIR}/../_fragments/PATH-SCOPED-COMMIT.md`: `git commit -m <subject> -- <those same paths>`; auto-commit msg `reorganize SPEC.md §V: <m> clusters, <k> renumbers, <a> archive-retired`; not user prompt for commit step.
 
 EXECUTE ends @ commit.
 Rollback `git revert <reorganize-sha>` per single-commit shape.
@@ -132,41 +132,16 @@ Map is append-only history of all runs; stacked runs admit duplicate `old:` keys
 Walk landing on `archive` sentinel → emit `archived → SPEC.archive.md ## §V.retired V<n>`, not resolve to live row — distinct terminus from "no further mapping" (current live id).
 Consumers: reorganize re-runs + explain skill LOAD (historical-id resolution); both walk newest-first, read-only per cite-resolution invariant.
 
-## MECHANIZE — script-candidate scan
+## MECHANIZE
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
-Candidate = any of:
-
-- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
-- LLM-side join / sort / count / dedup over script-emittable data
-- multi-step parse collapsible to one script emit mode
-- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
-
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
-Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
-Route by cwd:
-
-- dev repo (this plugin) → /sdd:spec → new §T row
-- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
+Load `${CLAUDE_SKILL_DIR}/../_fragments/MECHANIZE.md`.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
-Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state.
-State-mutator → post-EXECUTE prefer /sdd:check (confirm cite-DAG + format-layer clean post-renumber).
-
-Example after EXECUTE (commit auto-fired):
-
-```
-## Next
-
-1. /sdd:check — cascade scan over reorganized SPEC.md
-2. /sdd:build --next — start the next pending §T row
-3. git revert <reorganize-sha> — rollback if renumber breaks downstream
-```
-
-Variants: `--taxonomy-only` exit (not commit) → swap item 1 for `/sdd:reorganize` (apply for real), drop item 3; CONFIRM cancel → swap item 1 for `/sdd:reorganize --taxonomy-only` (re-propose w/ filter), drop item 3.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/NEXT.md`.
+State-mutator → post-EXECUTE prefer `/sdd:check` (confirm cite-DAG + format-layer clean post-renumber).
+`--taxonomy-only` exit → `/sdd:reorganize` apply for real; drop revert item.
+CONFIRM cancel → `/sdd:reorganize --taxonomy-only`; drop revert item.
 
 ## NON-GOALS
 

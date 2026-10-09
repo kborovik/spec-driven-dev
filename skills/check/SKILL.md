@@ -3,14 +3,15 @@ name: check
 description: |
   Read-only drift detector. Diffs SPEC.md vs current code, reports violations
   grouped by severity. Writes nothing — suggests remedies via spec or build
-  skills, never invokes them. Triggers when user asks to check drift, audit
+  skills; never invokes them except green-path chain (clean → build --next).
+  Triggers when user asks to check drift, audit
   spec, or verify invariants. Phrasings: "check drift", "audit the spec",
   "check invariants", "spec vs code", "is the spec still accurate?",
   "did the code drift?".
 allowed-tools: Read, Grep, Bash(python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py *), Agent, TaskCreate, TaskUpdate
 disallowed-tools: Edit, Write
-argument-hint: "[--full]"
-model: sonnet
+argument-hint: "[--full | --no-chain]"
+effort: medium
 context: fork
 background: false
 ---
@@ -24,15 +25,16 @@ Mechanical audits owned by published script per mechanical-realization invariant
 Behavioral judgment stays LLM.
 Recipes parametric per parametric-recipe invariant — repo-specific extensions: `.spec/scripts/check-extras.sh` hook (mechanical, run by script) + `.spec/check-extras.md` (judgment-class, consulted by LLM).
 Read-only → sub-agent delegation safe throughout.
-Runs `context: fork` + `background: false` — run isolates to the fork, REPORT returns as the result; no conversation history in fork (recipe self-contained). Agent tool absent → Batch single-agent path.
+Runs `context: fork` + `background: false` — run isolates to the fork, REPORT returns as the result; no conversation history in fork (recipe self-contained).
+Agent tool absent → Batch single-agent path.
+Fork = read-only boundary: `disallowed-tools` binds the fork only; green-path hop runs in the main thread off the returned REPORT (see CHAIN).
 Conditional detail lives in `references/` one level deep per token-budget invariant (skill-body budget) — each pointer names its load moment; Read on that moment only.
 
 ## PROGRESS
 
 Multi-phase run per response-shape invariant → emit live harness checklist.
 Phases: LOAD, audit (mechanical core), §V classify, §I + cite-DAG, §T, REPORT + WRITE-MEMO.
-TaskCreate one task per phase @ LOAD start; TaskUpdate `in_progress` @ phase entry → `completed` @ phase exit. `--full` adds no phase (same recipe, memo dropped).
-Checklist = ephemeral harness UI: never repo state, never the memo, never substitutes REPORT or the `## Next` block.
+Per `${CLAUDE_SKILL_DIR}/../_fragments/PROGRESS.md` (TaskCreate, TaskUpdate). `--full` adds no phase (same recipe, memo dropped).
 
 ## LOAD
 
@@ -46,13 +48,14 @@ Step 1 + 3 outputs arrive injected below (`!` preprocessing, pre-model); `disabl
    Prints §G/§C/§I/§T/§B bodies + §V id list; §V bodies arrive via `emit-v-slices` only (step 4).
    Script error "no SPEC.md" → "no spec, nothing to check."
    Stop.
-2. Parse `$ARGUMENTS` (two forms only, per dispatch invariant):
+2. Parse `$ARGUMENTS` (check-dispatch invariant):
    - bare → memo-driven default sweep: invariants + interfaces + tasks.
      Memo absent or invalidated → full re-classify.
      Fresh memo written on clean.
    - `--full` → delete `.spec/check-state.json` upfront, classify all rows, propagate `--full` to audit script (restores per-row history listing instead of aggregation).
      Interrupt mid-run → no memo → next run also full ("don't trust cache" fails safe).
-   - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full`.
+   - `--no-chain` → suppress green-path hop; combines w/ `--full`.
+   - other → bail w/ `unknown arg <arg> — accepted forms: bare invocation, --full, --no-chain, --full --no-chain`.
 3. Audit output (MECHANICAL CORE):
 
 !`python3 ${CLAUDE_SKILL_DIR}/../../scripts/check-mechanical.py audit $ARGUMENTS`
@@ -186,7 +189,7 @@ Silence-class verdicts excluded from body — collapsed in summary `suppressed` 
 - dirty run (any VIOLATE / DRIFT / MISSING / STALE / UNRESOLVED / TYPE-MISMATCH) → omit section.
 
 **Advisory** — fired conditions ! emit `## advisory` H2 between `## checkpoint` and `## summary` (or leading output when no checkpoint).
-One line per fired `token|ADVISORY` / `skill-token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row.
+One line per fired `token|ADVISORY` / `skill-token|ADVISORY` / `sembr|ADVISORY` / `memo|ADVISORY` / `history|ADVISORY` row, plus a **reorganize** line when sparse §V numbering / cluster gap shows renumber debt.
 No line → omit heading.
 
 ## WRITE-MEMO
@@ -211,31 +214,24 @@ Exit `0` = clean (memo advanced); `1` = dirty (memo untouched, offenders on stde
 ## REMEDY HINTS
 
 Populate the Next block (not a separate section) — drift-class → candidate-item map: Read `references/report-template.md` (Remedy map §) @ Next-block assembly; surface most acute.
+UNVERIFIABLE or multi-cite VIOLATE → lead with `/sdd:explain §V.<n>` before `/sdd:spec` / `/sdd:build`.
 Never invoke fixes.
 Report only.
 
-## MECHANIZE — script-candidate scan
+## CHAIN (default-on)
 
-Recipe end → before the `## Next` block, scan this run for a mechanization candidate.
-Candidate = any of:
+Per `${CLAUDE_SKILL_DIR}/../_fragments/CHAIN.md`.
+Clean report + ≥ 1 pending `.` §T + not `--no-chain` → REPORT ends w/ `## chain` H2 line `hop: /sdd:build --next` (or concrete `§T.<n>`) after `## Next`; main thread receives the fork result + runs that build same turn (fork stays read-only; build reached by a hop never hops again).
+Dirty → never auto-remedy; no `## chain` line.
 
-- ≥ 2 same-shape deterministic calls this run (identical command modulo args)
-- LLM-side join / sort / count / dedup over script-emittable data
-- multi-step parse collapsible to one script emit mode
-- fresh regex paraphrase of an existing mechanical rule (mechanical-realization invariant class)
+## MECHANIZE
 
-Hit → emit exactly one `## Next` item naming the observed pattern + proposed script mode; none → no item.
-Never self-implement the mechanization mid-run (recipe-step-no-dispatch + write-ownership invariants).
-Route by cwd:
-
-- dev repo (this plugin) → /sdd:spec → new §T row
-- consumer repo, plugin-target → monitor dispatched `mechanization-candidate` path (monitor-protocol invariant)
-- consumer repo-local → consumer /sdd:spec → `.spec/check-extras` row
+Load `${CLAUDE_SKILL_DIR}/../_fragments/MECHANIZE.md`.
 
 ## OUTPUT — "Next" block
 
-Heading `## Next`; 1–5 atomic items (one sentence each, no `Reply` prefix); positional dispatch (`run <int>` or `run /<plugin>:<cmd> [args]`).
-Optional `## Hint` (≤ 3 lines) precedes when item selection needs hidden state (severity order VIOLATE > DRIFT > MISSING > STALE > EXTRA; record-vs-amend choice).
+Per `${CLAUDE_SKILL_DIR}/../_fragments/NEXT.md`.
+`## Hint` severity order VIOLATE > DRIFT > MISSING > STALE > EXTRA; record-vs-amend choice.
 Items are slash-cmd follow-ups; before `/sdd:build --next` confirm ≥ 1 pending `.` task else suggest `/sdd:spec` seed.
 
 Example (drift found):
@@ -254,7 +250,7 @@ VIOLATE outranks DRIFT — record the V<n> breach via item 1 before fixing the i
 2. /sdd:spec I.api drifted at route.go — record interface drift
 ```
 
-Variants: clean + pending `.` task → `/sdd:build --next` + `/sdd:check` later; terminal (all closed, clean) → `/sdd:spec` to seed.
+Variants: clean + pending `.` task + chain off → `/sdd:build --next` + `/sdd:check` later; terminal (all closed, clean) → `/sdd:spec` to seed.
 
 ## NON-GOALS
 
